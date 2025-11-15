@@ -181,7 +181,7 @@ export default function PersonaFastCreatePage({ tiposDocumento }: FastCreateProp
                                         className="w-1/2"
                                         disabled={processing}
                                     >
-                                        {processing ? 'Creando Paciente...' : 'Registrar Carga Rápida'}
+                                        {processing ? 'Creando Paciente...' : 'Atender Emergencia'}
                                     </Button>
 
                                     <Link href={personas.create.url()} className="w-1/2">

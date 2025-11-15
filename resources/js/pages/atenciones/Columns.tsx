@@ -106,7 +106,7 @@ export const columns: ColumnDef<Atencion>[] = [
       const atencion = row.original;
 
       return (
-        <div className="flex items-center gap-2">
+        <div>
 
           {/* Ver */}
           <Link href={atenciones.ver_atencion(atencion.id).url}>

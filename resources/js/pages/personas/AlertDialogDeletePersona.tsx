@@ -45,9 +45,9 @@ export function DeletePersonaButton({ persona }: DeletePersonaButtonProps) {
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
           <AlertDialogAction
             onClick={() =>
-              router.delete(`/personas/${persona.id}`, {
+              router.delete(`/pacientes/${persona.id}`, {
                 onSuccess: () => {
-                  router.reload({ only: ["personas"] })
+                  router.reload({ only: ["pacientes"] })
                 },
               })
             }

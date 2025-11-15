@@ -94,9 +94,16 @@ class PersonaController extends Controller
         DB::transaction(function () use ($validated) {
             $persona = Persona::create(collect($validated)->except('dependencias')->toArray());
             PDAController::attachToPersona($persona, $validated['dependencias']);
+
+            // Guardar el ID del paciente reciente en la sesión
+            session()->flash(
+                'paciente_reciente',
+                $persona->fresh(['tipo_documento'])
+            );
+
         });
 
-        return redirect()->route('personas.index')
+        return redirect()->route('atenciones.crear_atencion')
             ->with('success', 'El paciente fue registrado correctamente.');
     }
 
@@ -287,7 +294,7 @@ class PersonaController extends Controller
 
             $max = Persona::whereNull('deleted_at')
                 ->whereRaw("numero_documento !~ '[^0-9]'")
-                ->whereRaw('CAST(numero_documento AS INTEGER) < 1000000')
+                ->whereRaw('CAST(numero_documento AS BIGINT) < 1000000')
                 ->max('numero_documento');
             $numero = $max ? $max + 1 : 1;
 
@@ -300,9 +307,13 @@ class PersonaController extends Controller
         }
 
         Persona::create($data);
+        session()->flash(
+            'carga_rapida',
+            $data
+        );
 
-        return redirect()->route('personas.index')
-            ->with('success', 'El paciente (carga rápida) fue registrado correctamente.');
+        return redirect()->route('atenciones.crear_atencion')
+            ->with('success', 'El paciente fue registrado correctamente (carga rápida).');
     }
 
     public function indexProfesionales(Request $request)

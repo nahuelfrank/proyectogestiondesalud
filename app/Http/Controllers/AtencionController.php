@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreAtencionRequest;
 use App\Models\Atencion;
 use App\Models\Especialidad;
 use App\Models\EspecialidadServicio;
@@ -85,21 +86,40 @@ class AtencionController extends Controller
 
     public function crearAtencion()
     {
-        return Inertia::render('atenciones/AtencionCreatePage', [   
-        'especialidadesServicios' => EspecialidadServicio::with('especialidad', 'servicio')->get(),
-        'tiposAtenciones' => TipoAtencion::all(),
-        'estadosAtenciones' => EstadoAtencion::all(),
-        'pacientes' => Persona::with('tipo_documento')->get(),
-        'profesionales' => Profesional::with(['persona.tipo_documento', 'disponibilidades_horarias'])->get(),
-        'pacienteReciente' => session('paciente_reciente'),
-        'cargaRapida' => session('carga_rapida', false),
-    ]);
+        return Inertia::render('atenciones/AtencionCreatePage', [
+            'especialidadesServicios' => EspecialidadServicio::with('especialidad', 'servicio')->get(),
+            'tiposAtenciones' => TipoAtencion::all(),
+            'estadosAtenciones' => EstadoAtencion::all(),
+            'pacientes' => Persona::with('tipo_documento')->get(),
+            'profesionales' => Profesional::with(['persona.tipo_documento', 'disponibilidades_horarias'])->get(),
+            'pacienteReciente' => session('paciente_reciente'),
+            'pacienteCargaRapida' => session('carga_rapida'),
+        ]);
     }
 
     public function guardarAtencion(Request $request)
     {
-        // Lógica para almacenar una nueva atención
-        return Inertia::render('atenciones/AtencionEditPage');
+
+        $validated = $request->validate([
+            'fecha' => 'required|date',
+            'hora' => 'required',
+            'servicio_id' => 'required|exists:servicios,id',
+            'estado_atencion_id' => 'required|exists:estados_atenciones,id',
+            'tipo_atencion_id' => 'required|exists:tipos_atenciones,id',
+            'persona_id' => 'required|exists:personas,id',
+            'profesional_id' => 'required|exists:profesionales,id',
+            'diagnostico_principal' => 'required|string',
+            'motivo_de_consulta' => 'required|string',
+        ]);
+
+        // Crear la atención directamente
+        Atencion::create($validated);
+
+        // Limpiar la sesión
+        session()->forget('carga_rapida');
+
+        return redirect()->route('atenciones.index')
+            ->with('success', 'Atención registrada exitosamente');
     }
 
     public function editarAtencion()

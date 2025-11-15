@@ -14,6 +14,11 @@ class Atencion extends Model
     protected $fillable = [
         'fecha',
         'hora',
+        'servicio_id',
+        'estado_atencion_id',
+        'tipo_atencion_id',
+        'persona_id',
+        'profesional_id',
         'diagnostico_principal',
         'motivo_de_consulta',
         'detalle_consulta',
@@ -23,10 +28,6 @@ class Atencion extends Model
         'prestacion_de_enfermeria',
         'realizacion_de_tratamiento',
         'observaciones',
-        'servicio_id',
-        'estado_atencion_id',
-        'tipo_atencion_id',
-        'profesional_id'
     ];
 
     // Una atencion pertenece a un servicio

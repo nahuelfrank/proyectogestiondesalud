@@ -6,8 +6,6 @@ import { DeletePersonaButton } from "@/pages/personas/AlertDialogDeletePersona";
 import personas from "@/routes/personas";
 import type { Persona } from "@/types/personas/persona";
 
-
-
 export const columns: ColumnDef<Persona>[] = [
 
   {
@@ -65,7 +63,7 @@ export const columns: ColumnDef<Persona>[] = [
       const isFastCreate = !persona.email;
 
       return (
-        <div className="flex items-center gap-2">
+        <div>
 
           {/* Ver - deshabilitado si es carga rápida */}
           {isFastCreate ? (

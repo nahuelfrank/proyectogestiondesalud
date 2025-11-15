@@ -21,18 +21,25 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import atenciones from '@/routes/atenciones';
+import { useDebounce } from "@/hooks/use-debounce";
+import { set } from 'date-fns';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Atenciones', href: atenciones.index.url() },
     { title: 'Registrar Atención', href: atenciones.crear_atencion.url() },
 ];
 
+interface TipoDocumento {
+    id: number;
+    nombre: string;
+}
+
 interface Persona {
     id: number;
     nombre: string;
     apellido: string;
     numero_documento: string;
-    tipo_documento: { nombre: string };
+    tipo_documento: TipoDocumento;
 }
 
 interface Profesional {
@@ -63,6 +70,13 @@ interface EstadoAtencion {
     nombre: string;
 }
 
+interface PacienteCargaRapida {
+    nombre: string;
+    apellido: string;
+    tipo_documento_id: number;
+    numero_documento: string;
+}
+
 interface Props {
     especialidadesServicios: EspecialidadServicio[];
     tiposAtenciones: TipoAtencion[];
@@ -70,7 +84,7 @@ interface Props {
     pacientes: Persona[];
     profesionales: Profesional[];
     pacienteReciente?: Persona;
-    cargaRapida?: boolean;
+    pacienteCargaRapida?: PacienteCargaRapida;
 }
 
 export default function AtencionCreatePage({
@@ -80,11 +94,13 @@ export default function AtencionCreatePage({
     pacientes,
     profesionales,
     pacienteReciente,
-    cargaRapida = false
+    pacienteCargaRapida
 }: Props) {
     const [busquedaDoc, setBusquedaDoc] = useState('');
+    const debouncedBusquedaDoc = useDebounce(busquedaDoc, 500);
     const [resultadosBusqueda, setResultadosBusqueda] = useState<Persona[]>([]);
     const [pacienteSeleccionado, setPacienteSeleccionado] = useState<Persona | null>(null);
+    const [esCargaRapida, setEsCargaRapida] = useState(false);
     const [serviciosDisponibles, setServiciosDisponibles] = useState<Array<{ id: number; nombre: string }>>([]);
     const [especialidadesDisponibles, setEspecialidadesDisponibles] = useState<Array<{ id: number; nombre: string }>>([]);
     const [profesionalesDisponibles, setProfesionalesDisponibles] = useState<Profesional[]>([]);
@@ -93,20 +109,16 @@ export default function AtencionCreatePage({
     const [notificacion, setNotificacion] = useState<{ tipo: string; mensaje: string } | null>(null);
     const [fechaHoraActual, setFechaHoraActual] = useState({ fecha: '', hora: '' });
 
-    console.log('Paciente Reciente:', pacienteReciente);
-    console.log('Profesionales Disponibles:', profesionales);
-    console.log('Pacientes:', pacientes);
-    console.log('Especialidades Servicios:', especialidadesServicios);
-
-
     const { data, setData, post, errors, processing } = useForm({
-        persona_id: "",
-        tipo_atencion_id: "",
-        servicio_id: "",
-        profesional_id: "",
         fecha: "",
         hora: "",
-        estado_atencion_id: estadosAtenciones.find(e => e.nombre === 'Pendiente')?.id.toString() || '',
+        servicio_id: "",
+        estado_atencion_id: "1", // Asumiendo '1' es el ID para 'En Espera'
+        tipo_atencion_id: "",
+        persona_id: "",
+        profesional_id: "",
+        diagnostico_principal: "Prueba",
+        motivo_de_consulta: "Prueba",
     });
 
     // Capturar fecha y hora automáticamente
@@ -125,17 +137,50 @@ export default function AtencionCreatePage({
         return () => clearInterval(intervalo);
     }, []);
 
-    // Verificar paciente reciente al cargar
+    // Verificar paciente reciente o carga rápida al cargar
     useEffect(() => {
-        if (pacienteReciente && !cargaRapida) {
-            setMostrarDialogoReciente(true);
-        } else if (pacienteReciente && cargaRapida) {
-            setPacienteSeleccionado(pacienteReciente);
-            setData('persona_id', pacienteReciente.id.toString());
-            setData('tipo_atencion_id', tiposAtenciones.find(t => t.nombre === 'Emergencia' || t.nombre === 'Urgencia')?.id.toString() || '');
-            setNotificacion({ tipo: 'info', mensaje: 'Paciente de carga rápida asignado automáticamente' });
+        // Prioridad 1: Paciente de carga rápida
+        if (pacienteCargaRapida) {
+            // Buscar el paciente en la lista de pacientes por número de documento y tipo
+            const pacienteEncontrado = pacientes.find(p =>
+                p.numero_documento === pacienteCargaRapida.numero_documento &&
+                p.tipo_documento.id === pacienteCargaRapida.tipo_documento_id
+            );
+
+            if (pacienteEncontrado) {
+                setPacienteSeleccionado(pacienteEncontrado);
+                setEsCargaRapida(true);
+                setData('persona_id', pacienteEncontrado.id.toString());
+
+                // Buscar tipo de atención Emergencia o Urgencia
+                const tipoEmergenciaUrgencia = tiposAtenciones.find(t =>
+                    t.nombre.toLowerCase().includes('emergencia') ||
+                    t.nombre.toLowerCase().includes('urgencia')
+                );
+
+                if (tipoEmergenciaUrgencia) {
+                    setData('tipo_atencion_id', tipoEmergenciaUrgencia.id.toString());
+                }
+
+                setNotificacion({
+                    tipo: 'info',
+                    mensaje: 'Paciente de carga rápida asignado automáticamente. Complete los datos de atención.'
+                });
+
+                // Limpiar la sesión de carga rápida
+                // Esto se puede hacer con una petición al backend si es necesario
+            } else {
+                setNotificacion({
+                    tipo: 'error',
+                    mensaje: 'No se encontró el paciente de carga rápida en el sistema.'
+                });
+            }
         }
-    }, [pacienteReciente, cargaRapida]);
+        // Prioridad 2: Paciente registrado recientemente (no carga rápida)
+        else if (pacienteReciente) {
+            setMostrarDialogoReciente(true);
+        }
+    }, [pacienteCargaRapida, pacienteReciente]);
 
     // Obtener servicios únicos
     useEffect(() => {
@@ -145,24 +190,27 @@ export default function AtencionCreatePage({
         setServiciosDisponibles(serviciosUnicos);
     }, [especialidadesServicios]);
 
-    const buscarPaciente = () => {
-        if (busquedaDoc.length > 0) {
-            const resultados = pacientes.filter(p =>
-                p.numero_documento.includes(busquedaDoc)
-            );
-            setResultadosBusqueda(resultados);
+    // Buscar paciente por documento
+    useEffect(() => {
+        if (debouncedBusquedaDoc.trim() === "") {
+            setResultadosBusqueda([]);
+            return;
         }
-    };
+
+        const resultados = pacientes.filter(p =>
+            p.numero_documento.includes(debouncedBusquedaDoc)
+        );
+
+        setResultadosBusqueda(resultados);
+    }, [debouncedBusquedaDoc]);
+
 
     const seleccionarPaciente = (paciente: Persona) => {
         setPacienteSeleccionado(paciente);
         setData('persona_id', paciente.id.toString());
         setResultadosBusqueda([]);
         setBusquedaDoc('');
-
-        if (cargaRapida) {
-            setData('tipo_atencion_id', tiposAtenciones.find(t => t.nombre === 'Emergencia' || t.nombre === 'Urgencia')?.id.toString() || '');
-        }
+        setEsCargaRapida(false);
     };
 
     const asignarPacienteReciente = () => {
@@ -246,6 +294,8 @@ export default function AtencionCreatePage({
     }, [data.profesional_id]);
 
     const registrarAtencion = () => {
+        console.log('Registrando atención con datos:', data);
+
         if (!pacienteSeleccionado || !data.tipo_atencion_id || !data.servicio_id || !data.profesional_id || !data.fecha || !data.hora) {
             setNotificacion({ tipo: 'error', mensaje: 'Por favor complete todos los campos requeridos' });
             return;
@@ -258,9 +308,12 @@ export default function AtencionCreatePage({
             return;
         }
 
-        post(atenciones.store.url(), {
+        post(atenciones.guardar_atencion.url(), {
             onSuccess: () => {
                 setNotificacion({ tipo: 'success', mensaje: 'Atención registrada exitosamente' });
+                setTimeout(() => {
+                    window.location.href = atenciones.index.url();
+                }, 1500);
             },
             onError: () => {
                 setNotificacion({ tipo: 'error', mensaje: 'Error al registrar la atención' });
@@ -270,9 +323,12 @@ export default function AtencionCreatePage({
 
     const confirmarRegistroFueraHorario = () => {
         setMostrarAlertaHorario(false);
-        post(atenciones.store.url(), {
+        post(atenciones.guardar_atencion.url(), {
             onSuccess: () => {
                 setNotificacion({ tipo: 'success', mensaje: 'Atención registrada exitosamente' });
+                setTimeout(() => {
+                    window.location.href = atenciones.index.url();
+                }, 1500);
             },
             onError: () => {
                 setNotificacion({ tipo: 'error', mensaje: 'Error al registrar la atención' });
@@ -280,35 +336,32 @@ export default function AtencionCreatePage({
         });
     };
 
-    const tiposAtencionPermitidos = cargaRapida
-        ? tiposAtenciones.filter(t => t.nombre === 'Emergencia' || t.nombre === 'Urgencia')
+    const tiposAtencionPermitidos = esCargaRapida
+        ? tiposAtenciones.filter(t =>
+            t.nombre.toLowerCase().includes('emergencia') ||
+            t.nombre.toLowerCase().includes('urgencia')
+        )
         : tiposAtenciones;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Registrar Atención" />
 
-
             <div className="container mx-auto py-10">
-
                 <div className="ml-5 mb-4">
-                    <h1 className="text-3xl font-semibold mb-2">Registrar Nuevo Atención</h1>
+                    <h1 className="text-3xl font-semibold mb-2">Registrar Nueva Atención</h1>
 
-                    <p className="text-muted-foreground mb-4">Complete el siguiente formulario para registrar una nueva atención
-                        en el sistema. Los campos con <span className="text-red-500">*</span> son obligatorios</p>
+                    <p className="text-muted-foreground mb-4">
+                        Complete el siguiente formulario para registrar una nueva atención
+                        en el sistema. Los campos con <span className="text-red-500">*</span> son obligatorios
+                    </p>
 
-                    <Link
-                        href={atenciones.index.url()}
-                        className="inline-block "
-                    >
-                        <Button
-                            className="flex items-center gap-2 mr-2"
-                        >
+                    <Link href={atenciones.index.url()} className="inline-block">
+                        <Button className="flex items-center gap-2 mr-2">
                             <Undo2 className="h-4 w-4" />
                             Volver
                         </Button>
                     </Link>
-
                 </div>
 
                 <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
@@ -389,35 +442,44 @@ export default function AtencionCreatePage({
                                                 id="busqueda"
                                                 type="text"
                                                 value={busquedaDoc}
-                                                onChange={(e) => setBusquedaDoc(e.target.value)}
+                                                onChange={(e) => setBusquedaDoc(e.target.value.trim())}
                                                 placeholder="Ingrese número de documento"
                                                 className="pl-9"
-                                                onKeyDown={(e) => e.key === 'Enter' && buscarPaciente()}
                                             />
                                         </div>
-                                        <Button onClick={buscarPaciente}>Buscar</Button>
                                     </div>
 
-                                    {resultadosBusqueda.length > 0 && (
-                                        <Card>
-                                            <CardContent className="p-0">
-                                                {resultadosBusqueda.map(paciente => (
-                                                    <button
-                                                        key={paciente.id}
-                                                        onClick={() => seleccionarPaciente(paciente)}
-                                                        className="w-full border-b p-4 text-left transition-colors hover:bg-muted last:border-b-0"
-                                                    >
-                                                        <div className="font-semibold">
-                                                            {paciente.nombre} {paciente.apellido}
-                                                        </div>
-                                                        <div className="text-sm text-muted-foreground">
-                                                            {paciente.tipo_documento.nombre}: {paciente.numero_documento}
-                                                        </div>
-                                                    </button>
-                                                ))}
-                                            </CardContent>
-                                        </Card>
+                                    {busquedaDoc.trim() !== "" ? (
+                                        resultadosBusqueda.length > 0 ? (
+                                            <Card>
+                                                <CardContent className="p-0">
+                                                    {resultadosBusqueda.map(paciente => (
+                                                        <button
+                                                            key={paciente.id}
+                                                            onClick={() => seleccionarPaciente(paciente)}
+                                                            className="w-full border-b p-4 text-left transition-colors hover:bg-muted last:border-b-0"
+                                                        >
+                                                            <div className="font-semibold">
+                                                                {paciente.nombre} {paciente.apellido}
+                                                            </div>
+                                                            <div className="text-sm text-muted-foreground">
+                                                                {paciente.tipo_documento.nombre}: {paciente.numero_documento}
+                                                            </div>
+                                                        </button>
+                                                    ))}
+                                                </CardContent>
+                                            </Card>
+                                        ) : (
+                                            <p className="text-sm text-muted-foreground">
+                                                No se encontraron pacientes con ese número de documento.
+                                            </p>
+                                        )
+                                    ) : (
+                                        <p className="text-sm text-muted-foreground">
+                                            Ingrese un número de documento para buscar.
+                                        </p>
                                     )}
+
 
                                     {errors.persona_id && (
                                         <p className="text-sm text-red-500">{errors.persona_id}</p>
@@ -436,7 +498,10 @@ export default function AtencionCreatePage({
                                             size="sm"
                                             onClick={() => {
                                                 setPacienteSeleccionado(null);
+                                                setEsCargaRapida(false);
+                                                setNotificacion(null);
                                                 setData('persona_id', '');
+                                                setData('tipo_atencion_id', '');
                                             }}
                                         >
                                             <X className="h-4 w-4" />
@@ -461,8 +526,10 @@ export default function AtencionCreatePage({
                                                 </span>
                                             </div>
                                         </div>
-                                        {cargaRapida && (
-                                            <Badge variant="secondary" className="mt-2">Carga Rápida</Badge>
+                                        {esCargaRapida && (
+                                            <Badge variant="secondary" className="mt-2">
+                                                Carga Rápida - Emergencia/Urgencia
+                                            </Badge>
                                         )}
                                     </AlertDescription>
                                 </Alert>
@@ -473,11 +540,12 @@ export default function AtencionCreatePage({
                                 <div className="space-y-4">
                                     {/* Tipo de Atención */}
                                     <div className="space-y-2">
-                                        <Label htmlFor="tipo-atencion">Tipo de Atención *</Label>
+                                        <Label htmlFor="tipo-atencion">
+                                            Tipo de Atención <span className="text-red-500">*</span>
+                                        </Label>
                                         <Select
                                             value={data.tipo_atencion_id}
                                             onValueChange={(value) => setData('tipo_atencion_id', value)}
-                                            disabled={cargaRapida}
                                         >
                                             <SelectTrigger id="tipo-atencion">
                                                 <SelectValue placeholder="Seleccione tipo de atención" />
@@ -490,6 +558,11 @@ export default function AtencionCreatePage({
                                                 ))}
                                             </SelectContent>
                                         </Select>
+                                        {esCargaRapida && (
+                                            <p className="text-xs text-muted-foreground">
+                                                El tipo de atención está preseleccionado para pacientes de carga rápida
+                                            </p>
+                                        )}
                                         {errors.tipo_atencion_id && (
                                             <p className="text-sm text-red-500">{errors.tipo_atencion_id}</p>
                                         )}
@@ -497,7 +570,7 @@ export default function AtencionCreatePage({
 
                                     {/* Servicio */}
                                     <div className="space-y-2">
-                                        <Label htmlFor="servicio">Servicio *</Label>
+                                        <Label htmlFor="servicio">Servicio <span className="text-red-500">*</span></Label>
                                         <Select value={data.servicio_id} onValueChange={handleServicioChange}>
                                             <SelectTrigger id="servicio">
                                                 <SelectValue placeholder="Seleccione servicio" />
@@ -518,7 +591,7 @@ export default function AtencionCreatePage({
                                     {/* Especialidad */}
                                     {data.servicio_id && (
                                         <div className="space-y-2">
-                                            <Label htmlFor="especialidad">Especialidad *</Label>
+                                            <Label htmlFor="especialidad">Especialidad <span className="text-red-500">*</span></Label>
                                             <Select
                                                 value={profesionalesDisponibles.find(p => p.id === parseInt(data.profesional_id))?.especialidad_id.toString() || ''}
                                                 onValueChange={handleEspecialidadChange}
@@ -540,7 +613,7 @@ export default function AtencionCreatePage({
                                     {/* Profesional */}
                                     {profesionalesDisponibles.length > 0 && (
                                         <div className="space-y-2">
-                                            <Label htmlFor="profesional">Profesional *</Label>
+                                            <Label htmlFor="profesional">Profesional <span className="text-red-500">*</span></Label>
                                             <Select
                                                 value={data.profesional_id}
                                                 onValueChange={(value) => setData('profesional_id', value)}
@@ -568,7 +641,7 @@ export default function AtencionCreatePage({
                                             <div className="space-y-2">
                                                 <Label htmlFor="fecha" className="flex items-center gap-2">
                                                     <Calendar className="h-4 w-4" />
-                                                    Fecha *
+                                                    Fecha <span className="text-red-500">*</span>
                                                 </Label>
                                                 <Input
                                                     id="fecha"
@@ -577,11 +650,14 @@ export default function AtencionCreatePage({
                                                     readOnly
                                                     className="bg-muted"
                                                 />
+                                                <p className="text-xs text-muted-foreground">
+                                                    Capturada automáticamente
+                                                </p>
                                             </div>
                                             <div className="space-y-2">
                                                 <Label htmlFor="hora" className="flex items-center gap-2">
                                                     <Clock className="h-4 w-4" />
-                                                    Hora *
+                                                    Hora <span className="text-red-500">*</span>
                                                 </Label>
                                                 <Input
                                                     id="hora"
@@ -590,6 +666,9 @@ export default function AtencionCreatePage({
                                                     readOnly
                                                     className="bg-muted"
                                                 />
+                                                <p className="text-xs text-muted-foreground">
+                                                    Capturada automáticamente
+                                                </p>
                                             </div>
                                         </div>
                                     )}
@@ -610,7 +689,6 @@ export default function AtencionCreatePage({
                         </CardContent>
                     </Card>
                 </div>
-
             </div>
         </AppLayout>
     );
