@@ -7,6 +7,7 @@ use App\Models\Especialidad;
 use App\Models\EspecialidadServicio;
 use App\Models\EstadoAtencion;
 use App\Models\Persona;
+use App\Models\Profesional;
 use App\Models\TipoAtencion;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -84,18 +85,15 @@ class AtencionController extends Controller
 
     public function crearAtencion()
     {
-
-        $pacienteReciente = session('paciente_reciente'); // Ajustar según tu lógica
-        $cargaRapida = session('carga_rapida', false);
-
         return Inertia::render('atenciones/AtencionCreatePage', [   
-            'especialidadesServicios' => EspecialidadServicio::with('especialidad', 'servicio')->get(),
-            'tiposAtenciones' => TipoAtencion::all(),
-            'estadosAtenciones' => EstadoAtencion::all(),
-            'pacientes' => Persona::all(),
-            'pacienteReciente' => $pacienteReciente,
-            'cargaRapida' => $cargaRapida,
-        ]);
+        'especialidadesServicios' => EspecialidadServicio::with('especialidad', 'servicio')->get(),
+        'tiposAtenciones' => TipoAtencion::all(),
+        'estadosAtenciones' => EstadoAtencion::all(),
+        'pacientes' => Persona::with('tipo_documento')->get(),
+        'profesionales' => Profesional::with(['persona.tipo_documento', 'disponibilidades_horarias'])->get(),
+        'pacienteReciente' => session('paciente_reciente'),
+        'cargaRapida' => session('carga_rapida', false),
+    ]);
     }
 
     public function guardarAtencion(Request $request)
