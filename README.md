@@ -80,10 +80,28 @@ Ej: sail up -d
 ./vendor/bin/sail down
 ```
 
+- Parar un contenedor
+```sh
+./vendor/bin/sail stop
+```
+
+- Carpetas que suelen faltar para que el proyecto inicie sin problemas.
+storage
+    ├── app
+    │   ├── private
+    │   └── public
+    ├── framework
+    │   ├── cache
+    │   │   └── data
+    │   ├── sessions
+    │   ├── testing
+    │   └── views
+    ├── logs
+    └── pail
+
+
 ## Referencias rápidas
 - Configuración Docker / Sail: [compose.yaml](compose.yaml)  
 - Scripts de PHP / instalación: [composer.json](composer.json)  
 - Scripts de frontend / Vite: [package.json](package.json) y [vite.config.ts](vite.config.ts)  
 - Entrypoint / comandos Artisan: [artisan](artisan)
-
-Si prefieres que añada un script de Composer para ejecutar Sail o un archivo .env.example adaptado para Sail, lo añado rápidamente.
