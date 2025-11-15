@@ -32,7 +32,8 @@ class Profesional extends Model
 
     public function disponibilidades_horarias()
     {
-        return $this->hasMany(DisponibilidadHoraria::class);
+        return $this->hasMany(DisponibilidadHoraria::class)->orderBy('dia_id', 'asc')
+                ->orderBy('hora_inicio_atencion', 'asc'); // opcional;
     }
 
 }

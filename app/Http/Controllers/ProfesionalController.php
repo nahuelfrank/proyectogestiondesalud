@@ -12,6 +12,7 @@ use App\Models\Genero;
 use App\Models\Persona;
 use App\Models\Profesional;
 use App\Models\TipoDocumento;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -105,10 +106,7 @@ class ProfesionalController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
-        
-    }
+    public function show(string $id) {}
 
     /**
      * Show the form for editing the specified resource.
@@ -220,5 +218,30 @@ class ProfesionalController extends Controller
         }
 
         return $profesional;
+    }
+
+    public function reporteHorarios(Profesional $profesional)
+    {
+        // Cargar relaciones necesarias + ordenar horarios por día y hora
+        $profesional->load([
+            'persona',
+            'especialidad',
+            'disponibilidades_horarias' => function ($query) {
+                $query->orderBy('dia_id')->orderBy('hora_inicio_atencion');
+            },
+            'disponibilidades_horarias.dia'
+        ]);
+
+        // Agrupar horarios por día (para la vista)
+        $horariosAgrupados = $profesional->disponibilidades_horarias
+            ->groupBy(fn($h) => $h->dia->nombre);
+
+        return Pdf::loadView(
+            'profesionales.reporte_horarios',
+            [
+                'profesional'      => $profesional,
+                'horariosPorDia'   => $horariosAgrupados
+            ]
+        )->stream("horarios_profesional_{$profesional->id}.pdf");
     }
 }

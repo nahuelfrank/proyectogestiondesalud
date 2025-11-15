@@ -1,7 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Clock, Eye, Pencil, Trash } from "lucide-react";
-import { router } from "@inertiajs/react";
+import { router, Link} from "@inertiajs/react";
 import {
   Dialog,
   DialogClose,
@@ -21,6 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { FileText } from 'lucide-react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
@@ -145,8 +146,8 @@ export const columns: ColumnDef<Profesional>[] = [
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[150px]">Día</TableHead>
-                    <TableHead>Hora Inicio</TableHead>
-                    <TableHead>Hora Fin</TableHead>
+                    <TableHead>Inicio Atención</TableHead>
+                    <TableHead>Fin de Atención</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -169,6 +170,13 @@ export const columns: ColumnDef<Profesional>[] = [
             )}
 
             <DialogFooter>
+                <Button
+                  className="flex items-center gap-2 mr-2"
+                  onClick={() => window.open(`/profesionales/reporte_horarios/${profesional.id}`, '_blank')}
+                >
+                  <FileText className="h-4 w-4" />
+                  PDF
+                </Button>
               <DialogClose asChild>
                 <Button variant="outline">Cerrar</Button>
               </DialogClose>
