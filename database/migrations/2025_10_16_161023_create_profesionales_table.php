@@ -14,19 +14,26 @@ return new class extends Migration
         Schema::create('profesionales', function (Blueprint $table) {
             $table->id();
 
-             // Clave foránea a personas
+            // Clave foránea a usuarios(users)
+            $table->foreignId('user_id')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete(); // Si eliminás un usuario: user_id en profesionales se pone automáticamente en NULL en lugar de borrar el profesional
+            $table->unique('user_id'); // Índice único para evitar duplicados
+
+            // Clave foránea a personas
             $table->foreignId('persona_id')
-                  ->constrained('personas')
-                  ->cascadeOnDelete();
-            
+                ->constrained('personas')
+                ->cascadeOnDelete();
+
             // Clave foránea a especialidades 
             $table->foreignId('especialidad_id')
-                  ->constrained('especialidades');
+                ->constrained('especialidades');
 
             // Atributos
             $table->string('estado')->notNullable();   // obligatorio
             $table->string('matricula')->nullable();   // opcional
-            
+
             $table->softDeletes();
             $table->timestamps();
         });

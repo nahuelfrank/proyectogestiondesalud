@@ -10,15 +10,22 @@ class Profesional extends Model
 {
     use HasFactory;
     use SoftDeletes;
-    
+
     protected $table = 'profesionales';
 
     protected $fillable = [
+        'user_id',
         'persona_id',
         'especialidad_id',
         'estado',
         'matricula',
     ];
+
+    // Se agregó la relación con el modelo User
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function persona()
     {
@@ -33,7 +40,6 @@ class Profesional extends Model
     public function disponibilidades_horarias()
     {
         return $this->hasMany(DisponibilidadHoraria::class)->orderBy('dia_id', 'asc')
-                ->orderBy('hora_inicio_atencion', 'asc'); // opcional;
+            ->orderBy('hora_inicio_atencion', 'asc'); // opcional;
     }
-
 }
