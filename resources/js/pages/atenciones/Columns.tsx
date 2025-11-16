@@ -116,8 +116,8 @@ export const columns: ColumnDef<Atencion>[] = [
           </Link>
 
           {/* Editar Estado */}
-          <Link href={atenciones.editar_atencion(atencion.id).url}>
-            <Button variant="ghost" size="icon" title="Editar estado">
+          <Link href={atenciones.modificar_estado(atencion.id).url}>
+            <Button variant="ghost" size="icon" title="Modificar estado">
               <Pencil className="h-4 w-4" />
             </Button>
           </Link>

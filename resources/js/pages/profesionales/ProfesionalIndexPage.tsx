@@ -6,6 +6,7 @@ import { DataTable } from '@/components/ui/data-table';
 import { Profesional } from '@/types/profesionales/profesional';
 import { Button } from '@/components/ui/button';
 import profesionales from '@/routes/profesionales';
+import { UserCog } from 'lucide-react';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Profesionales',
@@ -35,9 +36,17 @@ export default function ProfesionalIndexPage({ items, meta, filters }: Profesion
             <Head title="Profesional" />
             <div className="container mx-auto py-10">
 
-                <Link href={profesionales.crear_profesional.url()} className="mx-2 inline-block">
-                    <Button>Crear profesional</Button>
-                </Link>
+                <div className="ml-5">
+
+                    <h1 className="text-3xl font-semibold mb-6">Lista de Profesionales</h1>
+
+                    <Link href={profesionales.crear_profesional.url()} className="inline-block">
+                        <Button className="flex items-center gap-2 mr-2">
+                            <UserCog className="h-4 w-4" />
+                            Registrar profesional
+                        </Button>
+                    </Link>
+                </div>
 
                 <div className='m-2'>
                     <DataTable
@@ -46,6 +55,7 @@ export default function ProfesionalIndexPage({ items, meta, filters }: Profesion
                         meta={meta}
                         filters={filters}
                         routeName= {profesionales.index.url()}
+                        searchPlaceholder="Buscar por documento..."
                     />
                 </div>
             </div>

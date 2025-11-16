@@ -54,9 +54,9 @@ const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Pacientes',
         href: personas.index.url(),
-    },    
+    },
     {
-        title: 'Actualizar Paciente',
+        title: 'Modificar Paciente',
         href: '#',
     },
 
@@ -240,15 +240,15 @@ export default function PersonaEditPage({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Pacientes | Editar" />
+            <Head title="Pacientes | Modificar" />
             <div className="container mx-auto py-10">
 
                 <div className="ml-5 mb-4">
                     {isFastCreate ? (
-                        <h1 className="text-3xl font-semibold mb-2">Completar Datos del Paciente</h1>
+                        <h1 className="text-3xl font-semibold mb-2">Completar Datos de Paciente</h1>
 
                     ) : (
-                        <h1 className="text-3xl font-semibold mb-2">Editar Paciente</h1>
+                        <h1 className="text-3xl font-semibold mb-2">Modificar Datos de Paciente</h1>
                     )}
 
                     {isFastCreate ? (
@@ -258,7 +258,7 @@ export default function PersonaEditPage({
                         </p>
                     ) : (
                         <p className="text-muted-foreground mb-4">
-                            Actualice la información del paciente.
+                            Modifique los datos del paciente.
                             Los campos con <span className="text-red-500">*</span> son obligatorios.
                         </p>
 
@@ -562,7 +562,7 @@ export default function PersonaEditPage({
                                                     }}
 
                                                 >
-                                                      <SelectTrigger id={`claustro-${index}`}>
+                                                    <SelectTrigger id={`claustro-${index}`}>
                                                         <SelectValue placeholder="Seleccione un claustro" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -755,20 +755,28 @@ export default function PersonaEditPage({
                         </CardContent>
                     </Card>
 
-                    <div className="flex space-x-2">
-                        <Button
-                            type="submit"
-                            className="w-1/2"
-                            disabled={processing}
-                        >
-                            {processing ? 'Guardando...' : 'Actualizar Paciente'}
-                        </Button>
-
-                        <Link href={personas.index.url()} className="w-1/2">
-                            <Button variant="outline" className="w-full">
+                    <div className="flex justify-end gap-2 border-t pt-4 mr-5">
+                        <Link href={personas.index.url()}>
+                            <Button variant="outline">
                                 Cancelar
                             </Button>
                         </Link>
+
+                        {isFastCreate ? (
+                            <Button
+                                type="submit"
+                                disabled={processing}
+                            >
+                                {processing ? 'Guardando...' : 'Completar Datos del Paciente'}
+                            </Button>
+                        ) : (
+                            <Button
+                                type="submit"
+                                disabled={processing}
+                            >
+                                {processing ? 'Guardando...' : 'Modificar Paciente'}
+                            </Button>
+                        )}
                     </div>
 
                 </form>

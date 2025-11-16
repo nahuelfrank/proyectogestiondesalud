@@ -122,13 +122,41 @@ class AtencionController extends Controller
             ->with('success', 'Atención registrada exitosamente');
     }
 
+
+    public function modificarEstadoAtencion(Atencion $atencion)
+    {
+        $atencion->load([
+            'servicio',
+            'tipo_atencion',
+            'estado_atencion',
+            'profesional.persona',
+            'persona.tipo_documento',
+        ]);
+
+        return Inertia::render('atenciones/AtencionEditPage', [
+            'atencion' => $atencion,
+            'estadosAtenciones' => EstadoAtencion::all(),
+        ]);
+    }
+
+    public function actualizarEstadoAtencion(Request $request, Atencion $atencion)
+    {
+        $validated = $request->validate([
+            'estado_atencion_id' => 'required|exists:estados_atenciones,id',
+        ]);
+
+        $atencion->update($validated);
+
+        return redirect()->route('atenciones.index')
+            ->with('success', 'Estado de atención actualizado exitosamente');
+    }
+
     public function editarAtencion()
     {
-        return Inertia::render('atenciones/AtencionEditPage');
     }
 
     public function actualizarAtencion()
-    {
+    {   
 
     }
 

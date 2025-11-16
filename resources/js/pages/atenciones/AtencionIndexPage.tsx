@@ -5,7 +5,7 @@ import { columns } from './Columns';
 import { DataTable } from '@/components/ui/data-table';
 import { Atencion } from '@/types/atenciones/atencion';
 import { Button } from '@/components/ui/button';
-import { BookmarkPlus } from 'lucide-react';
+import { FilePlus } from 'lucide-react';
 import atenciones from '@/routes/atenciones';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -43,7 +43,7 @@ export default function AtencionIndexPage({ items, meta, filters }: AtencionInde
 
                     <Link href={atenciones.crear_atencion.url()} className="inline-block">
                         <Button className="flex items-center gap-2 mr-2">
-                            <BookmarkPlus className="h-4 w-4" />
+                            <FilePlus className="h-4 w-4" />
                             Registrar atención
                         </Button>
                     </Link>
@@ -56,7 +56,7 @@ export default function AtencionIndexPage({ items, meta, filters }: AtencionInde
                         meta={meta}
                         filters={filters}
                         routeName={atenciones.index.url()}
-                        searchPlaceholder="Buscar..."
+                        searchPlaceholder="Buscar paciente o profesional..."
                     />
                 </div>
 
