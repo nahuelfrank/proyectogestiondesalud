@@ -1,6 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, Eye, Pencil  } from "lucide-react";
+import { AlertCircle, Eye, Pencil, Trash2 } from "lucide-react";
 import { Link } from "@inertiajs/react";
 import { DeletePersonaButton } from "@/pages/personas/AlertDialogDeletePersona";
 import personas from "@/routes/personas";
@@ -53,7 +53,7 @@ export const columns: ColumnDef<Persona>[] = [
     cell: ({ row }) => <span>{row.original.email ?? "—"}</span>,
   },
   {
-   id: "acciones",
+    id: "acciones",
     header: "Acciones",
     enableSorting: false,
     cell: ({ row }) => {
@@ -67,10 +67,10 @@ export const columns: ColumnDef<Persona>[] = [
 
           {/* Ver - deshabilitado si es carga rápida */}
           {isFastCreate ? (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              title="Completar datos primero para ver" 
+            <Button
+              variant="ghost"
+              size="icon"
+              title="Completar datos primero para ver"
               disabled
               className="mx-2 opacity-50 cursor-not-allowed"
             >
@@ -108,7 +108,28 @@ export const columns: ColumnDef<Persona>[] = [
             </Link>
           )}
 
+          {/* Eliminar - deshabilitado si es carga rápida */}
+
+          {isFastCreate && (
             <DeletePersonaButton persona={persona} />
+          )}
+
+          {/**
+          {isFastCreate ? (
+            <DeletePersonaButton persona={persona} />
+          ) : (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              title="No se puede eliminar un paciente del sistema." 
+              disabled
+              className="mx-2 opacity-50 cursor-not-allowed"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
+          */}
+
         </div>
       );
     },

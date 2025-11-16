@@ -61,7 +61,7 @@ export default function PersonaIndexPage({ items, meta, filters }: PersonaIndexP
                         meta={meta}
                         filters={filters}
                         routeName={personas.index.url()}
-                        searchPlaceholder="Buscar por documento..."
+                        searchPlaceholder="Buscar por documento, apellido o nombre..."
                     />
                 </div>
             </div>

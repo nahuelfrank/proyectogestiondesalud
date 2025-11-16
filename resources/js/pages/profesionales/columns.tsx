@@ -67,7 +67,7 @@ export const columns: ColumnDef<Profesional>[] = [
     accessorFn: (row) => `${row.persona.apellido} ${row.persona.nombre}`,
     cell: ({ row }) => {
       const profesional = row.original;
-      return `${profesional.persona.apellido}, ${profesional.persona.nombre}` ;
+      return `${profesional.persona.apellido}, ${profesional.persona.nombre}`;
     },
   },
   {
@@ -230,6 +230,7 @@ export const columns: ColumnDef<Profesional>[] = [
       return (
         <div>
           {/* Ver */}
+
           <Button
             variant="ghost"
             size="icon"
@@ -250,6 +251,8 @@ export const columns: ColumnDef<Profesional>[] = [
           </Button>
 
           {/* Eliminar */}
+
+          {/*
           <Button
             variant="ghost"
             size="icon"
@@ -258,6 +261,8 @@ export const columns: ColumnDef<Profesional>[] = [
           >
             <Trash2 className="h-4 w-4" />
           </Button>
+          */
+          }
         </div>
       );
     },

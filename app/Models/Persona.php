@@ -12,7 +12,7 @@ class Persona extends Model
     use SoftDeletes;
 
     protected $table = 'personas';
-
+    
     protected $fillable = [
         'nombre',
         'apellido',

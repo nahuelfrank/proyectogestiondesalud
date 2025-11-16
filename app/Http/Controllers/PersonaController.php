@@ -18,6 +18,7 @@ use App\Models\Especialidad;
 use App\Models\Profesional;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class PersonaController extends Controller
@@ -34,7 +35,10 @@ class PersonaController extends Controller
         // Filtro de búsqueda (case-insensitive)
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
-                $q->whereRaw('LOWER(numero_documento) like ?', ['%' . strtolower($search) . '%']);
+                $q->where('numero_documento', 'ILIKE', "%{$search}%")
+                    ->orWhere('nombre', 'ILIKE', "%{$search}%")
+                    ->orWhere('apellido', 'ILIKE', "%{$search}%")
+                    ->orWhereRaw("CONCAT(nombre, ' ', apellido) ILIKE ?", ["%{$search}%"]);
             });
         }
 
@@ -268,7 +272,7 @@ class PersonaController extends Controller
             'numero_documento' => [
                 'nullable',
                 'string',
-                'unique:personas,numero_documento',
+                Rule::unique('personas', 'numero_documento')->withoutTrashed(),
                 'required_with:tipo_documento_id'
             ],
 
@@ -292,15 +296,15 @@ class PersonaController extends Controller
 
         if (!($data['numero_documento'] ?? null)) {
 
-            $max = Persona::whereNull('deleted_at')
+            $max = Persona::withTrashed()
                 ->whereRaw("numero_documento !~ '[^0-9]'")
                 ->whereRaw('CAST(numero_documento AS BIGINT) < 1000000')
                 ->max('numero_documento');
+
             $numero = $max ? $max + 1 : 1;
 
-            // Ahora solo incrementás hasta que NO exista
-            while (Persona::where('numero_documento', $numero)->exists()) {
-                $numero++; // acá sí puede llegar a 1000001, 1000002, etc.
+            while (Persona::withTrashed()->where('numero_documento', $numero)->exists()) {
+                $numero++;
             }
 
             $data['numero_documento'] = (string) $numero;
