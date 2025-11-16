@@ -49,9 +49,10 @@ const personaSchema = z.object({
         .min(1, "Debe agregar al menos una dependencia.")
 });
 const breadcrumbs: BreadcrumbItem[] = [
-    { 
-        title: 'Pacientes', 
-        href: personas.index.url() }, 
+    {
+        title: 'Pacientes',
+        href: personas.index.url()
+    },
     {
         title: 'Registrar Paciente',
         href: personas.create.url(),
@@ -230,8 +231,8 @@ export default function PersonaCreatePage({ generos, estadosCiviles, tiposDocume
                 <div className="ml-5 mb-4">
                     <h1 className="text-3xl font-semibold mb-2">Registrar Nuevo Paciente</h1>
 
-                    <p className="text-muted-foreground mb-4">Complete el siguiente formulario para registrar un nuevo paciente
-                        en el sistema. Los campos con <span className="text-red-500">*</span> son obligatorios</p>
+                    <p className="text-md text-muted-foreground mb-4">Complete el siguiente formulario para registrar un nuevo paciente
+                        en el sistema. Los campos con <span className="text-red-500">*</span> son obligatorios.</p>
 
                     <Link
                         href={personas.index.url()}
@@ -734,20 +735,18 @@ export default function PersonaCreatePage({ generos, estadosCiviles, tiposDocume
                         </CardContent>
                     </Card>
 
-                    <div className="flex space-x-2">
+                    <div className="flex justify-end gap-2 border-t pt-4 mr-5">
+                        <Link href={personas.index.url()}>
+                            <Button variant="outline">
+                                Cancelar
+                            </Button>
+                        </Link>
                         <Button
                             type="submit"
-                            className="w-1/2"
                             disabled={processing}
                         >
                             {processing ? 'Registrando Paciente...' : 'Registrar Paciente'}
                         </Button>
-
-                        <Link href={personas.index.url()} className="w-1/2">
-                            <Button variant="outline" className="w-full">
-                                Cancelar
-                            </Button>
-                        </Link>
                     </div>
 
                 </form>

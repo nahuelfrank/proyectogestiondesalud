@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
 import profesionales from '@/routes/profesionales';
 import { type BreadcrumbItem } from '@/types';
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { Controller, useForm } from 'react-hook-form';
 import * as z from "zod";
 import React from 'react';
@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Undo2 } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -30,7 +30,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     href: profesionales.index.url(),
   },
   {
-    title: 'Editar',
+    title: 'Modificar Profesional',
     href: '#',
   },
 ];
@@ -316,11 +316,27 @@ export default function ProfesionalEditPage({
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="Profesional | Editar" />
-      <div className='w-full max-w-4xl mx-auto p-4'>
-        <h1 className="text-2xl font-bold mb-6">
-          Editar Profesional: {persona.nombre} {persona.apellido}
-        </h1>
+      <Head title="Profesional | Modificar" />
+      <div className='container mx-auto py-10'>
+
+        <div className="ml-5 mb-4">
+          <h1 className="text-3xl font-semibold mb-2">Modificar Datos de Profesional</h1>
+
+          <p className="text-sm text-muted-foreground mb-4">Modifique los datos del profesional. 
+            Los campos con <span className="text-red-500">*</span> son obligatorios.</p>
+
+          <Link
+            href={profesionales.index.url()}
+            className="inline-block "
+          >
+            <Button
+              className="flex items-center gap-2 mr-2"
+            >
+              <Undo2 className="h-4 w-4" />
+              Volver
+            </Button>
+          </Link>
+        </div>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
           {/* Datos Personales */}
@@ -331,7 +347,7 @@ export default function ProfesionalEditPage({
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Field data-invalid={!!form.formState.errors.nombre}>
-                  <FieldLabel htmlFor="nombre">Nombre *</FieldLabel>
+                  <FieldLabel htmlFor="nombre">Nombre <span className="text-red-500">*</span></FieldLabel>
                   <Input
                     id="nombre"
                     placeholder='Ingresar Nombre'
@@ -343,7 +359,7 @@ export default function ProfesionalEditPage({
                 </Field>
 
                 <Field data-invalid={!!form.formState.errors.apellido}>
-                  <FieldLabel htmlFor="apellido">Apellido *</FieldLabel>
+                  <FieldLabel htmlFor="apellido">Apellido <span className="text-red-500">*</span></FieldLabel>
                   <Input
                     id="apellido"
                     placeholder='Ingresar Apellido'
@@ -357,7 +373,7 @@ export default function ProfesionalEditPage({
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Field data-invalid={!!form.formState.errors.fecha_de_nacimiento}>
-                  <FieldLabel htmlFor="fecha_de_nacimiento">Fecha de Nacimiento *</FieldLabel>
+                  <FieldLabel htmlFor="fecha_de_nacimiento">Fecha de Nacimiento <span className="text-red-500">*</span></FieldLabel>
                   <Input
                     type='date'
                     id="fecha_de_nacimiento"
@@ -373,7 +389,7 @@ export default function ProfesionalEditPage({
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="genero_id">Género *</FieldLabel>
+                      <FieldLabel htmlFor="genero_id">Género <span className="text-red-500">*</span></FieldLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccionar" />
@@ -398,7 +414,7 @@ export default function ProfesionalEditPage({
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="estado_civil_id">Estado Civil *</FieldLabel>
+                      <FieldLabel htmlFor="estado_civil_id">Estado Civil <span className="text-red-500">*</span></FieldLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccionar" />
@@ -425,7 +441,7 @@ export default function ProfesionalEditPage({
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="tipo_documento_id">Tipo de Documento *</FieldLabel>
+                      <FieldLabel htmlFor="tipo_documento_id">Tipo de Documento <span className="text-red-500">*</span></FieldLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccionar" />
@@ -446,7 +462,7 @@ export default function ProfesionalEditPage({
                 />
 
                 <Field data-invalid={!!form.formState.errors.numero_documento}>
-                  <FieldLabel htmlFor="numero_documento">Número de Documento *</FieldLabel>
+                  <FieldLabel htmlFor="numero_documento">Número de Documento <span className="text-red-500">*</span></FieldLabel>
                   <Input
                     id="numero_documento"
                     placeholder='Ingresar Número'
@@ -472,7 +488,7 @@ export default function ProfesionalEditPage({
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="especialidad_id">Especialidad *</FieldLabel>
+                      <FieldLabel htmlFor="especialidad_id">Especialidad <span className="text-red-500">*</span></FieldLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccionar" />
@@ -493,7 +509,7 @@ export default function ProfesionalEditPage({
                 />
 
                 <Field data-invalid={!!form.formState.errors.matricula}>
-                  <FieldLabel htmlFor="matricula">Matrícula *</FieldLabel>
+                  <FieldLabel htmlFor="matricula">Matrícula <span className="text-red-500">*</span></FieldLabel>
                   <Input
                     id="matricula"
                     placeholder='Ingresar Matrícula'
@@ -509,7 +525,7 @@ export default function ProfesionalEditPage({
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="estado">Estado *</FieldLabel>
+                      <FieldLabel htmlFor="estado">Estado <span className="text-red-500">*</span></FieldLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccionar" />
@@ -612,10 +628,7 @@ export default function ProfesionalEditPage({
             </CardContent>
           </Card>
 
-          <div className="flex gap-4">
-            <Button disabled={isSubmitting} type='submit'>
-              {isSubmitting ? 'Actualizando...' : 'Actualizar Profesional'}
-            </Button>
+          <div className="flex justify-end gap-2 border-t pt-4 mr-5">
             <Button
               type="button"
               variant="outline"
@@ -623,6 +636,9 @@ export default function ProfesionalEditPage({
               disabled={isSubmitting}
             >
               Cancelar
+            </Button>
+            <Button disabled={isSubmitting} type='submit'>
+              {isSubmitting ? 'Guardando...' : 'Modificar Profesional'}
             </Button>
           </div>
         </form>

@@ -33,15 +33,15 @@ return new class extends Migration
             // Atributos personales
             $table->date('fecha');
             $table->time('hora');
-            $table->string('diagnostico_principal');
-            $table->string('motivo_de_consulta');
-            $table->string('detalle_consulta')->nullable();
-            $table->string('enfermedad_actual')->nullable();
-            $table->string('indicaciones')->nullable();
-            $table->string('examen_fisico')->nullable();
-            $table->string('prestacion_de_enfermeria')->nullable();
-            $table->string('realizacion_de_tratamiento')->nullable();
-            $table->string('observaciones')->nullable();
+            $table->text('diagnostico_principal');
+            $table->text('motivo_de_consulta');
+            $table->text('detalle_consulta')->nullable();
+            $table->text('enfermedad_actual')->nullable();
+            $table->text('indicaciones')->nullable();
+            $table->text('examen_fisico')->nullable();
+            $table->text('prestacion_de_enfermeria')->nullable();
+            $table->text('realizacion_de_tratamiento')->nullable();
+            $table->text('observaciones')->nullable();
 
             $table->timestamps();
         });

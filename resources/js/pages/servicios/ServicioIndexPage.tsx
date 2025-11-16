@@ -44,7 +44,11 @@ export default function ServicioIndexPage({ items, meta, filters }: ServicioInde
             <div className="container mx-auto py-10">
 
                 <div className="ml-5">
-                    <h1 className="text-3xl font-semibold mb-6">Lista de Servicios</h1>
+                    <h1 className="text-3xl font-semibold mb-3">Lista de Servicios</h1>
+
+                    <p className="text-md text-muted-foreground mb-3">
+                        El sistema muestra todos los servicios registrados junto con su estado actual.
+                    </p>
                 </div>
 
                 <div className='m-3'>

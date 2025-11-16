@@ -26,20 +26,22 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             GeneroSeeder::class,
-            EstadoCivilSeeder::class,
-            TipoDocumentoSeeder::class,
             ClaustroSeeder::class,
-            DiaSeeder::class,
             DependenciaSeeder::class,
             AreaSeeder::class,
             DependenciaAreaSeeder::class,
-            PersonaSeeder::class,
+            EstadoCivilSeeder::class,
+            TipoDocumentoSeeder::class,
+            DiaSeeder::class,
             EspecialidadSeeder::class,
             ServicioSeeder::class,
             EspecialidadServicioSeeder::class,
             EstadoAtencionSeeder::class,
             TipoAtencionSeeder::class,
             AtributoSeeder::class,
+            PersonaSeeder::class,
+            ProfesionalSeeder::class,
+            AtencionSeeder::class,
         ]);
     }
 }

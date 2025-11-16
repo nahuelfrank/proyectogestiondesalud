@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AtencionController;
+use App\Http\Controllers\EstadisticasController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\ProfesionalController;
@@ -45,6 +46,7 @@ Route::post('pacientes', [PersonaController::class, 'store'])->name('personas.st
 Route::get('pacientes/editar_paciente/{persona}', [PersonaController::class, 'edit'])->name('personas.edit');
 Route::get('/pacientes/carga_rapida', [PersonaController::class, 'fastCreate'])->name('personas.fastCreate');
 Route::post('/pacientes/carga_rapida', [PersonaController::class, 'fastStore'])->name('personas.fastStore');
+Route::delete('pacientes/{persona}', [PersonaController::class, 'destroyFastCreate'])->name('personas.destroyFastCreate');
 Route::put('pacientes/{persona}', [PersonaController::class, 'update'])->name('personas.update');
 Route::get('pacientes/detalles/{persona}', [PersonaController::class, 'show'])->name('personas.show');
 Route::delete('pacientes/{persona}', [PersonaController::class, 'destroy'])->name('personas.destroy');
@@ -61,12 +63,17 @@ Route::get('profesionales/reporte_horarios/{profesional}', [ProfesionalControlle
 // Rutas para el recurso Atenciones
 Route::get('atenciones', [AtencionController::class, 'index'])->name('atenciones.index');
 Route::get('atenciones/registrar_atencion', [AtencionController::class, 'crearAtencion'])->name('atenciones.crear_atencion');
-Route::post('atenciones/guardar_atencion', [AtencionController::class, 'guardarAtencion'])->name('atenciones.guardar_atencion');
+Route::post('atenciones/guardar_atencion',[AtencionController::class, 'guardarAtencion'])->name('atenciones.guardar_atencion');
 Route::get('atenciones/editar_atencion/{atencion}', [AtencionController::class, 'editarAtencion'])->name('atenciones.editar_atencion');
 Route::put('atenciones/{atencion}', [AtencionController::class, 'actualizarAtencion'])->name('atenciones.actualizar_atencion');
 Route::get('atenciones/detalles/{persona}', [AtencionController::class, 'verAtencion'])->name('atenciones.ver_atencion');
 
 // Rutas para el recurso Servicios
 Route::get('servicios', [ServicioController::class, 'index'])->name('servicios.index');
+
+
+// Ruta para el modulo de estadisticas
+Route::get('estadisticas', [EstadisticasController::class, 'index'])->name('estadisticas.index');
+
 
 require __DIR__ . '/settings.php';

@@ -12,12 +12,13 @@ import {
 } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookPlus, BriefcaseMedicalIcon, NotebookPen, UserRound } from 'lucide-react';
+import { BookPlus, BriefcaseMedicalIcon, ChartNoAxesCombined, NotebookPen, UserRound } from 'lucide-react';
 import AppLogo from './app-logo';
 import personas from '@/routes/personas';
 import profesionales from '@/routes/profesionales';
 import atenciones from '@/routes/atenciones';
 import servicios from '@/routes/servicios';
+import estadisticas from '@/routes/estadisticas';
 
 const mainNavItems: NavItem[] = [
     {
@@ -40,6 +41,11 @@ const mainNavItems: NavItem[] = [
         href: atenciones.index().url,
         icon: NotebookPen,
     },
+    {
+        title: 'Estadísticas',
+        href: estadisticas.index().url,
+        icon: ChartNoAxesCombined,
+    }
 
 ];
 

@@ -5,7 +5,7 @@ import { columns } from './Columns';
 import { DataTable } from '@/components/ui/data-table';
 import { Atencion } from '@/types/atenciones/atencion';
 import { Button } from '@/components/ui/button';
-import { BookmarkPlus } from 'lucide-react';
+import { FilePlus } from 'lucide-react';
 import atenciones from '@/routes/atenciones';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -31,7 +31,7 @@ interface AtencionIndexPageProps {
 }
 
 export default function AtencionIndexPage({ items, meta, filters }: AtencionIndexPageProps) {
-    
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Atenciones" />
@@ -39,14 +39,29 @@ export default function AtencionIndexPage({ items, meta, filters }: AtencionInde
 
                 <div className="ml-5">
 
-                    <h1 className="text-3xl font-semibold mb-6">Lista de Atenciones</h1>
+                    <h1 className="text-3xl font-semibold mb-3">Lista de Atenciones</h1>
+
+                    <p className="text-sm text-muted-foreground mb-3">
+                        Solo se muestran las atenciones del día actual con estado:
+                    </p>
+
+                    <ul className="list-disc ml-8 my-2 text-sm text-muted-foreground">
+                        <li>En Espera</li>
+                        <li>En Atención</li>
+                        <li>Cancelado</li>
+                    </ul>
+
+                    <p className="text-sm text-muted-foreground mb-3">
+                        Ordenadas por horario (orden de llegada).  Las atenciones con tipo de atención  ‘Emergencia’, ’Urgencia’ se muestran al inicio de la lista.
+                    </p>
 
                     <Link href={atenciones.crear_atencion.url()} className="inline-block">
                         <Button className="flex items-center gap-2 mr-2">
-                            <BookmarkPlus className="h-4 w-4" />
+                            <FilePlus className="h-4 w-4" />
                             Registrar atención
                         </Button>
                     </Link>
+
                 </div>
 
                 <div className='m-3'>
@@ -56,7 +71,7 @@ export default function AtencionIndexPage({ items, meta, filters }: AtencionInde
                         meta={meta}
                         filters={filters}
                         routeName={atenciones.index.url()}
-                        searchPlaceholder="Buscar..."
+                        searchPlaceholder="Buscar paciente o profesional..."
                     />
                 </div>
 

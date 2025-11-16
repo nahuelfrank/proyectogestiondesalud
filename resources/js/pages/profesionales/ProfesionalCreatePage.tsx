@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
 import profesionales from '@/routes/profesionales';
 import { type BreadcrumbItem } from '@/types';
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { Controller, useForm } from 'react-hook-form';
 import * as z from "zod";
 import React from 'react';
@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Undo2 } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -30,7 +30,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     href: profesionales.index.url(),
   },
   {
-    title: 'Crear',
+    title: 'Registrar Profesional',
     href: '#',
   },
 ];
@@ -109,7 +109,7 @@ export default function ProfesionalCreatePage({
 }: ProfesionalCreatePageProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [diasSeleccionados, setDiasSeleccionados] = React.useState<number[]>([]);
-  
+
   // Estado local para manejar horarios - CLAVE para que funcione
   const [horariosPorDia, setHorariosPorDia] = React.useState<Map<number, Horario[]>>(
     new Map()
@@ -144,7 +144,7 @@ export default function ProfesionalCreatePage({
   // Manejar selección/deselección de días
   const handleDiaToggle = (diaId: number, checked: boolean) => {
     const nuevoMapa = new Map(horariosPorDia);
-    
+
     if (checked) {
       setDiasSeleccionados([...diasSeleccionados, diaId]);
       // Agregar un horario vacío para este día
@@ -158,7 +158,7 @@ export default function ProfesionalCreatePage({
       // Remover todos los horarios de este día
       nuevoMapa.delete(diaId);
     }
-    
+
     setHorariosPorDia(nuevoMapa);
     sincronizarConForm(nuevoMapa);
   };
@@ -167,7 +167,7 @@ export default function ProfesionalCreatePage({
   const handleAgregarHorario = (diaId: number) => {
     const nuevoMapa = new Map(horariosPorDia);
     const horariosActuales = nuevoMapa.get(diaId) || [];
-    
+
     nuevoMapa.set(diaId, [
       ...horariosActuales,
       {
@@ -176,7 +176,7 @@ export default function ProfesionalCreatePage({
         hora_fin_atencion: "",
       }
     ]);
-    
+
     setHorariosPorDia(nuevoMapa);
     sincronizarConForm(nuevoMapa);
   };
@@ -185,33 +185,33 @@ export default function ProfesionalCreatePage({
   const handleEliminarHorario = (diaId: number, index: number) => {
     const nuevoMapa = new Map(horariosPorDia);
     const horariosActuales = nuevoMapa.get(diaId) || [];
-    
+
     // Si es el único horario, no eliminar (mantener al menos uno)
     if (horariosActuales.length === 1) {
       return;
     }
-    
+
     const nuevosHorarios = horariosActuales.filter((_, i) => i !== index);
     nuevoMapa.set(diaId, nuevosHorarios);
-    
+
     setHorariosPorDia(nuevoMapa);
     sincronizarConForm(nuevoMapa);
   };
 
   // Actualizar un horario específico
   const handleHorarioChange = (
-    diaId: number, 
-    index: number, 
-    field: 'hora_inicio_atencion' | 'hora_fin_atencion', 
+    diaId: number,
+    index: number,
+    field: 'hora_inicio_atencion' | 'hora_fin_atencion',
     value: string
   ) => {
     const nuevoMapa = new Map(horariosPorDia);
     const horariosActuales = nuevoMapa.get(diaId) || [];
-    
+
     const horariosActualizados = horariosActuales.map((h, i) =>
       i === index ? { ...h, [field]: value } : h
     );
-    
+
     nuevoMapa.set(diaId, horariosActualizados);
     setHorariosPorDia(nuevoMapa);
     sincronizarConForm(nuevoMapa);
@@ -251,9 +251,27 @@ export default function ProfesionalCreatePage({
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="Profesional | Crear" />
-      <div className='w-full max-w-4xl mx-auto p-4'>
-        <h1 className="text-2xl font-bold mb-6">Crear Profesional</h1>
+      <Head title="Profesional | Registrar" />
+      <div className='container mx-auto py-10'>
+
+        <div className="ml-5 mb-4">
+          <h1 className="text-3xl font-semibold mb-2">Registrar Nuevo Profesional</h1>
+
+          <p className="text-sm text-muted-foreground mb-4">Complete el siguiente formulario para registrar un nuevo profesional
+            en el sistema. Los campos con <span className="text-red-500">*</span> son obligatorios</p>
+
+          <Link
+            href={profesionales.index.url()}
+            className="inline-block "
+          >
+            <Button
+              className="flex items-center gap-2 mr-2"
+            >
+              <Undo2 className="h-4 w-4" />
+              Volver
+            </Button>
+          </Link>
+        </div>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
           {/* Datos Personales */}
@@ -491,7 +509,7 @@ export default function ProfesionalCreatePage({
                           {dia.nombre}
                         </label>
                       </div>
-                      
+
                       {isSelected && (
                         <Button
                           type="button"
@@ -545,10 +563,7 @@ export default function ProfesionalCreatePage({
             </CardContent>
           </Card>
 
-          <div className="flex gap-4">
-            <Button disabled={isSubmitting} type='submit'>
-              {isSubmitting ? 'Creando...' : 'Crear Profesional'}
-            </Button>
+          <div className="flex justify-end gap-2 border-t pt-4 mr-5">
             <Button
               type="button"
               variant="outline"
@@ -556,6 +571,9 @@ export default function ProfesionalCreatePage({
               disabled={isSubmitting}
             >
               Cancelar
+            </Button>
+            <Button disabled={isSubmitting} type='submit'>
+              {isSubmitting ? 'Registrando Profesional...' : 'Registrar Profesional'}
             </Button>
           </div>
         </form>

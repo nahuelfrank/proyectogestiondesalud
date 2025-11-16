@@ -89,7 +89,6 @@ class AtencionController extends Controller
         return Inertia::render('atenciones/AtencionCreatePage', [
             'especialidadesServicios' => EspecialidadServicio::with('especialidad', 'servicio')->get(),
             'tiposAtenciones' => TipoAtencion::all(),
-            'estadosAtenciones' => EstadoAtencion::all(),
             'pacientes' => Persona::with('tipo_documento')->get(),
             'profesionales' => Profesional::with(['persona.tipo_documento', 'disponibilidades_horarias'])->get(),
             'pacienteReciente' => session('paciente_reciente'),
@@ -108,8 +107,8 @@ class AtencionController extends Controller
             'tipo_atencion_id' => 'required|exists:tipos_atenciones,id',
             'persona_id' => 'required|exists:personas,id',
             'profesional_id' => 'required|exists:profesionales,id',
-            'diagnostico_principal' => 'required|string',
-            'motivo_de_consulta' => 'required|string',
+            'diagnostico_principal' => 'required|text',
+            'motivo_de_consulta' => 'required|text',
         ]);
 
         // Crear la atención directamente
@@ -119,16 +118,44 @@ class AtencionController extends Controller
         session()->forget('carga_rapida');
 
         return redirect()->route('atenciones.index')
-            ->with('success', 'Atención registrada exitosamente');
+            ->with('success', 'La atención fue registrada exitosamente.');
+    }
+
+
+    public function modificarEstadoAtencion(Atencion $atencion)
+    {
+        $atencion->load([
+            'servicio',
+            'tipo_atencion',
+            'estado_atencion',
+            'profesional.persona',
+            'persona.tipo_documento',
+        ]);
+
+        return Inertia::render('atenciones/AtencionEditPage', [
+            'atencion' => $atencion,
+            'estadosAtenciones' => EstadoAtencion::all(),
+        ]);
+    }
+
+    public function actualizarEstadoAtencion(Request $request, Atencion $atencion)
+    {
+        $validated = $request->validate([
+            'estado_atencion_id' => 'required|exists:estados_atenciones,id',
+        ]);
+
+        $atencion->update($validated);
+
+        return redirect()->route('atenciones.index')
+            ->with('success', 'El estado de atención fue modificado exitosamente.');
     }
 
     public function editarAtencion()
     {
-        return Inertia::render('atenciones/AtencionEditPage');
     }
 
     public function actualizarAtencion()
-    {
+    {   
 
     }
 

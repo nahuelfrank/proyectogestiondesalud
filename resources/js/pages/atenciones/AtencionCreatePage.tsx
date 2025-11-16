@@ -22,7 +22,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import atenciones from '@/routes/atenciones';
 import { useDebounce } from "@/hooks/use-debounce";
-import { set } from 'date-fns';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Atenciones', href: atenciones.index.url() },
@@ -90,7 +89,6 @@ interface Props {
 export default function AtencionCreatePage({
     especialidadesServicios,
     tiposAtenciones,
-    estadosAtenciones,
     pacientes,
     profesionales,
     pacienteReciente,
@@ -109,6 +107,17 @@ export default function AtencionCreatePage({
     const [notificacion, setNotificacion] = useState<{ tipo: string; mensaje: string } | null>(null);
     const [fechaHoraActual, setFechaHoraActual] = useState({ fecha: '', hora: '' });
 
+    console.log(pacienteCargaRapida);
+
+    console.log("Holalalalalal");
+
+    const styles = {
+        success: 'border-green-500 bg-green-50 text-green-900 dark:bg-green-950 dark:text-green-100',
+        error: '', // usa el estilo destructive por defecto
+        warning: 'border-yellow-500 bg-yellow-50 text-yellow-900 dark:bg-yellow-950 dark:text-yellow-100',
+        info: 'border-blue-500 bg-blue-50 text-blue-900 dark:bg-blue-950 dark:text-blue-100',
+    };
+
     const { data, setData, post, errors, processing } = useForm({
         fecha: "",
         hora: "",
@@ -117,8 +126,8 @@ export default function AtencionCreatePage({
         tipo_atencion_id: "",
         persona_id: "",
         profesional_id: "",
-        diagnostico_principal: "Prueba",
-        motivo_de_consulta: "Prueba",
+        diagnostico_principal: "A definir",
+        motivo_de_consulta: "A definir",
     });
 
     // Capturar fecha y hora automáticamente
@@ -140,7 +149,9 @@ export default function AtencionCreatePage({
     // Verificar paciente reciente o carga rápida al cargar
     useEffect(() => {
         // Prioridad 1: Paciente de carga rápida
+
         if (pacienteCargaRapida) {
+
             // Buscar el paciente en la lista de pacientes por número de documento y tipo
             const pacienteEncontrado = pacientes.find(p =>
                 p.numero_documento === pacienteCargaRapida.numero_documento &&
@@ -353,11 +364,11 @@ export default function AtencionCreatePage({
 
                     <p className="text-muted-foreground mb-4">
                         Complete el siguiente formulario para registrar una nueva atención
-                        en el sistema. Los campos con <span className="text-red-500">*</span> son obligatorios
+                        en el sistema. Los campos con <span className="text-red-500">*</span> son obligatorios.
                     </p>
 
                     <Link href={atenciones.index.url()} className="inline-block">
-                        <Button className="flex items-center gap-2 mr-2">
+                        <Button className="flex items-center gap-2">
                             <Undo2 className="h-4 w-4" />
                             Volver
                         </Button>
@@ -367,7 +378,7 @@ export default function AtencionCreatePage({
                 <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                     {/* Notificaciones */}
                     {notificacion && (
-                        <Alert variant={notificacion.tipo === 'error' ? 'destructive' : 'default'}>
+                        <Alert variant={notificacion.tipo === 'error' ? 'destructive' : 'default'} className={`mb-4 pr-8 ${styles[notificacion.tipo]}`}>
                             {notificacion.tipo === 'success' ? <CheckCircle className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
                             <AlertTitle>
                                 {notificacion.tipo === 'success' ? 'Éxito' : notificacion.tipo === 'error' ? 'Error' : 'Información'}
@@ -471,12 +482,12 @@ export default function AtencionCreatePage({
                                             </Card>
                                         ) : (
                                             <p className="text-sm text-muted-foreground">
-                                                No se encontraron pacientes con ese número de documento.
+                                                No se encontraron pacientes con ese número de documento 
                                             </p>
                                         )
                                     ) : (
                                         <p className="text-sm text-muted-foreground">
-                                            Ingrese un número de documento para buscar.
+                                            Ingrese un número de documento para buscar un paciente
                                         </p>
                                     )}
 
@@ -520,7 +531,7 @@ export default function AtencionCreatePage({
                                                 <span className="ml-2 font-semibold">
                                                     {pacienteSeleccionado.tipo_documento.nombre}
                                                 </span>
-                                                <span className="ml-2 text-muted-foreground">Documento:</span>
+                                                <span className="ml-3 text-muted-foreground">Documento:</span>
                                                 <span className="ml-2 font-semibold">
                                                     {pacienteSeleccionado.numero_documento}
                                                 </span>
@@ -674,15 +685,17 @@ export default function AtencionCreatePage({
                                     )}
 
                                     {/* Botones de Acción */}
+
                                     <div className="flex justify-end gap-2 border-t pt-4">
-                                        <Link href={atenciones.index.url()}>
-                                            <Button variant="outline">
-                                                Cancelar
-                                            </Button>
-                                        </Link>
                                         <Button onClick={registrarAtencion} disabled={processing}>
                                             {processing ? 'Registrando...' : 'Registrar Atención'}
                                         </Button>
+                                        <Link href={atenciones.index.url()}>
+                                            <Button
+                                                variant="outline">
+                                                Cancelar
+                                            </Button>
+                                        </Link>
                                     </div>
                                 </div>
                             )}

@@ -175,20 +175,18 @@ export default function PersonaFastCreatePage({ tiposDocumento }: FastCreateProp
                                 </Field>
                                 {getError('numero_documento') && <FieldError>{getError('numero_documento')}</FieldError>}
 
-                                <div className="flex space-x-2">
+                                <div className="flex justify-end gap-2 border-t pt-4">
+                                    <Link href={personas.create.url()}>
+                                        <Button variant="outline">
+                                            Cancelar
+                                        </Button>
+                                    </Link>
                                     <Button
                                         type="submit"
-                                        className="w-1/2"
                                         disabled={processing}
                                     >
                                         {processing ? 'Creando Paciente...' : 'Atender Emergencia'}
                                     </Button>
-
-                                    <Link href={personas.create.url()} className="w-1/2">
-                                        <Button variant="outline" className="w-full">
-                                            Cancelar
-                                        </Button>
-                                    </Link>
                                 </div>
 
                             </form>
@@ -199,7 +197,6 @@ export default function PersonaFastCreatePage({ tiposDocumento }: FastCreateProp
             </div>
         </AppLayout>
     );
-
 }
 
 

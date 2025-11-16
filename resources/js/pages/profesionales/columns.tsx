@@ -1,7 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { Clock, Eye, Pencil, Trash } from "lucide-react";
-import { router, Link} from "@inertiajs/react";
+import { Clock, Eye, Pencil, Trash2 } from "lucide-react";
+import { router } from "@inertiajs/react";
 import {
   Dialog,
   DialogClose,
@@ -15,15 +15,12 @@ import {
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
 import { FileText } from 'lucide-react';
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 
 export type Profesional = {
   id: number;
@@ -70,7 +67,7 @@ export const columns: ColumnDef<Profesional>[] = [
     accessorFn: (row) => `${row.persona.apellido} ${row.persona.nombre}`,
     cell: ({ row }) => {
       const profesional = row.original;
-      return `${profesional.persona.apellido}, ${profesional.persona.nombre}`;
+      return `${profesional.persona.apellido}, ${profesional.persona.nombre}` ;
     },
   },
   {
@@ -170,13 +167,13 @@ export const columns: ColumnDef<Profesional>[] = [
             )}
 
             <DialogFooter>
-                <Button
-                  className="flex items-center gap-2 mr-2"
-                  onClick={() => window.open(`/profesionales/reporte_horarios/${profesional.id}`, '_blank')}
-                >
-                  <FileText className="h-4 w-4" />
-                  PDF
-                </Button>
+              <Button
+                className="flex items-center gap-2 mr-2"
+                onClick={() => window.open(`/profesionales/reporte_horarios/${profesional.id}`, '_blank')}
+              >
+                <FileText className="h-4 w-4" />
+                PDF
+              </Button>
               <DialogClose asChild>
                 <Button variant="outline">Cerrar</Button>
               </DialogClose>
@@ -231,7 +228,7 @@ export const columns: ColumnDef<Profesional>[] = [
       };
 
       return (
-        <div className="flex items-center gap-2">
+        <div>
           {/* Ver */}
           <Button
             variant="ghost"
@@ -247,19 +244,19 @@ export const columns: ColumnDef<Profesional>[] = [
             variant="ghost"
             size="icon"
             onClick={() => router.get(`/profesionales/edit/${profesional.id}`)}
-            title="Editar"
+            title="Modificar"
           >
             <Pencil className="h-4 w-4" />
           </Button>
 
           {/* Eliminar */}
           <Button
-            variant="destructive"
+            variant="ghost"
             size="icon"
             onClick={handleDelete}
             title="Eliminar"
           >
-            <Trash className="h-4 w-4" />
+            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       );
