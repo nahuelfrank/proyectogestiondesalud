@@ -257,7 +257,7 @@ export default function ProfesionalCreatePage({
         <div className="ml-5 mb-4">
           <h1 className="text-3xl font-semibold mb-2">Registrar Nuevo Profesional</h1>
 
-          <p className="text-muted-foreground mb-4">Complete el siguiente formulario para registrar un nuevo profesional
+          <p className="text-sm text-muted-foreground mb-4">Complete el siguiente formulario para registrar un nuevo profesional
             en el sistema. Los campos con <span className="text-red-500">*</span> son obligatorios</p>
 
           <Link

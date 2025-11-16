@@ -108,8 +108,8 @@ export default function EditarAtencionPage({ atencion, estadosAtenciones }: Prop
       <div className="container mx-auto py-10">
         <div className="ml-5 mb-4">
           <h1 className="text-3xl font-semibold mb-2">Modificar Estado de Atención</h1>
-          <p className="text-muted-foreground mb-4">
-            Actualice el estado de la atención del paciente
+          <p className="text-md text-muted-foreground mb-4">
+            Actualice el estado de la atención del paciente.
           </p>
 
           <Link href={atenciones.index.url()} className="inline-block">

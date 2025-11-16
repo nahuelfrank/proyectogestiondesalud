@@ -32,7 +32,7 @@ export default function PersonaShowPage({ persona }: PersonaShowPageProps) {
             <h1 className="text-3xl font-semibold tracking-tight mb-2">
               {persona.nombre} {persona.apellido}
             </h1>
-            <p className="text-muted-foreground mb-4">Detalles personales y dependencias asociadas</p>
+            <p className="text-muted-foreground mb-4">Detalles personales y dependencias asociadas.</p>
 
             <Link href={personas.index.url()} className="inline-block">
               <Button>Volver a la lista de Pacientes</Button>

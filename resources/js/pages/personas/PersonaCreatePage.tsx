@@ -231,8 +231,8 @@ export default function PersonaCreatePage({ generos, estadosCiviles, tiposDocume
                 <div className="ml-5 mb-4">
                     <h1 className="text-3xl font-semibold mb-2">Registrar Nuevo Paciente</h1>
 
-                    <p className="text-muted-foreground mb-4">Complete el siguiente formulario para registrar un nuevo paciente
-                        en el sistema. Los campos con <span className="text-red-500">*</span> son obligatorios</p>
+                    <p className="text-md text-muted-foreground mb-4">Complete el siguiente formulario para registrar un nuevo paciente
+                        en el sistema. Los campos con <span className="text-red-500">*</span> son obligatorios.</p>
 
                     <Link
                         href={personas.index.url()}

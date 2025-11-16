@@ -37,10 +37,13 @@ export default function PersonaIndexPage({ items, meta, filters }: PersonaIndexP
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Pacientes" />
             <div className="container mx-auto py-10">
-
                 <div className="ml-5">
 
-                    <h1 className="text-3xl font-semibold mb-6">Lista de Pacientes</h1>
+                    <h1 className="text-3xl font-semibold mb-3">Lista de Pacientes</h1>
+
+                     <p className="text-md text-muted-foreground mb-3">
+                        El sistema muestra los pacientes registrados con información relevante.
+                    </p>
 
                     <Link href={personas.create.url()} className="inline-block">
                         <Button className="flex items-center gap-2 mr-2">
@@ -48,8 +51,8 @@ export default function PersonaIndexPage({ items, meta, filters }: PersonaIndexP
                             Registrar paciente
                         </Button>
                     </Link>
-                </div>
 
+                </div>
 
                 <div className='m-3'>
                     <DataTable

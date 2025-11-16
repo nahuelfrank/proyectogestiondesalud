@@ -252,12 +252,12 @@ export default function PersonaEditPage({
                     )}
 
                     {isFastCreate ? (
-                        <p className="text-muted-foreground mb-4">
+                        <p className="text-md text-muted-foreground mb-4">
                             Complete los datos del paciente.
                             Los campos con <span className="text-red-500">*</span> son obligatorios.
                         </p>
                     ) : (
-                        <p className="text-muted-foreground mb-4">
+                        <p className="text-md text-muted-foreground mb-4">
                             Modifique los datos del paciente.
                             Los campos con <span className="text-red-500">*</span> son obligatorios.
                         </p>

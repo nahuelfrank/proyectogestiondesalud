@@ -38,7 +38,10 @@ export default function ProfesionalIndexPage({ items, meta, filters }: Profesion
 
                 <div className="ml-5">
 
-                    <h1 className="text-3xl font-semibold mb-6">Lista de Profesionales</h1>
+                    <h1 className="text-3xl font-semibold mb-3">Lista de Profesionales</h1>
+                     <p className="text-md text-muted-foreground mb-3">
+                        El sistema muestra los profesionales registrados con información relevante.
+                    </p>
 
                     <Link href={profesionales.crear_profesional.url()} className="inline-block">
                         <Button className="flex items-center gap-2 mr-2">

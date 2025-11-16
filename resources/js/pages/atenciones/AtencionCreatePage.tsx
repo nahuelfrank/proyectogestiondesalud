@@ -89,7 +89,6 @@ interface Props {
 export default function AtencionCreatePage({
     especialidadesServicios,
     tiposAtenciones,
-    estadosAtenciones,
     pacientes,
     profesionales,
     pacienteReciente,
@@ -107,6 +106,10 @@ export default function AtencionCreatePage({
     const [mostrarAlertaHorario, setMostrarAlertaHorario] = useState(false);
     const [notificacion, setNotificacion] = useState<{ tipo: string; mensaje: string } | null>(null);
     const [fechaHoraActual, setFechaHoraActual] = useState({ fecha: '', hora: '' });
+
+    console.log(pacienteCargaRapida);
+
+    console.log("Holalalalalal");
 
     const styles = {
         success: 'border-green-500 bg-green-50 text-green-900 dark:bg-green-950 dark:text-green-100',
@@ -146,7 +149,9 @@ export default function AtencionCreatePage({
     // Verificar paciente reciente o carga rápida al cargar
     useEffect(() => {
         // Prioridad 1: Paciente de carga rápida
+
         if (pacienteCargaRapida) {
+
             // Buscar el paciente en la lista de pacientes por número de documento y tipo
             const pacienteEncontrado = pacientes.find(p =>
                 p.numero_documento === pacienteCargaRapida.numero_documento &&
@@ -359,11 +364,11 @@ export default function AtencionCreatePage({
 
                     <p className="text-muted-foreground mb-4">
                         Complete el siguiente formulario para registrar una nueva atención
-                        en el sistema. Los campos con <span className="text-red-500">*</span> son obligatorios
+                        en el sistema. Los campos con <span className="text-red-500">*</span> son obligatorios.
                     </p>
 
                     <Link href={atenciones.index.url()} className="inline-block">
-                        <Button className="flex items-center gap-2 mr-2">
+                        <Button className="flex items-center gap-2">
                             <Undo2 className="h-4 w-4" />
                             Volver
                         </Button>

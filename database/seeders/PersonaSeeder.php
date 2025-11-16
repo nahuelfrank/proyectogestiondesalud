@@ -10,6 +10,9 @@ class PersonaSeeder extends Seeder
 {
     public function run(): void
     {
+
+        Persona::factory(200)->create();
+        /*
         // Obtenemos TODAS las combinaciones válidas
         $dependenciasAreasValidas = DB::table('dependencias_areas')->get();
 
@@ -182,5 +185,6 @@ class PersonaSeeder extends Seeder
                 ]);
             }
         }
+        */
     }
 }

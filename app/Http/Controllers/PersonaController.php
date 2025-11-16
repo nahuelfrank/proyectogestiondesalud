@@ -225,7 +225,7 @@ class PersonaController extends Controller
 
         return redirect()
             ->route('personas.index')
-            ->with('success', 'El paciente fue actualizado correctamente.');
+            ->with('success', 'El paciente fue modificado correctamente.');
     }
 
     /**
@@ -315,6 +315,14 @@ class PersonaController extends Controller
         return redirect()->route('atenciones.crear_atencion')
             ->with('success', 'El paciente fue registrado correctamente (carga rápida).');
     }
+
+    public function destroyFastCreate(Persona $persona)
+    {
+        $persona->delete(); // Esto marca el deleted_at, no borra realmente
+
+        return back()->with('success', 'El paciente fue eliminado correctamente.');
+    }
+
 
     public function indexProfesionales(Request $request)
     {
@@ -499,6 +507,6 @@ class PersonaController extends Controller
         });
 
         return redirect()->route('profesionales.index')
-            ->with('success', 'Profesional actualizado correctamente.');
+            ->with('success', 'El profesional fue modificado correctamente.');
     }
 }

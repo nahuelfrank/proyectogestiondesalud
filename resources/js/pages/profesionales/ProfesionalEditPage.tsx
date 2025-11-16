@@ -322,7 +322,7 @@ export default function ProfesionalEditPage({
         <div className="ml-5 mb-4">
           <h1 className="text-3xl font-semibold mb-2">Modificar Datos de Profesional</h1>
 
-          <p className="text-muted-foreground mb-4">Modifique los datos del profesional. 
+          <p className="text-sm text-muted-foreground mb-4">Modifique los datos del profesional. 
             Los campos con <span className="text-red-500">*</span> son obligatorios.</p>
 
           <Link

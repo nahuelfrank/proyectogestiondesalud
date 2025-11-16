@@ -67,7 +67,7 @@ export const columns: ColumnDef<Profesional>[] = [
     accessorFn: (row) => `${row.persona.apellido} ${row.persona.nombre}`,
     cell: ({ row }) => {
       const profesional = row.original;
-      return `${profesional.persona.apellido}, ${profesional.persona.nombre}`;
+      return `${profesional.persona.apellido}, ${profesional.persona.nombre}` ;
     },
   },
   {
