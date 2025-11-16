@@ -155,7 +155,7 @@ export default function AtencionCreatePage({
             // Buscar el paciente en la lista de pacientes por número de documento y tipo
             const pacienteEncontrado = pacientes.find(p =>
                 p.numero_documento === pacienteCargaRapida.numero_documento &&
-                p.tipo_documento.id === pacienteCargaRapida.tipo_documento_id
+                p.tipo_documento.id === Number(pacienteCargaRapida.tipo_documento_id)
             );
 
             if (pacienteEncontrado) {
