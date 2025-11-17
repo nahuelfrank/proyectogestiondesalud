@@ -4,6 +4,7 @@ import { DisponibilidadHoraria } from "@/pages/profesionales/columns";
 
 export type Profesional = {
   id: number;
+  user_id: number | null;
   persona_id: number;
   especialidad_id: number;
   persona: {

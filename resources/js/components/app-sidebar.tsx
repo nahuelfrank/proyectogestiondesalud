@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookPlus, BriefcaseMedicalIcon, ChartNoAxesCombined, NotebookPen, UserRound } from 'lucide-react';
+import { BookPlus, BriefcaseMedicalIcon, ChartNoAxesCombined, NotebookPen, Shield, UserRound } from 'lucide-react';
 import AppLogo from './app-logo';
 import personas from '@/routes/personas';
 import profesionales from '@/routes/profesionales';
@@ -24,22 +24,32 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Servicios',
         href: servicios.index().url,
-        icon: BookPlus
+        icon: BookPlus,
+        permission: 'view servicios',
     },
     {
         title: 'Pacientes',
         href: personas.index().url,
         icon: UserRound,
+        permission: 'view pacientes',
     },
     {
         title: 'Profesionales',
         href: profesionales.index().url,
         icon: BriefcaseMedicalIcon,
+        permission: 'view profesionales',
     },
     {
         title: 'Atenciones',
         href: atenciones.index().url,
         icon: NotebookPen,
+        permission: 'view atenciones',
+    },
+    {
+        title: 'Roles y Permisos',
+        href: '/roles',
+        icon: Shield,
+        permission: 'view roles',
     },
     {
         title: 'Estadísticas',

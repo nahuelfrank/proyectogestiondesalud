@@ -94,7 +94,7 @@ class RolePermissionSeeder extends Seeder
         // Crear usuario super admin por defecto
         $user = \App\Models\User::create([
             'name' => 'Super Admin',
-            'email' => 'admin@tuapp.com',
+            'email' => 'admin@example.com',
             'password' => bcrypt('password'),
             'email_verified_at' => now(),
         ]);
