@@ -72,12 +72,12 @@ export const columns: ColumnDef<Persona>[] = [
               size="icon"
               title="Completar datos primero para ver"
               disabled
-              className="mx-2 opacity-50 cursor-not-allowed"
+              className="opacity-50 cursor-not-allowed"
             >
               <Eye className="h-4 w-4" />
             </Button>
           ) : (
-            <Link href={personas.show(persona.id).url} className="mx-2 inline-block">
+            <Link href={personas.show(persona.id).url} className="inline-block">
               <Button variant="ghost" size="icon" title="Ver">
                 <Eye className="h-4 w-4" />
               </Button>
@@ -86,7 +86,7 @@ export const columns: ColumnDef<Persona>[] = [
 
           {/* Editar / Completar datos */}
           {isFastCreate ? (
-            <Link href={personas.edit(persona.id).url} className="mx-2 inline-block">
+            <Link href={personas.edit(persona.id).url} className="minline-block">
               <Button
                 variant="ghost"
                 size="icon"
@@ -97,7 +97,7 @@ export const columns: ColumnDef<Persona>[] = [
               </Button>
             </Link>
           ) : (
-            <Link href={personas.edit(persona.id).url} className="mx-2 inline-block">
+            <Link href={personas.edit(persona.id).url} className="inline-block">
               <Button
                 variant="ghost"
                 size="icon"

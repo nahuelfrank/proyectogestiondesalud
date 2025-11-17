@@ -13,7 +13,7 @@ class AtencionSeeder extends Seeder
     public function run(): void
     {
         Atencion::factory()
-            ->count(50)
+            ->count(10000)
             ->create();
     }
 }

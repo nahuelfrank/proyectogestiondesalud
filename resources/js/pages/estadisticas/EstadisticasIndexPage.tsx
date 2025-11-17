@@ -1,7 +1,8 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import estadisticas from '@/routes/estadisticas';
+import { useState } from 'react';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -19,9 +20,12 @@ import { Line, Bar, Pie, Doughnut } from 'react-chartjs-2';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Users, Activity, Stethoscope, Calendar, TrendingUp } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Users, Activity, Stethoscope, Calendar, TrendingUp, Download, FileText, FileSpreadsheet, ArrowUp, ArrowDown, Clock, TrendingUpIcon } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
-// Registrar componentes de Chart.js
 ChartJS.register(
     CategoryScale,
     LinearScale,
@@ -42,26 +46,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-interface EstadisticasProps {
-    pacientesPorDia: Array<{ fecha: string; total: number }>;
-    distribucionGenero: Array<{ genero: string; total: number }>;
-    motivosConsultaFrecuentes: Array<{ motivo_de_consulta: string; total: number }>;
-    consultasPorEspecialidad: Array<{ especialidad: string; total: number }>;
-    promedioConsultasPorPaciente: number;
-    distribucionTipoAtencion: Array<{ tipo: string; total: number }>;
-    topProfesionales: Array<{ nombre_completo: string; especialidad: string; total_atenciones: number }>;
-    evolucionMensual: Array<{ periodo: string; total: number }>;
-    distribucionRangoEtario: Array<{ rango: string; total: number }>;
-    estadisticasGenerales: {
-        total_atenciones: number;
-        total_pacientes: number;
-        total_profesionales: number;
-        atenciones_hoy: number;
-        atenciones_este_mes: number;
-    };
-}
-
-// Componente para las tarjetas de estadísticas
 const StatCard = ({
     title,
     value,
@@ -84,7 +68,45 @@ const StatCard = ({
     </Card>
 );
 
+interface EstadisticasProps {
+    filtros: {
+        fecha_inicio: string;
+        fecha_fin: string;
+    };
+    pacientesPorDia: Array<{ fecha: string; total: number }>;
+    distribucionGenero: Array<{ genero: string; total: number }>;
+    motivosConsultaFrecuentes: Array<{ motivo_de_consulta: string; total: number }>;
+    consultasPorEspecialidad: Array<{ especialidad: string; total: number }>;
+    promedioConsultasPorPaciente: number;
+    distribucionTipoAtencion: Array<{ tipo: string; total: number }>;
+    topProfesionales: Array<{ nombre_completo: string; especialidad: string; total_atenciones: number }>;
+    evolucionMensual: Array<{ periodo: string; total: number }>;
+    distribucionRangoEtario: Array<{ rango: string; total: number }>;
+    estadisticasGenerales: {
+        total_atenciones: number;
+        total_pacientes: number;
+        total_profesionales: number;
+        atenciones_hoy: number;
+        atenciones_este_mes: number;
+    };
+    comparativaMensual: {
+        mes_actual: { periodo: string; total: number };
+        mes_anterior: { periodo: string; total: number };
+        diferencia: number;
+        porcentaje: number;
+        tendencia: string;
+    };
+    prediccionDemanda: {
+        proximo_mes: number;
+        confianza: string;
+        tendencia: string;
+    };
+    mapaCalor: number[][];
+    tiempoEsperaPorServicio: Array<{ servicio: string; total_atenciones: number; promedio_minutos: number }>;
+}
+
 export default function EstadisticasIndexPage({
+    filtros,
     pacientesPorDia,
     distribucionGenero,
     motivosConsultaFrecuentes,
@@ -94,10 +116,33 @@ export default function EstadisticasIndexPage({
     topProfesionales,
     evolucionMensual,
     distribucionRangoEtario,
-    estadisticasGenerales
+    estadisticasGenerales,
+    comparativaMensual,
+    prediccionDemanda,
+    mapaCalor,
+    tiempoEsperaPorServicio
 }: EstadisticasProps) {
 
-    // Colores para los gráficos
+    const [fechaInicio, setFechaInicio] = useState(filtros.fecha_inicio);
+    const [fechaFin, setFechaFin] = useState(filtros.fecha_fin);
+
+    const aplicarFiltros = () => {
+        router.get(estadisticas.index.url(), {
+            fecha_inicio: fechaInicio,
+            fecha_fin: fechaFin,
+        }, {
+            preserveState: true,
+        });
+    };
+
+    const exportarPDF = () => {
+        window.open(`/estadisticas/exportar-pdf?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`, '_blank');
+    };
+
+    const exportarExcel = () => {
+        window.location.href = `/estadisticas/exportar-excel?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
+    };
+
     const colors = {
         primary: 'rgba(59, 130, 246, 0.8)',
         secondary: 'rgba(16, 185, 129, 0.8)',
@@ -120,7 +165,6 @@ export default function EstadisticasIndexPage({
         colors.success,
     ];
 
-    // Datos para pacientes por día
     const pacientesPorDiaData = {
         labels: pacientesPorDia.map(item => {
             const fecha = new Date(item.fecha);
@@ -136,7 +180,6 @@ export default function EstadisticasIndexPage({
         }]
     };
 
-    // Datos para distribución por género
     const distribucionGeneroData = {
         labels: distribucionGenero.map(item => item.genero),
         datasets: [{
@@ -146,7 +189,6 @@ export default function EstadisticasIndexPage({
         }]
     };
 
-    // Datos para motivos de consulta
     const motivosConsultaData = {
         labels: motivosConsultaFrecuentes.map(item =>
             item.motivo_de_consulta.length > 30
@@ -160,7 +202,6 @@ export default function EstadisticasIndexPage({
         }]
     };
 
-    // Datos para consultas por especialidad
     const consultasEspecialidadData = {
         labels: consultasPorEspecialidad.map(item => item.especialidad),
         datasets: [{
@@ -170,7 +211,6 @@ export default function EstadisticasIndexPage({
         }]
     };
 
-    // Datos para tipo de atención
     const tipoAtencionData = {
         labels: distribucionTipoAtencion.map(item => item.tipo),
         datasets: [{
@@ -180,7 +220,6 @@ export default function EstadisticasIndexPage({
         }]
     };
 
-    // Datos para evolución mensual
     const evolucionMensualData = {
         labels: evolucionMensual.map(item => item.periodo),
         datasets: [{
@@ -193,7 +232,6 @@ export default function EstadisticasIndexPage({
         }]
     };
 
-    // Datos para rango etario
     const rangoEtarioData = {
         labels: distribucionRangoEtario.map(item => item.rango + ' años'),
         datasets: [{
@@ -202,6 +240,10 @@ export default function EstadisticasIndexPage({
             backgroundColor: chartColors.slice(0, distribucionRangoEtario.length),
         }]
     };
+
+    // Datos para mapa de calor
+    const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    const maxValue = Math.max(...mapaCalor.flat());
 
     const chartOptions = {
         responsive: true,
@@ -225,11 +267,8 @@ export default function EstadisticasIndexPage({
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Estadísticas" />
-
             <div className="container mx-auto py-6 space-y-6">
-
                 <div className="ml-5">
-
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">Estadísticas del Sistema</h1>
                         <p className="text-md text-muted-foreground mt-2">
@@ -238,6 +277,47 @@ export default function EstadisticasIndexPage({
                     </div>
                 </div>
 
+                {/* Filtros y Exportación */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Filtros y Exportación</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex flex-wrap gap-4 items-end">
+                            <div className="flex-1 min-w-[200px]">
+                                <Label htmlFor="fecha_inicio">Fecha Inicio</Label>
+                                <Input
+                                    id="fecha_inicio"
+                                    type="date"
+                                    value={fechaInicio}
+                                    onChange={(e) => setFechaInicio(e.target.value)}
+                                />
+                            </div>
+                            <div className="flex-1 min-w-[200px]">
+                                <Label htmlFor="fecha_fin">Fecha Fin</Label>
+                                <Input
+                                    id="fecha_fin"
+                                    type="date"
+                                    value={fechaFin}
+                                    onChange={(e) => setFechaFin(e.target.value)}
+                                />
+                            </div>
+                            <Button onClick={aplicarFiltros}>
+                                Aplicar Filtros
+                            </Button>
+                            <div className="flex gap-2">
+                                <Button onClick={exportarPDF} variant="outline">
+                                    <FileText className="mr-2 h-4 w-4" />
+                                    PDF
+                                </Button>
+                                <Button onClick={exportarExcel} variant="outline">
+                                    <FileSpreadsheet className="mr-2 h-4 w-4" />
+                                    Excel
+                                </Button>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
 
                 {/* Tarjetas de resumen */}
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
@@ -273,12 +353,154 @@ export default function EstadisticasIndexPage({
                     />
                 </div>
 
+                {/* Comparativa y Predicción */}
+                <div className="grid gap-4 md:grid-cols-2">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Comparativa Mensual</CardTitle>
+                            <CardDescription>Mes actual vs anterior</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <p className="text-sm text-muted-foreground">{comparativaMensual.mes_actual.periodo}</p>
+                                    <p className="text-2xl font-bold">{comparativaMensual.mes_actual.total.toLocaleString()}</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-sm text-muted-foreground">{comparativaMensual.mes_anterior.periodo}</p>
+                                    <p className="text-2xl font-bold">{comparativaMensual.mes_anterior.total.toLocaleString()}</p>
+                                </div>
+                            </div>
+                            <Alert className={comparativaMensual.tendencia === 'aumento' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}>
+                                <div className="flex items-center gap-2">
+                                    {comparativaMensual.tendencia === 'aumento' ? (
+                                        <ArrowUp className="h-4 w-4 text-green-600" />
+                                    ) : (
+                                        <ArrowDown className="h-4 w-4 text-red-600" />
+                                    )}
+                                    <AlertDescription className={comparativaMensual.tendencia === 'aumento' ? 'text-green-700' : 'text-red-700'}>
+                                        <span className="font-bold">{comparativaMensual.diferencia > 0 ? '+' : ''}{comparativaMensual.diferencia}</span> atenciones
+                                        ({comparativaMensual.porcentaje > 0 ? '+' : ''}{comparativaMensual.porcentaje}%)
+                                    </AlertDescription>
+                                </div>
+                            </Alert>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Predicción de Demanda</CardTitle>
+                            <CardDescription>Proyección para el próximo mes</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="flex flex-col items-center justify-center py-4">
+                                <TrendingUpIcon className="h-12 w-12 text-purple-600 mb-4" />
+                                <p className="text-5xl font-bold text-purple-600">{prediccionDemanda.proximo_mes}</p>
+                                <p className="text-sm text-muted-foreground mt-2">atenciones estimadas</p>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                                <div>
+                                    <p className="text-muted-foreground">Confianza</p>
+                                    <Badge variant={prediccionDemanda.confianza === 'alta' ? 'default' : 'secondary'}>
+                                        {prediccionDemanda.confianza}
+                                    </Badge>
+                                </div>
+                                <div>
+                                    <p className="text-muted-foreground">Tendencia</p>
+                                    <Badge variant="outline">
+                                        {prediccionDemanda.tendencia}
+                                    </Badge>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Mapa de Calor */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Mapa de Calor - Horarios de Mayor Demanda</CardTitle>
+                        <CardDescription>Distribución de atenciones por día y hora</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="overflow-x-auto">
+                            <table className="w-full border-collapse">
+                                <thead>
+                                    <tr>
+                                        <th className="p-2 text-sm font-medium border">Hora</th>
+                                        {diasSemana.map((dia, index) => (
+                                            <th key={index} className="p-2 text-sm font-medium border">{dia}</th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {Array.from({ length: 24 }, (_, hora) => (
+                                        <tr key={hora}>
+                                            <td className="p-2 text-xs border font-medium">{hora}:00</td>
+                                            {diasSemana.map((_, diaIndex) => {
+                                                const valor = mapaCalor[diaIndex]?.[hora] || 0;
+                                                const intensidad = maxValue > 0 ? (valor / maxValue) : 0;
+                                                const bgColor = intensidad === 0
+                                                    ? 'bg-gray-50'
+                                                    : `rgba(59, 130, 246, ${intensidad})`;
+                                                return (
+                                                    <td
+                                                        key={diaIndex}
+                                                        className="p-2 text-xs border text-center"
+                                                        style={{ backgroundColor: intensidad > 0 ? bgColor : undefined }}
+                                                        title={`${valor} atenciones`}
+                                                    >
+                                                        {valor > 0 ? valor : '-'}
+                                                    </td>
+                                                );
+                                            })}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Tiempo de Espera */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Tiempo de Espera por Servicio</CardTitle>
+                        <CardDescription>Promedio de tiempo en minutos</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Servicio</TableHead>
+                                    <TableHead className="text-right">Total Atenciones</TableHead>
+                                    <TableHead className="text-right">Tiempo Promedio</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {tiempoEsperaPorServicio.map((servicio, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell className="font-medium">{servicio.servicio}</TableCell>
+                                        <TableCell className="text-right">{servicio.total_atenciones}</TableCell>
+                                        <TableCell className="text-right">
+                                            <Badge variant="outline" className="gap-1">
+                                                <Clock className="h-3 w-3" />
+                                                {servicio.promedio_minutos} min
+                                            </Badge>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+
                 {/* Gráficos principales */}
                 <div className="grid gap-4 md:grid-cols-2">
                     <Card>
                         <CardHeader>
                             <CardTitle>Pacientes Atendidos por Día</CardTitle>
-                            <CardDescription>Últimos 30 días</CardDescription>
+                            <CardDescription>Período seleccionado</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className="h-80">

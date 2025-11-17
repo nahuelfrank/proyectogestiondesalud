@@ -107,8 +107,8 @@ class AtencionController extends Controller
             'tipo_atencion_id' => 'required|exists:tipos_atenciones,id',
             'persona_id' => 'required|exists:personas,id',
             'profesional_id' => 'required|exists:profesionales,id',
-            'diagnostico_principal' => 'required|text',
-            'motivo_de_consulta' => 'required|text',
+            'diagnostico_principal' => 'required|string|max:5000',
+            'motivo_de_consulta' => 'required|string|max:5000',
         ]);
 
         // Crear la atención directamente
@@ -155,7 +155,7 @@ class AtencionController extends Controller
     }
 
     public function actualizarAtencion()
-    {   
+    {
 
     }
 

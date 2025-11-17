@@ -16,10 +16,7 @@ class AtencionFactory extends Factory
     public function definition()
     {
         return [
-            'fecha' => fake()->boolean(75)
-                ? now()->toDateString()
-                : fake()->dateTimeBetween('-30 days', 'now')->format('Y-m-d'),
-
+            'fecha' => fake()->dateTimeBetween('-1 year', 'now'),
             'hora' => fake()->time('H:i'),
             'servicio_id' => Servicio::inRandomOrder()->value('id') ?? 1,
             'estado_atencion_id' => fake()->randomElement([1, 2, 3]),

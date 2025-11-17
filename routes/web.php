@@ -42,14 +42,14 @@ Route::post('profesionales/guardar_profesional', [PersonaController::class, 'gua
 Route::get('profesionales/edit/{profesional}', [ProfesionalController::class, 'edit'])->name('profesionales.edit');
 Route::put('profesionales/{profesional}', [ProfesionalController::class, 'update'])->name('profesionales.update');
 Route::get('profesionales/{profesional}', [ProfesionalController::class, 'show'])->name('profesionales.show');
-Route::get('profesionales/reporte_horarios/{profesional}', [ProfesionalController::class,'reporteHorarios'])->name('profesionales.reporte_horarios');
+Route::get('profesionales/reporte_horarios/{profesional}', [ProfesionalController::class, 'reporteHorarios'])->name('profesionales.reporte_horarios');
 
 // Rutas para el recurso Atenciones
 Route::get('atenciones', [AtencionController::class, 'index'])->name('atenciones.index');
 Route::get('atenciones/registrar_atencion', [AtencionController::class, 'crearAtencion'])->name('atenciones.crear_atencion');
 Route::get('atenciones/modificar_estado/{atencion}', [AtencionController::class, 'modificarEstadoAtencion'])->name('atenciones.modificar_estado');
 Route::put('atenciones/actualizar_estado/{atencion}', [AtencionController::class, 'actualizarEstadoAtencion'])->name('atenciones.actualizar_estado');
-Route::post('atenciones/guardar_atencion',[AtencionController::class, 'guardarAtencion'])->name('atenciones.guardar_atencion');
+Route::post('atenciones/guardar_atencion', [AtencionController::class, 'guardarAtencion'])->name('atenciones.guardar_atencion');
 Route::get('atenciones/editar_atencion/{atencion}', [AtencionController::class, 'editarAtencion'])->name('atenciones.editar_atencion');
 Route::put('atenciones/{atencion}', [AtencionController::class, 'actualizarAtencion'])->name('atenciones.actualizar_atencion');
 Route::get('atenciones/detalles/{persona}', [AtencionController::class, 'verAtencion'])->name('atenciones.ver_atencion');
@@ -61,5 +61,9 @@ Route::get('servicios', [ServicioController::class, 'index'])->name('servicios.i
 // Ruta para el modulo de estadisticas
 Route::get('estadisticas', [EstadisticasController::class, 'index'])->name('estadisticas.index');
 
+// Rutas de exportación
+Route::get('/estadisticas/exportar-pdf', [EstadisticasController::class, 'exportarPDF'])->name('estadisticas.exportar-pdf');
+Route::get('/estadisticas/exportar-excel', [EstadisticasController::class, 'exportarExcel'])->name('estadisticas.exportar-excel');
 
-require __DIR__.'/settings.php';
+
+require __DIR__ . '/settings.php';

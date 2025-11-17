@@ -25,7 +25,7 @@ export function DeletePersonaButton({ persona }: DeletePersonaButtonProps) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="ghost" size="icon" title="Eliminar" className="mx-2">
+        <Button variant="ghost" size="icon" title="Eliminar">
           <Trash2 className="h-4 w-4" />
         </Button>
       </AlertDialogTrigger>
