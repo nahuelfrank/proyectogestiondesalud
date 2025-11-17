@@ -30,6 +30,7 @@ class StoreProfesionalRequest extends FormRequest
             'tipo_documento_id' => ['required', 'exists:tipos_documento,id'],
             'numero_documento' => ['required', 'string', 'unique:personas,numero_documento'],
             'estado_civil_id' => ['required', 'exists:estados_civiles,id'],
+            'email' => ['required', 'email', 'max:255', 'unique:personas,email'], // ✅ Campo email agregado
 
             // Datos de Profesional
             'especialidad_id' => ['required', 'exists:especialidades,id'],
@@ -60,6 +61,9 @@ class StoreProfesionalRequest extends FormRequest
             'genero_id.required' => 'El género es requerido.',
             'tipo_documento_id.required' => 'El tipo de documento es requerido.',
             'estado_civil_id.required' => 'El estado civil es requerido.',
+            'email.required' => 'El email es requerido.',
+            'email.email' => 'El email debe ser una dirección válida.',
+            'email.unique' => 'El email ya existe en el sistema.',
             'especialidad_id.required' => 'La especialidad es requerida.',
             'estado.required' => 'El estado es requerido.',
             'matricula.required' => 'La matrícula es requerida.',

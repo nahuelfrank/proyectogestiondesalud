@@ -150,6 +150,7 @@ class ProfesionalController extends Controller
                 'tipo_documento_id' => $validated['tipo_documento_id'],
                 'numero_documento' => $validated['numero_documento'],
                 'estado_civil_id' => $validated['estado_civil_id'],
+                'email' => $validated['email'],
             ]);
 
             // 2. Actualizar datos del Profesional

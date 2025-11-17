@@ -93,6 +93,7 @@ const formSchema = z.object({
   genero_id: z.string().min(1, "El género es requerido"),
   tipo_documento_id: z.string().min(1, "El tipo de documento es requerido"),
   numero_documento: z.string().min(1, "El número de documento es requerido"),
+  email: z.string().email("Debe ser un email válido").min(1, "El email es requerido"),
   estado_civil_id: z.string().min(1, "El estado civil es requerido"),
   especialidad_id: z.string().min(1, "Debe seleccionar una especialidad."),
   estado: z.string().min(1, "Debe seleccionar un estado."),
@@ -124,6 +125,7 @@ export default function ProfesionalCreatePage({
       genero_id: "",
       tipo_documento_id: "",
       numero_documento: "",
+      email: "",
       estado_civil_id: "",
       especialidad_id: "",
       estado: "",
@@ -227,6 +229,7 @@ export default function ProfesionalCreatePage({
       genero_id: parseInt(rhfData.genero_id),
       tipo_documento_id: parseInt(rhfData.tipo_documento_id),
       numero_documento: rhfData.numero_documento,
+      email: rhfData.email,
       estado_civil_id: parseInt(rhfData.estado_civil_id),
       especialidad_id: parseInt(rhfData.especialidad_id),
       estado: rhfData.estado,
@@ -405,6 +408,20 @@ export default function ProfesionalCreatePage({
                   />
                   {form.formState.errors.numero_documento && (
                     <FieldError>{form.formState.errors.numero_documento.message}</FieldError>
+                  )}
+                </Field>
+
+                {/* Campo Email */}
+                <Field data-invalid={!!form.formState.errors.email}>
+                  <FieldLabel htmlFor="email">Email *</FieldLabel>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="ejemplo@email.com"
+                    {...form.register("email")}
+                  />
+                  {form.formState.errors.email && (
+                    <FieldError>{form.formState.errors.email.message}</FieldError>
                   )}
                 </Field>
               </div>

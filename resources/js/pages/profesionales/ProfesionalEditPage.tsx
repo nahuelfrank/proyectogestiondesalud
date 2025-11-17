@@ -64,6 +64,7 @@ type Persona = {
   apellido: string;
   fecha_de_nacimiento: string;
   numero_documento: string;
+  email: string,
   genero_id: number;
   tipo_documento_id: number;
   estado_civil_id: number;
@@ -140,6 +141,7 @@ const formSchema = z.object({
   genero_id: z.string().min(1, "El género es requerido"),
   tipo_documento_id: z.string().min(1, "El tipo de documento es requerido"),
   numero_documento: z.string().min(1, "El número de documento es requerido"),
+  email: z.string().email("Debe ser un email válido").min(1, "El email es requerido"),
   estado_civil_id: z.string().min(1, "El estado civil es requerido"),
   especialidad_id: z.string().min(1, "Debe seleccionar una especialidad."),
   estado: z.string().min(1, "Debe seleccionar un estado."),
@@ -196,6 +198,7 @@ export default function ProfesionalEditPage({
       genero_id: String(persona.genero_id),
       tipo_documento_id: String(persona.tipo_documento_id),
       numero_documento: persona.numero_documento,
+      email: persona.email,
       estado_civil_id: String(persona.estado_civil_id),
       especialidad_id: String(profesional.especialidad_id),
       estado: profesional.estado,
@@ -292,6 +295,7 @@ export default function ProfesionalEditPage({
       genero_id: parseInt(rhfData.genero_id),
       tipo_documento_id: parseInt(rhfData.tipo_documento_id),
       numero_documento: rhfData.numero_documento,
+      email: rhfData.email,
       estado_civil_id: parseInt(rhfData.estado_civil_id),
 
       // Datos de Profesional
@@ -322,7 +326,7 @@ export default function ProfesionalEditPage({
         <div className="ml-5 mb-4">
           <h1 className="text-3xl font-semibold mb-2">Modificar Datos de Profesional</h1>
 
-          <p className="text-sm text-muted-foreground mb-4">Modifique los datos del profesional. 
+          <p className="text-sm text-muted-foreground mb-4">Modifique los datos del profesional.
             Los campos con <span className="text-red-500">*</span> son obligatorios.</p>
 
           <Link
@@ -470,6 +474,20 @@ export default function ProfesionalEditPage({
                   />
                   {form.formState.errors.numero_documento && (
                     <FieldError>{form.formState.errors.numero_documento.message}</FieldError>
+                  )}
+                </Field>
+
+                {/* Campo Email */}
+                <Field data-invalid={!!form.formState.errors.email}>
+                  <FieldLabel htmlFor="email">Email <span className="text-red-500">*</span></FieldLabel>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="ejemplo@email.com"
+                    {...form.register("email")}
+                  />
+                  {form.formState.errors.email && (
+                    <FieldError>{form.formState.errors.email.message}</FieldError>
                   )}
                 </Field>
               </div>
