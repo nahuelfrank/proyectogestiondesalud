@@ -1,6 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { Clock, Eye, Pencil, Trash2 } from "lucide-react";
+import { Clock, Eye, Mail, Pencil, Trash2 } from "lucide-react";
 import { router } from "@inertiajs/react";
 import {
   Dialog,
@@ -21,9 +21,15 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { FileText } from 'lucide-react';
+import { usePermissions } from "@/hooks/use-permissions";
+import React from "react";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 
 export type Profesional = {
   id: number;
+  user_id: number | null;
   persona_id: number;
   especialidad_id: number;
   persona: {
@@ -58,6 +64,59 @@ export type DisponibilidadHoraria = {
     nombre: string;
   };
 };
+
+function InvitationForm({ profesionalId, profesionalName }: { profesionalId: number, profesionalName: string }) {
+  const [email, setEmail] = React.useState('');
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    router.post(`/profesionales/${profesionalId}/send-invitation`, { email }, {
+      onSuccess: () => {
+        // El dialog se cerrará automáticamente
+      },
+      onError: (errors) => {
+        console.error('Error al enviar invitación:', errors);
+        alert('Error al enviar la invitación');
+      },
+      onFinish: () => {
+        setIsSubmitting(false);
+      }
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <Label htmlFor="email">Email del profesional</Label>
+        <Input
+          id="email"
+          type="email"
+          placeholder="profesional@ejemplo.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <p className="text-sm text-gray-500 mt-1">
+          Se enviará un email a {profesionalName} para que cree su cuenta.
+        </p>
+      </div>
+
+      <div className="flex gap-2">
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Enviando...' : 'Enviar Invitación'}
+        </Button>
+        <DialogClose asChild>
+          <Button type="button" variant="outline">
+            Cancelar
+          </Button>
+        </DialogClose>
+      </div>
+    </form>
+  );
+}
 
 export const columns: ColumnDef<Profesional>[] = [
   {
@@ -264,6 +323,45 @@ export const columns: ColumnDef<Profesional>[] = [
           */
           }
         </div>
+      );
+    },
+  },
+  {
+    accessorKey: "user",
+    header: "Usuario",
+    enableSorting: false,
+    cell: ({ row }) => {
+      const profesional = row.original;
+      const { can } = usePermissions();
+
+      if (profesional.user_id) {
+        return <Badge variant="outline">Cuenta activa</Badge>;
+      }
+
+      if (!can('invite profesionales')) {
+        return <Badge variant="secondary">Sin cuenta</Badge>;
+      }
+
+      return (
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="sm">
+              <Mail className="h-4 w-4 mr-2" />
+              Invitar
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Enviar Invitación</DialogTitle>
+              <DialogDescription>
+                Enviar invitación a {profesional.persona.nombre} {profesional.persona.apellido}
+              </DialogDescription>
+            </DialogHeader>
+            <InvitationForm
+              profesionalId={profesional.id}
+              profesionalName={`${profesional.persona.nombre} ${profesional.persona.apellido}`} />
+          </DialogContent>
+        </Dialog>
       );
     },
   },

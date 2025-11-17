@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\AtencionController;
 use App\Http\Controllers\EstadisticasController;
+use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\ProfesionalController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ServicioController;
 use App\Models\Persona;
 use Illuminate\Support\Facades\Route;
@@ -22,6 +24,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 });
 
+// Invitaciones
+Route::post('profesionales/{profesional}/send-invitation', [InvitationController::class, 'sendInvitation'])->name('profesionales.send_invitation')->middleware('auth');
+Route::get('invitation/accept/{token}', [InvitationController::class, 'showAcceptForm'])->name('invitation.accept');
+Route::post('invitation/accept/{token}', [InvitationController::class, 'acceptInvitation'])->name('invitation.process');
+
+// Roles (protegidas con permisos)
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('roles', [RoleController::class, 'index'])->name('roles.index');
+    Route::get('roles/create', [RoleController::class, 'create'])->name('roles.create');
+    Route::post('roles', [RoleController::class, 'store'])->name('roles.store');
+    Route::get('roles/{role}/edit', [RoleController::class, 'edit'])->name('roles.edit');
+    Route::put('roles/{role}', [RoleController::class, 'update'])->name('roles.update');
+    Route::delete('roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
+});
 
 // Rutas para el recurso Persona
 Route::get('pacientes', [PersonaController::class, 'index'])->name('personas.index');
@@ -49,7 +65,7 @@ Route::get('atenciones', [AtencionController::class, 'index'])->name('atenciones
 Route::get('atenciones/registrar_atencion', [AtencionController::class, 'crearAtencion'])->name('atenciones.crear_atencion');
 Route::get('atenciones/modificar_estado/{atencion}', [AtencionController::class, 'modificarEstadoAtencion'])->name('atenciones.modificar_estado');
 Route::put('atenciones/actualizar_estado/{atencion}', [AtencionController::class, 'actualizarEstadoAtencion'])->name('atenciones.actualizar_estado');
-Route::post('atenciones/guardar_atencion', [AtencionController::class, 'guardarAtencion'])->name('atenciones.guardar_atencion');
+Route::post('atenciones/guardar_atencion',[AtencionController::class, 'guardarAtencion'])->name('atenciones.guardar_atencion');
 Route::get('atenciones/editar_atencion/{atencion}', [AtencionController::class, 'editarAtencion'])->name('atenciones.editar_atencion');
 Route::put('atenciones/{atencion}', [AtencionController::class, 'actualizarAtencion'])->name('atenciones.actualizar_atencion');
 Route::get('atenciones/detalles/{persona}', [AtencionController::class, 'verAtencion'])->name('atenciones.ver_atencion');
