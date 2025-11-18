@@ -7,7 +7,7 @@ use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\ProfesionalController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ServicioController;
-use App\Models\Persona;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -37,6 +37,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('roles/{role}/edit', [RoleController::class, 'edit'])->name('roles.edit');
     Route::put('roles/{role}', [RoleController::class, 'update'])->name('roles.update');
     Route::delete('roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
+});
+
+// Usuarios (protegidas con permisos)
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('usuarios', [UserController::class, 'index'])->name('usuarios.index');
+    Route::get('usuarios/crear', [UserController::class, 'create'])->name('usuarios.create');
+    Route::post('usuarios', [UserController::class, 'store'])->name('usuarios.store');
+    Route::get('usuarios/{usuario}', [UserController::class, 'show'])->name('usuarios.show');
+    Route::get('usuarios/{usuario}/editar', [UserController::class, 'edit'])->name('usuarios.edit');
+    Route::put('usuarios/{usuario}', [UserController::class, 'update'])->name('usuarios.update');
+    Route::delete('usuarios/{usuario}', [UserController::class, 'destroy'])->name('usuarios.destroy');
+    Route::post('usuarios/{usuario}/reenviar-password', [UserController::class, 'resendPasswordReset'])->name('usuarios.resend_password');
 });
 
 // Rutas para el recurso Persona
@@ -73,13 +85,11 @@ Route::get('atenciones/detalles/{persona}', [AtencionController::class, 'verAten
 // Rutas para el recurso Servicios
 Route::get('servicios', [ServicioController::class, 'index'])->name('servicios.index');
 
-
 // Ruta para el modulo de estadisticas
 Route::get('estadisticas', [EstadisticasController::class, 'index'])->name('estadisticas.index');
 
 // Rutas de exportación
 Route::get('/estadisticas/exportar-pdf', [EstadisticasController::class, 'exportarPDF'])->name('estadisticas.exportar-pdf');
 Route::get('/estadisticas/exportar-excel', [EstadisticasController::class, 'exportarExcel'])->name('estadisticas.exportar-excel');
-
 
 require __DIR__ . '/settings.php';

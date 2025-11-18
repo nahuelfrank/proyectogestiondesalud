@@ -20,33 +20,39 @@ class RolePermissionSeeder extends Seeder
             'create pacientes',
             'edit pacientes',
             'delete pacientes',
-            
+
             // Profesionales
             'view profesionales',
             'create profesionales',
             'edit profesionales',
             'delete profesionales',
             'invite profesionales',
-            
+
             // Atenciones
             'view atenciones',
             'create atenciones',
             'edit atenciones',
             'delete atenciones',
-            
+
             // Servicios
             'view servicios',
             'create servicios',
             'edit servicios',
             'delete servicios',
-            
+
             // Roles y Permisos
             'view roles',
             'create roles',
             'edit roles',
             'delete roles',
             'assign permissions',
-            
+
+            // Usuarios
+            'view usuarios',
+            'create usuarios',
+            'edit usuarios',
+            'delete usuarios',
+
             // Reportes
             'view reportes',
             'generate reportes',
@@ -59,36 +65,36 @@ class RolePermissionSeeder extends Seeder
 
         // Crear roles
         $superAdmin = Role::create(['name' => 'super-admin']);
-        $admin = Role::create(['name' => 'admin']);
         $profesional = Role::create(['name' => 'profesional']);
-        $recepcionista = Role::create(['name' => 'recepcionista']);
+        $administrativo = Role::create(['name' => 'administrativo']);
 
         // Super Admin tiene todos los permisos
         $superAdmin->givePermissionTo(Permission::all());
 
-        // Admin
-        $admin->givePermissionTo([
-            'view pacientes', 'create pacientes', 'edit pacientes', 'delete pacientes',
-            'view profesionales', 'create profesionales', 'edit profesionales',
-            'view atenciones', 'create atenciones', 'edit atenciones',
-            'view servicios', 'create servicios', 'edit servicios',
-            'view reportes', 'generate reportes',
-        ]);
-
         // Profesional
         $profesional->givePermissionTo([
-            'view pacientes', 'create pacientes', 'edit pacientes',
+            'view pacientes',
+            'create pacientes',
+            'edit pacientes',
             'view profesionales',
-            'view atenciones', 'create atenciones', 'edit atenciones',
+            'view atenciones',
+            'create atenciones',
+            'edit atenciones',
             'view servicios',
         ]);
 
-        // Recepcionista
-        $recepcionista->givePermissionTo([
-            'view pacientes', 'create pacientes', 'edit pacientes',
+        // Administrativo (antes recepcionista)
+        $administrativo->givePermissionTo([
+            'view pacientes',
+            'create pacientes',
+            'edit pacientes',
             'view profesionales',
-            'view atenciones', 'create atenciones',
+            'create profesionales',
+            'edit profesionales',
+            'view atenciones',
+            'create atenciones',
             'view servicios',
+            'view usuarios',
         ]);
 
         // Crear usuario super admin por defecto

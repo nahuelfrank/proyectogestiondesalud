@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookPlus, BriefcaseMedicalIcon, ChartNoAxesCombined, NotebookPen, Shield, UserRound } from 'lucide-react';
+import { BookPlus, BriefcaseMedicalIcon, ChartNoAxesCombined, NotebookPen, Shield, UserRound, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 import personas from '@/routes/personas';
 import profesionales from '@/routes/profesionales';
@@ -44,6 +44,12 @@ const mainNavItems: NavItem[] = [
         href: atenciones.index().url,
         icon: NotebookPen,
         permission: 'view atenciones',
+    },
+    {
+        title: 'Usuarios',
+        href: '/usuarios',
+        icon: Users,
+        permission: 'view usuarios',
     },
     {
         title: 'Roles y Permisos',
