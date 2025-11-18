@@ -109,10 +109,10 @@ export default function AtencionCreatePage({
     const [fechaHoraActual, setFechaHoraActual] = useState({ fecha: '', hora: '' });
 
     const styles = {
-        success: 'border-green-500 bg-green-50 text-green-900 dark:bg-green-950 dark:text-green-100',
-        error: '', // usa el estilo destructive por defecto
-        warning: 'border-yellow-500 bg-yellow-50 text-yellow-900 dark:bg-yellow-950 dark:text-yellow-100',
-        info: 'border-blue-500 bg-blue-50 text-blue-900 dark:bg-blue-950 dark:text-blue-100',
+        success: 'bg-[var(--success)] text-[var(--success-foreground)] border-[var(--success)]',
+        error: '', // usa destructive del sistema
+        warning: 'bg-[var(--warning)] text-[var(--warning-foreground)] border-[var(--warning)]',
+        info: 'bg-[var(--info)] text-[var(--info-foreground)] border-[var(--info)]',
     };
 
     const { data, setData, post, errors, processing } = useForm({

@@ -274,7 +274,7 @@ export default function EstadisticasIndexPage({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Estadísticas" />
             <div className="container mx-auto py-6 space-y-6">
-                <div className="flex justify-between items-start">
+                <div className="ml-5">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">Estadísticas del Sistema</h1>
                         <p className="text-muted-foreground mt-2">

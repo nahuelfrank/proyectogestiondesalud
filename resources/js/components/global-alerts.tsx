@@ -41,12 +41,6 @@ export function GlobalAlerts() {
 
     if (!alert || !visible) return null;
 
-    const icons = {
-        success: <CheckCircle className="h-4 w-4" />,
-        error: <XCircle className="h-4 w-4" />,
-        warning: <AlertCircle className="h-4 w-4" />,
-        info: <Info className="h-4 w-4" />,
-    };
 
     const titles = {
         success: 'Éxito',
@@ -63,17 +57,24 @@ export function GlobalAlerts() {
     } as const;
 
     const styles = {
-        success: 'border-green-500 bg-green-50 text-green-900 dark:bg-green-950 dark:text-green-100',
-        error: '', // usa el estilo destructive por defecto
-        warning: 'border-yellow-500 bg-yellow-50 text-yellow-900 dark:bg-yellow-950 dark:text-yellow-100',
-        info: 'border-blue-500 bg-blue-50 text-blue-900 dark:bg-blue-950 dark:text-blue-100',
+        success: 'bg-[var(--success)] text-[var(--success-foreground)] border-[var(--success)]',
+        error: '', // usa destructive del sistema
+        warning: 'bg-[var(--warning)] text-[var(--warning-foreground)] border-[var(--warning)]',
+        info: 'bg-[var(--info)] text-[var(--info-foreground)] border-[var(--info)]',
     };
 
     const iconStyles = {
-        success: 'text-green-600 dark:text-green-400',
-        error: '', // usa el estilo por defecto
-        warning: 'text-yellow-600 dark:text-yellow-400',
-        info: 'text-blue-600 dark:text-blue-400',
+        success: 'text-[var(--success-foreground)]',
+        error: '',
+        warning: 'text-[var(--warning-foreground)]',
+        info: 'text-[var(--info-foreground)]',
+    };
+
+    const icons = {
+        success: <CheckCircle className={`h-4 w-4 ${iconStyles.success}`} />,
+        error: <XCircle className={`h-4 w-4 ${iconStyles.error}`} />,
+        warning: <AlertCircle className={`h-4 w-4 ${iconStyles.warning}`} />,
+        info: <Info className={`h-4 w-4 ${iconStyles.info}`} />,
     };
 
     return (

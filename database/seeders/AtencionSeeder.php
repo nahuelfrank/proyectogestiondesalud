@@ -38,6 +38,7 @@ class AtencionSeeder extends Seeder
             ->completada()
             ->create();
 
+        /*    
         // 2. Atenciones de esta semana
         $this->command->info('Generando atenciones de esta semana...');
 
@@ -56,6 +57,7 @@ class AtencionSeeder extends Seeder
             ->completada()
             ->create();
 
+        
         // 4. Mix de tipos de atención del último año
         $this->command->info('Generando mezcla de consultas, emergencias y urgencias...');
 
@@ -105,5 +107,7 @@ class AtencionSeeder extends Seeder
                 ['TOTAL', $total],
             ]
         );
+
+        */
     }
 }

@@ -12,7 +12,7 @@ Instrucciones rápidas para levantar el proyecto localmente (con Docker / Sail).
 
 1. Clonar el repositorio y situarse en la raíz del proyecto.
 
-2. (Opcional, recomendado la primera vez) Instalar dependencias PHP en el host:
+2. Instalar dependencias PHP en el host:
 ```sh
 composer install
 ```
