@@ -101,15 +101,12 @@ export default function AtencionCreatePage({
     const [esCargaRapida, setEsCargaRapida] = useState(false);
     const [serviciosDisponibles, setServiciosDisponibles] = useState<Array<{ id: number; nombre: string }>>([]);
     const [especialidadesDisponibles, setEspecialidadesDisponibles] = useState<Array<{ id: number; nombre: string }>>([]);
+    const [especialidadSeleccionada, setEspecialidadSeleccionada] = useState<string>('');
     const [profesionalesDisponibles, setProfesionalesDisponibles] = useState<Profesional[]>([]);
     const [mostrarDialogoReciente, setMostrarDialogoReciente] = useState(false);
     const [mostrarAlertaHorario, setMostrarAlertaHorario] = useState(false);
     const [notificacion, setNotificacion] = useState<{ tipo: string; mensaje: string } | null>(null);
     const [fechaHoraActual, setFechaHoraActual] = useState({ fecha: '', hora: '' });
-
-    console.log(pacienteCargaRapida);
-
-    console.log("Holalalalalal");
 
     const styles = {
         success: 'border-green-500 bg-green-50 text-green-900 dark:bg-green-950 dark:text-green-100',
@@ -122,7 +119,7 @@ export default function AtencionCreatePage({
         fecha: "",
         hora: "",
         servicio_id: "",
-        estado_atencion_id: "1", // Asumiendo '1' es el ID para 'En Espera'
+        estado_atencion_id: "1",
         tipo_atencion_id: "",
         persona_id: "",
         profesional_id: "",
@@ -141,18 +138,14 @@ export default function AtencionCreatePage({
         };
 
         actualizarFechaHora();
-        const intervalo = setInterval(actualizarFechaHora, 60000); // Actualizar cada minuto
+        const intervalo = setInterval(actualizarFechaHora, 60000);
 
         return () => clearInterval(intervalo);
     }, []);
 
     // Verificar paciente reciente o carga rápida al cargar
     useEffect(() => {
-        // Prioridad 1: Paciente de carga rápida
-
         if (pacienteCargaRapida) {
-
-            // Buscar el paciente en la lista de pacientes por número de documento y tipo
             const pacienteEncontrado = pacientes.find(p =>
                 p.numero_documento === pacienteCargaRapida.numero_documento &&
                 p.tipo_documento.id === Number(pacienteCargaRapida.tipo_documento_id)
@@ -163,7 +156,6 @@ export default function AtencionCreatePage({
                 setEsCargaRapida(true);
                 setData('persona_id', pacienteEncontrado.id.toString());
 
-                // Buscar tipo de atención Emergencia o Urgencia
                 const tipoEmergenciaUrgencia = tiposAtenciones.find(t =>
                     t.nombre.toLowerCase().includes('emergencia') ||
                     t.nombre.toLowerCase().includes('urgencia')
@@ -177,9 +169,6 @@ export default function AtencionCreatePage({
                     tipo: 'info',
                     mensaje: 'Paciente de carga rápida asignado automáticamente. Complete los datos de atención.'
                 });
-
-                // Limpiar la sesión de carga rápida
-                // Esto se puede hacer con una petición al backend si es necesario
             } else {
                 setNotificacion({
                     tipo: 'error',
@@ -187,7 +176,6 @@ export default function AtencionCreatePage({
                 });
             }
         }
-        // Prioridad 2: Paciente registrado recientemente (no carga rápida)
         else if (pacienteReciente) {
             setMostrarDialogoReciente(true);
         }
@@ -215,7 +203,6 @@ export default function AtencionCreatePage({
         setResultadosBusqueda(resultados);
     }, [debouncedBusquedaDoc]);
 
-
     const seleccionarPaciente = (paciente: Persona) => {
         setPacienteSeleccionado(paciente);
         setData('persona_id', paciente.id.toString());
@@ -234,6 +221,7 @@ export default function AtencionCreatePage({
     const handleServicioChange = (servicioId: string) => {
         setData('servicio_id', servicioId);
         setData('profesional_id', '');
+        setEspecialidadSeleccionada('');
 
         // Filtrar especialidades compatibles con el servicio
         const especialidadesCompatibles = especialidadesServicios
@@ -245,9 +233,24 @@ export default function AtencionCreatePage({
         );
 
         setEspecialidadesDisponibles(especialidadesUnicas);
+
+        // Si solo hay una especialidad, seleccionarla automáticamente
+        if (especialidadesUnicas.length === 1) {
+            const especialidadUnica = especialidadesUnicas[0];
+            setEspecialidadSeleccionada(especialidadUnica.id.toString());
+            
+            // Filtrar profesionales por esta especialidad
+            const profesionalesFiltrados = profesionales.filter(
+                p => p.especialidad_id === especialidadUnica.id
+            );
+            setProfesionalesDisponibles(profesionalesFiltrados);
+        } else {
+            setProfesionalesDisponibles([]);
+        }
     };
 
     const handleEspecialidadChange = (especialidadId: string) => {
+        setEspecialidadSeleccionada(especialidadId);
         setData('profesional_id', '');
 
         // Validar compatibilidad entre especialidad y servicio
@@ -305,8 +308,6 @@ export default function AtencionCreatePage({
     }, [data.profesional_id]);
 
     const registrarAtencion = () => {
-        console.log('Registrando atención con datos:', data);
-
         if (!pacienteSeleccionado || !data.tipo_atencion_id || !data.servicio_id || !data.profesional_id || !data.fecha || !data.hora) {
             setNotificacion({ tipo: 'error', mensaje: 'Por favor complete todos los campos requeridos' });
             return;
@@ -438,7 +439,7 @@ export default function AtencionCreatePage({
                     {/* Contenido Principal */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>Registrar Atención (Turno)</CardTitle>
+                            <CardTitle>Registrar Atención</CardTitle>
                             <CardDescription>Complete los datos para registrar una nueva atención</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
@@ -490,7 +491,6 @@ export default function AtencionCreatePage({
                                             Ingrese un número de documento para buscar un paciente
                                         </p>
                                     )}
-
 
                                     {errors.persona_id && (
                                         <p className="text-sm text-red-500">{errors.persona_id}</p>
@@ -599,28 +599,6 @@ export default function AtencionCreatePage({
                                         )}
                                     </div>
 
-                                    {/* Especialidad */}
-                                    {data.servicio_id && (
-                                        <div className="space-y-2">
-                                            <Label htmlFor="especialidad">Especialidad <span className="text-red-500">*</span></Label>
-                                            <Select
-                                                value={profesionalesDisponibles.find(p => p.id === parseInt(data.profesional_id))?.especialidad_id.toString() || ''}
-                                                onValueChange={handleEspecialidadChange}
-                                            >
-                                                <SelectTrigger id="especialidad">
-                                                    <SelectValue placeholder="Seleccione especialidad" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {especialidadesDisponibles.map(esp => (
-                                                        <SelectItem key={esp.id} value={esp.id.toString()}>
-                                                            {esp.nombre}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    )}
-
                                     {/* Profesional */}
                                     {profesionalesDisponibles.length > 0 && (
                                         <div className="space-y-2">
@@ -685,14 +663,12 @@ export default function AtencionCreatePage({
                                     )}
 
                                     {/* Botones de Acción */}
-
                                     <div className="flex justify-end gap-2 border-t pt-4">
                                         <Button onClick={registrarAtencion} disabled={processing}>
                                             {processing ? 'Registrando...' : 'Registrar Atención'}
                                         </Button>
                                         <Link href={atenciones.index.url()}>
-                                            <Button
-                                                variant="outline">
+                                            <Button variant="outline">
                                                 Cancelar
                                             </Button>
                                         </Link>

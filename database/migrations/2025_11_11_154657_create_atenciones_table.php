@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -33,6 +32,10 @@ return new class extends Migration
             // Atributos personales
             $table->date('fecha');
             $table->time('hora');
+            // Hora en que inicia la atención (cuando el profesional lo atiende)
+            $table->time('hora_inicio_atencion')->nullable();
+            // Hora en que finaliza la atención
+            $table->time('hora_fin_atencion')->nullable();
             $table->text('diagnostico_principal');
             $table->text('motivo_de_consulta');
             $table->text('detalle_consulta')->nullable();

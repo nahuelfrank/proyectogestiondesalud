@@ -13,13 +13,22 @@ export const columns: ColumnDef<Atencion>[] = [
     enableSorting: false,
     cell: ({ row }) => {
       const at = row.original;
+
+      // Formatear fecha YYYY-MM-DD -> DD/MM/YYYY
+      const [year, month, day] = at.fecha.split("-");
+      const fechaFormateada = `${day}/${month}/${year}`;
+
+      // Formatear hora HH:MM:SS -> HH:MM
+      const horaFormateada = at.hora.slice(0, 5);
+
       return (
         <span>
-          {at.fecha} - {at.hora}
+          {fechaFormateada} - {horaFormateada}
         </span>
       );
     },
   },
+
 
   {
     accessorKey: "servicio.nombre",
@@ -45,8 +54,8 @@ export const columns: ColumnDef<Atencion>[] = [
             isEmergencia
               ? `${base} bg-red-100 text-red-800`
               : isUrgencia
-              ? `${base} bg-orange-100 text-orange-800`
-              : `${base} bg-blue-100 text-blue-800`
+                ? `${base} bg-orange-100 text-orange-800`
+                : `${base} bg-blue-100 text-blue-800`
           }
         >
           {tipo}

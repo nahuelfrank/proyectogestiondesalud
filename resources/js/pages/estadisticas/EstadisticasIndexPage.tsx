@@ -46,27 +46,28 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const StatCard = ({
-    title,
-    value,
-    icon: Icon,
-    colorClass
-}: {
-    title: string;
-    value: number;
-    icon: any;
-    colorClass: string
-}) => (
-    <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{title}</CardTitle>
-            <Icon className={`h-4 w-4 ${colorClass}`} />
-        </CardHeader>
-        <CardContent>
-            <div className={`text-2xl font-bold ${colorClass}`}>{value.toLocaleString()}</div>
-        </CardContent>
-    </Card>
-);
+  const StatCard = ({ 
+        title, 
+        value, 
+        icon: Icon, 
+        colorClass 
+    }: { 
+        title: string; 
+        value: number; 
+        icon: any; 
+        colorClass: string 
+    }) => (
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">{title}</CardTitle>
+                <Icon className={`h-4 w-4 ${colorClass}`} />
+            </CardHeader>
+            <CardContent>
+                <div className={`text-2xl font-bold ${colorClass}`}>{value.toLocaleString()}</div>
+            </CardContent>
+        </Card>
+    );
+
 
 interface EstadisticasProps {
     filtros: {
@@ -102,8 +103,13 @@ interface EstadisticasProps {
         tendencia: string;
     };
     mapaCalor: number[][];
-    tiempoEsperaPorServicio: Array<{ servicio: string; total_atenciones: number; promedio_minutos: number }>;
-}
+    tiempoEsperaPorServicio: Array<{ 
+        servicio: string; 
+        total_atenciones: number; 
+        promedio_minutos: number;
+        minimo_minutos: number;
+        maximo_minutos: number;
+    }>;}
 
 export default function EstadisticasIndexPage({
     filtros,
@@ -190,9 +196,9 @@ export default function EstadisticasIndexPage({
     };
 
     const motivosConsultaData = {
-        labels: motivosConsultaFrecuentes.map(item =>
-            item.motivo_de_consulta.length > 30
-                ? item.motivo_de_consulta.substring(0, 30) + '...'
+        labels: motivosConsultaFrecuentes.map(item => 
+            item.motivo_de_consulta.length > 30 
+                ? item.motivo_de_consulta.substring(0, 30) + '...' 
                 : item.motivo_de_consulta
         ),
         datasets: [{
@@ -268,10 +274,10 @@ export default function EstadisticasIndexPage({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Estadísticas" />
             <div className="container mx-auto py-6 space-y-6">
-                <div className="ml-5">
+                <div className="flex justify-between items-start">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">Estadísticas del Sistema</h1>
-                        <p className="text-md text-muted-foreground mt-2">
+                        <p className="text-muted-foreground mt-2">
                             Panel de análisis y métricas del sistema de atención médica
                         </p>
                     </div>
@@ -285,7 +291,7 @@ export default function EstadisticasIndexPage({
                     <CardContent>
                         <div className="flex flex-wrap gap-4 items-end">
                             <div className="flex-1 min-w-[200px]">
-                                <Label htmlFor="fecha_inicio">Fecha Inicio</Label>
+                                <Label htmlFor="fecha_inicio" className='mb-2'>Fecha Inicio</Label>
                                 <Input
                                     id="fecha_inicio"
                                     type="date"
@@ -294,7 +300,7 @@ export default function EstadisticasIndexPage({
                                 />
                             </div>
                             <div className="flex-1 min-w-[200px]">
-                                <Label htmlFor="fecha_fin">Fecha Fin</Label>
+                                <Label htmlFor="fecha_fin" className='mb-2'>Fecha Fin</Label>
                                 <Input
                                     id="fecha_fin"
                                     type="date"
@@ -440,8 +446,8 @@ export default function EstadisticasIndexPage({
                                             {diasSemana.map((_, diaIndex) => {
                                                 const valor = mapaCalor[diaIndex]?.[hora] || 0;
                                                 const intensidad = maxValue > 0 ? (valor / maxValue) : 0;
-                                                const bgColor = intensidad === 0
-                                                    ? 'bg-gray-50'
+                                                const bgColor = intensidad === 0 
+                                                    ? 'bg-gray-50' 
                                                     : `rgba(59, 130, 246, ${intensidad})`;
                                                 return (
                                                     <td
@@ -466,7 +472,7 @@ export default function EstadisticasIndexPage({
                 <Card>
                     <CardHeader>
                         <CardTitle>Tiempo de Espera por Servicio</CardTitle>
-                        <CardDescription>Promedio de tiempo en minutos</CardDescription>
+                        <CardDescription>Promedio calculado desde llegada hasta inicio de atención</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <Table>
@@ -475,21 +481,48 @@ export default function EstadisticasIndexPage({
                                     <TableHead>Servicio</TableHead>
                                     <TableHead className="text-right">Total Atenciones</TableHead>
                                     <TableHead className="text-right">Tiempo Promedio</TableHead>
+                                    <TableHead className="text-right">Mínimo</TableHead>
+                                    <TableHead className="text-right">Máximo</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {tiempoEsperaPorServicio.map((servicio, index) => (
-                                    <TableRow key={index}>
-                                        <TableCell className="font-medium">{servicio.servicio}</TableCell>
-                                        <TableCell className="text-right">{servicio.total_atenciones}</TableCell>
-                                        <TableCell className="text-right">
-                                            <Badge variant="outline" className="gap-1">
-                                                <Clock className="h-3 w-3" />
-                                                {servicio.promedio_minutos} min
-                                            </Badge>
+                                {tiempoEsperaPorServicio.length > 0 ? (
+                                    tiempoEsperaPorServicio.map((servicio, index) => (
+                                        <TableRow key={index}>
+                                            <TableCell className="font-medium">{servicio.servicio}</TableCell>
+                                            <TableCell className="text-right">{servicio.total_atenciones}</TableCell>
+                                            <TableCell className="text-right">
+                                                <Badge 
+                                                    variant="outline" 
+                                                    className={`gap-1 ${
+                                                        servicio.promedio_minutos <= 15 ? 'border-green-500 text-green-700' :
+                                                        servicio.promedio_minutos <= 30 ? 'border-yellow-500 text-yellow-700' :
+                                                        'border-red-500 text-red-700'
+                                                    }`}
+                                                >
+                                                    <Clock className="h-3 w-3" />
+                                                    {servicio.promedio_minutos} min
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="text-right text-sm text-muted-foreground">
+                                                {servicio.minimo_minutos} min
+                                            </TableCell>
+                                            <TableCell className="text-right text-sm text-muted-foreground">
+                                                {servicio.maximo_minutos} min
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                                            No hay datos de tiempo de espera disponibles.
+                                            <br />
+                                            <span className="text-sm">
+                                                Asegúrate de registrar hora_inicio_atencion en las atenciones.
+                                            </span>
                                         </TableCell>
                                     </TableRow>
-                                ))}
+                                )}
                             </TableBody>
                         </Table>
                     </CardContent>

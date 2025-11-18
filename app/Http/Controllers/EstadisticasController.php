@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Persona;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use App\Models\Atencion;
-use App\Models\Persona;
 use App\Models\Profesional;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -192,7 +193,6 @@ class EstadisticasController extends Controller
             ->get();
     }
 
-
     private function getEstadisticasGenerales($fechaInicio, $fechaFin)
     {
         $totalAtenciones = Atencion::whereBetween('fecha', [$fechaInicio, $fechaFin])->count();
@@ -300,7 +300,6 @@ class EstadisticasController extends Controller
             'historico' => $datos->map(fn($d) => $d->total)->toArray()
         ];
     }
-
     private function getMapaCalor($fechaInicio, $fechaFin)
     {
         $datos = Atencion::whereBetween('fecha', [$fechaInicio, $fechaFin])
@@ -316,7 +315,7 @@ class EstadisticasController extends Controller
             ->get();
 
         // 🔍 DEBUGGING: Ver qué datos estamos obteniendo
-        \Log::info('Datos del mapa de calor:', $datos->toArray());
+        Log::info('Datos del mapa de calor:', $datos->toArray());
 
         // Crear matriz 7x24 (días x horas)
         $mapa = [];
@@ -337,25 +336,58 @@ class EstadisticasController extends Controller
 
         return $mapa;
     }
+
     private function getTiempoEsperaPorServicio($fechaInicio, $fechaFin)
     {
-        // Simulación de tiempo de espera (puedes ajustar según tu lógica real)
-        // Asumiendo que tienes un campo de hora de llegada y hora de atención
         return Atencion::whereBetween('atenciones.fecha', [$fechaInicio, $fechaFin])
+            ->whereNotNull('atenciones.hora')
+            ->whereNotNull('atenciones.hora_inicio_atencion')
             ->join('servicios', 'atenciones.servicio_id', '=', 'servicios.id')
             ->select(
                 'servicios.nombre as servicio',
                 DB::raw('COUNT(*) as total_atenciones'),
-                DB::raw('ROUND(AVG(EXTRACT(EPOCH FROM (hora - hora)) / 60)::numeric, 2) as promedio_minutos')
+                DB::raw("
+                    ROUND(AVG(
+                        CASE 
+                            WHEN hora_inicio_atencion >= hora THEN 
+                                EXTRACT(EPOCH FROM (hora_inicio_atencion - hora)) / 60
+                            ELSE 
+                                EXTRACT(EPOCH FROM (hora_inicio_atencion + INTERVAL '1 day' - hora)) / 60
+                        END
+                    )::numeric, 2) as promedio_minutos
+                "),
+                DB::raw("
+                    MIN(
+                        CASE 
+                            WHEN hora_inicio_atencion >= hora THEN 
+                                EXTRACT(EPOCH FROM (hora_inicio_atencion - hora)) / 60
+                            ELSE 
+                                EXTRACT(EPOCH FROM (hora_inicio_atencion + INTERVAL '1 day' - hora)) / 60
+                        END
+                    )::integer as minimo_minutos
+                "),
+                DB::raw("
+                    MAX(
+                        CASE 
+                            WHEN hora_inicio_atencion >= hora THEN 
+                                EXTRACT(EPOCH FROM (hora_inicio_atencion - hora)) / 60
+                            ELSE 
+                                EXTRACT(EPOCH FROM (hora_inicio_atencion + INTERVAL '1 day' - hora)) / 60
+                        END
+                    )::integer as maximo_minutos
+                ")
             )
             ->groupBy('servicios.id', 'servicios.nombre')
+            ->having(DB::raw('COUNT(*)'), '>', 0)
+            ->orderBy('promedio_minutos', 'desc')
             ->get()
             ->map(function ($item) {
-                // Simulación temporal - ajusta según tu modelo de datos
                 return [
                     'servicio' => $item->servicio,
                     'total_atenciones' => $item->total_atenciones,
-                    'promedio_minutos' => rand(15, 45) // Reemplaza con cálculo real
+                    'promedio_minutos' => round($item->promedio_minutos, 1),
+                    'minimo_minutos' => max(0, $item->minimo_minutos), // Asegurar que no sea negativo
+                    'maximo_minutos' => $item->maximo_minutos,
                 ];
             });
     }
@@ -375,7 +407,7 @@ class EstadisticasController extends Controller
         ];
 
         $pdf = PDF::loadView('estadisticas.reporte-pdf', $datos);
-        return $pdf->download('estadisticas-' . Carbon::now()->format('Y-m-d') . '.pdf');
+        return $pdf->stream('estadisticas-' . Carbon::now()->format('Y-m-d') . '.pdf');
     }
 
     public function exportarExcel(Request $request)
