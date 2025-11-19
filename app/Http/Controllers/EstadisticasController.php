@@ -168,30 +168,37 @@ class EstadisticasController extends Controller
             });
     }
 
-    private function getDistribucionRangoEtario()
+    private function getDistribucionRangoEtario($fechaInicio, $fechaFin)
     {
-        $sub = Persona::whereHas('atenciones')
-            ->selectRaw("CASE 
-            WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, fecha_de_nacimiento)) < 18 THEN '0-17'
-            WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, fecha_de_nacimiento)) BETWEEN 18 AND 30 THEN '18-30'
-            WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, fecha_de_nacimiento)) BETWEEN 31 AND 45 THEN '31-45'
-            WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, fecha_de_nacimiento)) BETWEEN 46 AND 60 THEN '46-60'
-            ELSE '61+'
-        END as rango")
-            ->selectRaw('COUNT(*) as total')
+        $sub = Persona::whereHas('atenciones', function ($q) use ($fechaInicio, $fechaFin) {
+            $q->whereBetween('fecha', [$fechaInicio, $fechaFin]);
+        })
+            ->selectRaw("
+            CASE 
+                WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, fecha_de_nacimiento)) < 18 THEN '0-17'
+                WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, fecha_de_nacimiento)) BETWEEN 18 AND 30 THEN '18-30'
+                WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, fecha_de_nacimiento)) BETWEEN 31 AND 45 THEN '31-45'
+                WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, fecha_de_nacimiento)) BETWEEN 46 AND 60 THEN '46-60'
+                ELSE '61+'
+            END AS rango
+        ")
+            ->selectRaw("COUNT(*) AS total")
             ->groupBy('rango');
 
         return DB::query()
             ->fromSub($sub, 't')
-            ->orderByRaw("CASE rango 
-            WHEN '0-17' THEN 1
-            WHEN '18-30' THEN 2
-            WHEN '31-45' THEN 3
-            WHEN '46-60' THEN 4
-            WHEN '61+' THEN 5
-        END")
+            ->orderByRaw("
+            CASE rango
+                WHEN '0-17' THEN 1
+                WHEN '18-30' THEN 2
+                WHEN '31-45' THEN 3
+                WHEN '46-60' THEN 4
+                WHEN '61+' THEN 5
+            END
+        ")
             ->get();
     }
+
 
     private function getEstadisticasGenerales($fechaInicio, $fechaFin)
     {
@@ -300,6 +307,7 @@ class EstadisticasController extends Controller
             'historico' => $datos->map(fn($d) => $d->total)->toArray()
         ];
     }
+    
     private function getMapaCalor($fechaInicio, $fechaFin)
     {
         $datos = Atencion::whereBetween('fecha', [$fechaInicio, $fechaFin])

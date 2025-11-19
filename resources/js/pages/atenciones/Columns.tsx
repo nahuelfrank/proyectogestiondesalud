@@ -52,10 +52,10 @@ export const columns: ColumnDef<Atencion>[] = [
         <span
           className={
             isEmergencia
-              ? `${base} bg-red-100 text-red-800`
+              ? `${base} bg-destructive text-destructive-foreground`
               : isUrgencia
-                ? `${base} bg-orange-100 text-orange-800`
-                : `${base} bg-blue-100 text-blue-800`
+                ? `${base} bg-warning text-warning-foreground`
+                : `${base} bg-info text-info-foreground`
           }
         >
           {tipo}
@@ -93,15 +93,16 @@ export const columns: ColumnDef<Atencion>[] = [
       const base =
         "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium";
 
-      let classes = "bg-gray-100 text-gray-800";
+      let classes = "bg-muted text-muted-foreground";
 
       if (estado === "En Espera") {
-        classes = "bg-yellow-100 text-yellow-800";
+        classes = "bg-warning text-warning-foreground";
       } else if (estado === "En Atención") {
-        classes = "bg-blue-100 text-blue-800";
+        classes = "bg-info text-info-foreground";
       } else if (estado === "Cancelado") {
-        classes = "bg-red-100 text-red-800";
+        classes = "bg-destructive text-destructive-foreground";
       }
+
 
       return <span className={`${base} ${classes}`}>{estado}</span>;
     },

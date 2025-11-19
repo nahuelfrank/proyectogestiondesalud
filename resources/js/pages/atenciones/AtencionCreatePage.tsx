@@ -110,7 +110,7 @@ export default function AtencionCreatePage({
 
     const styles = {
         success: 'bg-[var(--success)] text-[var(--success-foreground)] border-[var(--success)]',
-        error: '', // usa destructive del sistema
+        error: 'bg-[var(--destructive)] text-[var(--destructive-foreground)] border-[var(--destructive)]',
         warning: 'bg-[var(--warning)] text-[var(--warning-foreground)] border-[var(--warning)]',
         info: 'bg-[var(--info)] text-[var(--info-foreground)] border-[var(--info)]',
     };
@@ -238,7 +238,7 @@ export default function AtencionCreatePage({
         if (especialidadesUnicas.length === 1) {
             const especialidadUnica = especialidadesUnicas[0];
             setEspecialidadSeleccionada(especialidadUnica.id.toString());
-            
+
             // Filtrar profesionales por esta especialidad
             const profesionalesFiltrados = profesionales.filter(
                 p => p.especialidad_id === especialidadUnica.id
@@ -309,7 +309,7 @@ export default function AtencionCreatePage({
 
     const registrarAtencion = () => {
         if (!pacienteSeleccionado || !data.tipo_atencion_id || !data.servicio_id || !data.profesional_id || !data.fecha || !data.hora) {
-            setNotificacion({ tipo: 'error', mensaje: 'Por favor complete todos los campos requeridos' });
+            setNotificacion({ tipo: 'error', mensaje: 'Por favor complete todos los campos requeridos.' });
             return;
         }
 
@@ -379,12 +379,16 @@ export default function AtencionCreatePage({
                 <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                     {/* Notificaciones */}
                     {notificacion && (
-                        <Alert variant={notificacion.tipo === 'error' ? 'destructive' : 'default'} className={`mb-4 pr-8 ${styles[notificacion.tipo]}`}>
+                        <Alert className={`mb-4 pr-8 ${styles[notificacion.tipo]}`}>
                             {notificacion.tipo === 'success' ? <CheckCircle className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
                             <AlertTitle>
                                 {notificacion.tipo === 'success' ? 'Éxito' : notificacion.tipo === 'error' ? 'Error' : 'Información'}
                             </AlertTitle>
-                            <AlertDescription>{notificacion.mensaje}</AlertDescription>
+                            <AlertDescription
+                                className={notificacion.tipo === "error" ? "text-[hsl(var(--foreground))]" : ""}
+                            >
+                                {notificacion.mensaje}
+                            </AlertDescription>
                         </Alert>
                     )}
 
@@ -483,7 +487,7 @@ export default function AtencionCreatePage({
                                             </Card>
                                         ) : (
                                             <p className="text-sm text-muted-foreground">
-                                                No se encontraron pacientes con ese número de documento 
+                                                No se encontraron pacientes con ese número de documento
                                             </p>
                                         )
                                     ) : (

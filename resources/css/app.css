@@ -185,3 +185,19 @@
         @apply bg-background text-foreground;
     }
 }
+
+@layer utilities {
+  .bg-warning { background-color: var(--warning); }
+  .text-warning-foreground { color: var(--warning-foreground); }
+
+  .bg-info { background-color: var(--info); }
+  .text-info-foreground { color: var(--info-foreground); }
+
+  .bg-destructive { background-color: var(--destructive); }
+  .text-destructive-foreground { color: var(--destructive-foreground); }
+
+  .bg-muted { background-color: var(--muted); }
+  .text-muted-foreground { color: var(--muted-foreground); }
+
+  .text-secondary-foreground {color: var(--secondary-foreground);}
+}

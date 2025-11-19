@@ -1,7 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Clock, Eye, Mail, Pencil, FileSpreadsheet } from "lucide-react";
-import { router } from "@inertiajs/react";
+import { Link, router } from "@inertiajs/react";
 import {
   Dialog,
   DialogClose,
@@ -25,6 +25,7 @@ import { usePermissions } from "@/hooks/use-permissions";
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { usePage } from "@inertiajs/react";
+import profesionales from "@/routes/profesionales";
 
 export type Profesional = {
   id: number;
@@ -218,8 +219,8 @@ export const columns: ColumnDef<Profesional>[] = [
       return (
         <span
           className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${estado === "activo"
-            ? "bg-green-100 text-green-800"
-            : "bg-gray-100 text-gray-800"
+            ? "bg-secondary text-secondary-foreground"
+            : "bg-muted text-muted-foreground"
             }`}
         >
           {estado.charAt(0).toUpperCase() + estado.slice(1)}
@@ -237,14 +238,11 @@ export const columns: ColumnDef<Profesional>[] = [
       return (
         <div>
           {/* Ver */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.get(`/profesionales/${profesional.id}`)}
-            title="Ver detalles"
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
+          <Link href={profesionales.show(profesional.id).url} className="inline-block">
+            <Button variant="ghost" size="icon" title="Ver">
+              <Eye className="h-4 w-4" />
+            </Button>
+          </Link>
 
           {/* Editar */}
           <Button
@@ -272,7 +270,7 @@ export const columns: ColumnDef<Profesional>[] = [
 
       // Si el profesional ya tiene usuario
       if (profesional.user_id) {
-        return <Badge variant="outline" className="bg-green-50 text-green-700">Cuenta activa</Badge>;
+        return <Badge variant="outline" className="bg-success text-muted-foreground">Cuenta activa</Badge>;
       }
 
       // Si no tiene email

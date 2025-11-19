@@ -248,7 +248,8 @@ export default function PersonaCreatePage({ generos, estadosCiviles, tiposDocume
 
                     <Link href={personas.fastCreate.url()} className="inline-block">
                         <Button
-                            className="flex items-center gap-2 bg-red-600 text-white hover:bg-red-700"
+                        variant="destructive"
+                            className="flex items-center gap-2"
                         >
                             <Siren className="h-4 w-4" />
                             Carga Rápida

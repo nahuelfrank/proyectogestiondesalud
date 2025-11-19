@@ -49,31 +49,42 @@ export default function Welcome({
                         )}
                     </nav>
                 </header>
+                {/* CONTENEDOR CENTRAL */}
                 <div className="flex w-full items-center justify-center opacity-100 transition-opacity duration-750 lg:grow starting:opacity-0">
-                    <main className="flex w-full max-w-[335px] flex-col-reverse lg:max-w-4xl lg:flex-row">
-                        <div className="flex w-full items-center justify-center opacity-100 transition-opacity duration-750 lg:grow">
-                            <main className="flex w-full max-w-[335px] flex-col-reverse lg:max-w-4xl lg:flex-row lg:gap-0">
-                                <div className="flex-1 rounded-br-lg rounded-bl-lg bg-white p-6 pb-12 shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] lg:rounded-tl-lg lg:rounded-br-none lg:p-12 dark:bg-[#161615] dark:text-[#EDEDEC] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]">
-                                    <h1 className="mb-6 text-3xl font-semibold lg:text-4xl">
-                                        Sistema de Gestión de Salud Universitaria
-                                    </h1>
-                                    <p className="mb-4 text-base leading-relaxed text-[#1b1b18]/80 dark:text-[#EDEDEC]/80">
-                                        Bienvenido al sistema de gestión de salud universitaria de la Dirección de Salud Universitaria.
-                                    </p>
-                                    <p className="text-sm leading-relaxed text-[#1b1b18]/70 dark:text-[#EDEDEC]/70">
-                                        Servicio Médico para toda la comunidad universitaria.
-                                    </p>
-                                </div>
+                    <main className="flex w-full max-w-[335px] flex-col-reverse lg:max-w-4xl lg:flex-row lg:gap-0">
 
-                                <div className="flex items-center justify-center rounded-tr-lg rounded-tl-lg bg-[#f5f5f5] lg:w-1/2 lg:rounded-tr-lg lg:rounded-tl-none lg:rounded-br-lg dark:bg-[#1a1a1a]">
-                                    <img
-                                        src="sanidad.jpeg"
-                                        alt="Dirección de Salud Universitaria - Servicio Médico"
-                                        className="h-full w-full rounded-tr-lg rounded-tl-lg object-cover lg:rounded-tr-lg lg:rounded-tl-none lg:rounded-br-lg"
-                                    />
-                                </div>
-                            </main>
+                        {/* COLUMNA TEXTO DEL SISTEMA */}
+                        <div className="flex-1 rounded-br-lg rounded-bl-lg bg-white p-6 pb-12 shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] lg:rounded-tl-lg lg:rounded-br-none lg:p-12 dark:bg-[#161615] dark:text-[#EDEDEC] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]">
+                            <h1 className="mb-6 text-3xl font-semibold lg:text-4xl">
+                                Sistema de Gestión de Salud Universitaria
+                            </h1>
+
+                            <p className="mb-4 text-base leading-relaxed text-[#1b1b18]/80 dark:text-[#EDEDEC]/80">
+                                Bienvenido al sistema de gestión de salud universitaria de la Dirección de Salud Universitaria.
+                            </p>
+
+                            <p className="text-sm leading-relaxed text-[#1b1b18]/70 dark:text-[#EDEDEC]/70">
+                                Servicio Médico para toda la comunidad universitaria.
+                            </p>
                         </div>
+
+                        {/* COLUMNA IZQUIERDA (LOGO + TEXTOS) */}
+                        <div className="flex flex-col justify-center items-center text-center bg-[#f5f5f5] dark:bg-[#1a1a1a] lg:w-1/2 p-8 rounded-tr-lg rounded-tl-lg lg:rounded-tl-none lg:rounded-br-lg">
+                            <img
+                                src="unsa_logo.png"
+                                alt="Logo Unsa"
+                                className="h-36 w-auto object-contain mb-6 lg:h-52"
+                            />
+
+                            <p className="text-lg font-semibold text-[#1b1b18] dark:text-[#EDEDEC]">
+                                Universidad Nacional de Salta
+                            </p>
+
+                            <p className="text-sm text-[#1b1b18]/70 dark:text-[#EDEDEC]/70">
+                                Dirección de Salud Universitaria
+                            </p>
+                        </div>
+
                     </main>
                 </div>
                 <div className="hidden h-14.5 lg:block"></div>

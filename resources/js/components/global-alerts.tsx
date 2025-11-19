@@ -58,14 +58,14 @@ export function GlobalAlerts() {
 
     const styles = {
         success: 'bg-[var(--success)] text-[var(--success-foreground)] border-[var(--success)]',
-        error: '', // usa destructive del sistema
+        error: 'bg-[var(--destructive)] text-[var(--destructive-foreground)] border-[var(--destructive)]',
         warning: 'bg-[var(--warning)] text-[var(--warning-foreground)] border-[var(--warning)]',
         info: 'bg-[var(--info)] text-[var(--info-foreground)] border-[var(--info)]',
     };
 
     const iconStyles = {
         success: 'text-[var(--success-foreground)]',
-        error: '',
+        error: 'text-[var(--destructive-foreground]',
         warning: 'text-[var(--warning-foreground)]',
         info: 'text-[var(--info-foreground)]',
     };
@@ -82,7 +82,7 @@ export function GlobalAlerts() {
             <Alert variant={variants[alert.type]} className={`pr-8 ${styles[alert.type]}`}>
                 {icons[alert.type]}
                 <AlertTitle>{titles[alert.type]}</AlertTitle>
-                <AlertDescription>{alert.message}</AlertDescription>
+                <AlertDescription className="text-muted">{alert.message}</AlertDescription>
                 <button
                     onClick={() => setVisible(false)}
                     className="absolute top-3 right-3 text-foreground/50 hover:text-foreground transition-colors"

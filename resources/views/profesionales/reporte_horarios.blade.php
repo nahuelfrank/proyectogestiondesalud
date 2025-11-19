@@ -3,12 +3,14 @@
 
 <head>
     <meta charset="utf-8">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horarios de un Profesional</title>
     <style>
         body {
             font-family: DejaVu Sans, sans-serif;
             font-size: 12px;
             color: #333;
+            padding: 20px;
         }
 
         h2,
@@ -60,18 +62,27 @@
             font-size: 14px;
             color: #666;
         }
+
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+            border-top: 1px solid #aaa;
+            padding-top: 15px;
+        }
     </style>
 </head>
 
 <body>
     @php
-        $titulos = [
-            1 => 'Enfermería',
-            2 => 'Médico',
-            3 => 'Nutricionista',
-            4 => 'Cardiología',
-        ];
-        $titulo = $titulos[$profesional->especialidad->id] ?? 'Psicología';
+    $titulos = [
+    1 => 'Enfermería',
+    2 => 'Médico',
+    3 => 'Nutricionista',
+    4 => 'Cardiología',
+    ];
+    $titulo = $titulos[$profesional->especialidad->id] ?? 'Psicología';
     @endphp
     <div class="header">
         <h2>Horarios - {{ $titulo }}</h2>
@@ -113,7 +124,10 @@
     @endforeach
 
     @endif
-
+    <div class="footer">
+        <p>Este reporte fue generado automáticamente por el Sistema de Gestión de Atención Médica</p>
+        <p>Todos los derechos reservados © {{ date('Y') }}</p>
+    </div>
 </body>
 
 </html>

@@ -108,8 +108,22 @@ class ProfesionalController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id) {}
+    public function show(Profesional $profesional)
+    {
+        // Cargar todas las relaciones necesarias para mostrar los detalles
+        $profesional->load([
+            'persona.genero',
+            'persona.estado_civil',
+            'persona.tipo_documento',
+            'especialidad',
+            'disponibilidades_horarias.dia'
+        ]);
 
+        return Inertia::render('profesionales/ProfesionalShowPage', [
+            'persona' => $profesional->persona,
+            'profesional' => $profesional,
+        ]);
+    }
     /**
      * Show the form for editing the specified resource.
      */

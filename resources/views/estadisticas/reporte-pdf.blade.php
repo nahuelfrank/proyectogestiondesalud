@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,104 +11,140 @@
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: DejaVu Sans, Arial, sans-serif;
             font-size: 12px;
             color: #333;
             padding: 20px;
         }
+
         .header {
             text-align: center;
             margin-bottom: 30px;
-            border-bottom: 2px solid #3b82f6;
+            border-bottom: 2px solid #444;
+            /* igual que el segundo reporte */
             padding-bottom: 15px;
         }
+
         .header h1 {
-            color: #3b82f6;
+            color: #444;
+            /* reemplaza el azul por el gris oscuro del otro reporte */
             font-size: 24px;
             margin-bottom: 5px;
         }
+
         .header p {
             color: #666;
+            /* gris medio */
             margin: 5px 0;
         }
+
         .section {
             margin-bottom: 25px;
         }
+
         .section-title {
-            background-color: #3b82f6;
-            color: white;
+            background-color: #eee;
+            /* igual que los <th> del segundo reporte */
+            color: #333;
             padding: 10px;
             font-size: 14px;
             font-weight: bold;
             margin-bottom: 10px;
+            border-left: 4px solid #444;
+            /* banda lateral igual a day-title */
         }
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 15px;
             margin-bottom: 20px;
         }
+
         .stat-card {
-            border: 1px solid #e5e7eb;
+            border: 1px solid #aaa;
+            /* mismo borde del segundo reporte */
             padding: 15px;
-            border-radius: 5px;
-            background-color: #f9fafb;
+            border-radius: 4px;
+            background-color: #f0f0f0;
+            /* equivalente a day-title */
         }
+
         .stat-card .label {
-            color: #6b7280;
+            color: #666;
             font-size: 11px;
             margin-bottom: 5px;
         }
+
         .stat-card .value {
             font-size: 24px;
             font-weight: bold;
-            color: #3b82f6;
+            color: #444;
+            /* reemplaza azul por gris oscuro */
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
         }
+
         table th {
-            background-color: #f3f4f6;
+            background-color: #eee;
+            /* igual al segundo reporte */
             padding: 10px;
             text-align: left;
-            border-bottom: 2px solid #e5e7eb;
+            border: 1px solid #aaa;
             font-weight: bold;
+            color: #333;
         }
+
         table td {
             padding: 8px 10px;
-            border-bottom: 1px solid #e5e7eb;
+            border: 1px solid #aaa;
+            color: #333;
         }
+
         table tr:hover {
-            background-color: #f9fafb;
+            background-color: #f0f0f0;
+            /* igual que day-title */
         }
+
         .comparativa {
-            background-color: #f0f9ff;
-            border: 1px solid #bfdbfe;
+            background-color: #f0f0f0;
+            /* gris suave */
+            border: 1px solid #aaa;
             padding: 15px;
-            border-radius: 5px;
+            border-radius: 4px;
             margin-top: 10px;
         }
+
         .comparativa .trend-up {
-            color: #10b981;
+            color: #333;
+            /* ya no verde */
             font-weight: bold;
         }
+
         .comparativa .trend-down {
-            color: #ef4444;
+            color: #333;
+            /* ya no rojo */
             font-weight: bold;
         }
+
         .footer {
             margin-top: 40px;
             text-align: center;
             font-size: 10px;
-            color: #9ca3af;
-            border-top: 1px solid #e5e7eb;
+            color: #666;
+            border-top: 1px solid #aaa;
             padding-top: 15px;
         }
     </style>
+
 </head>
+
 <body>
     <div class="header">
         <h1>Reporte de Estadísticas</h1>
@@ -140,9 +177,9 @@
             <p><strong>{{ $comparativa['mes_actual']['periodo'] }}:</strong> {{ number_format($comparativa['mes_actual']['total']) }} atenciones</p>
             <p><strong>{{ $comparativa['mes_anterior']['periodo'] }}:</strong> {{ number_format($comparativa['mes_anterior']['total']) }} atenciones</p>
             <p style="margin-top: 10px;">
-                <strong>Diferencia:</strong> 
+                <strong>Diferencia:</strong>
                 <span class="trend-{{ $comparativa['tendencia'] == 'aumento' ? 'up' : 'down' }}">
-                    {{ $comparativa['diferencia'] > 0 ? '+' : '' }}{{ number_format($comparativa['diferencia']) }} 
+                    {{ $comparativa['diferencia'] > 0 ? '+' : '' }}{{ number_format($comparativa['diferencia']) }}
                     ({{ $comparativa['porcentaje'] > 0 ? '+' : '' }}{{ $comparativa['porcentaje'] }}%)
                 </span>
             </p>
@@ -161,7 +198,7 @@
             </thead>
             <tbody>
                 @php
-                    $totalConsultas = $consultasPorEspecialidad->sum('total');
+                $totalConsultas = $consultasPorEspecialidad->sum('total');
                 @endphp
                 @foreach($consultasPorEspecialidad as $especialidad)
                 <tr>
@@ -203,4 +240,5 @@
         <p>Todos los derechos reservados © {{ date('Y') }}</p>
     </div>
 </body>
+
 </html>

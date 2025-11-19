@@ -518,7 +518,7 @@ export default function EstadisticasIndexPage({
                                             No hay datos de tiempo de espera disponibles.
                                             <br />
                                             <span className="text-sm">
-                                                Asegúrate de registrar hora_inicio_atencion en las atenciones.
+                                                Asegúrate de registrar hora de inicio de atención en las atenciones.
                                             </span>
                                         </TableCell>
                                     </TableRow>

@@ -6,6 +6,7 @@ import AppLayout from '@/layouts/app-layout'
 import { Button } from '@/components/ui/button'
 import personas from '@/routes/personas'
 import type { PersonaShowPageProps } from '@/types/personas/persona';
+import { Undo2 } from 'lucide-react'
 
 // Componente para mostrar una etiqueta de información
 function Info({ label, value }: { label: string; value: string | null }) {
@@ -35,7 +36,10 @@ export default function PersonaShowPage({ persona }: PersonaShowPageProps) {
             <p className="text-muted-foreground mb-4">Detalles personales y dependencias asociadas.</p>
 
             <Link href={personas.index.url()} className="inline-block">
-              <Button>Volver a la lista de Pacientes</Button>
+              <Button className="flex items-center gap-2">
+                <Undo2 className="h-4 w-4" />
+                Volver
+              </Button>
             </Link>
           </div>
 
@@ -96,8 +100,8 @@ export default function PersonaShowPage({ persona }: PersonaShowPageProps) {
                           <TableCell>
                             <span
                               className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${d.estado === "activo"
-                                ? "bg-green-100 text-green-800"
-                                : "bg-gray-100 text-gray-800"
+                                ? "bg-secondary text-secondary-foreground"
+                                : "bg-muted text-muted-foreground"
                                 }`}
                             >
                               {d.estado.charAt(0).toUpperCase() + d.estado.slice(1)}
