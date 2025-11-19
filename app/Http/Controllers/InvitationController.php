@@ -2,99 +2,72 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\ProfesionalInvitation;
+use App\Models\Profesional;
 use App\Models\User;
-use App\Models\UserInvitation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
-use Inertia\Inertia;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Validation\Rules;
 
 class InvitationController extends Controller
 {
-    public function sendInvitation(Request $request, $profesionalId)
+    /**
+     * Crear usuario automáticamente para un profesional y enviar email de contraseña
+     */
+    public function inviteProfesional(Request $request, $profesionalId)
     {
-        $request->validate([
-            'email' => ['required', 'email', 'unique:users,email'],
-        ]);
+        // Solo super-admin puede invitar
+        if (!auth()->user()->hasRole('super-admin')) {
+            return back()->with('error', 'Solo el Super Admin puede crear usuarios.');
+        }
 
-        $profesional = \App\Models\Profesional::with('persona')->findOrFail($profesionalId);
+        $profesional = Profesional::with('persona')->findOrFail($profesionalId);
 
         // Verificar que el profesional no tenga usuario ya
         if ($profesional->user_id) {
             return back()->with('error', 'Este profesional ya tiene un usuario asociado.');
         }
 
-        // Crear invitación
-        $invitation = UserInvitation::createForProfesional(
-            $profesional,
-            $request->email,
-            'profesional'
-        );
-
-        // Enviar email
-        Mail::to($request->email)->send(
-            new ProfesionalInvitation(
-                $invitation,
-                $profesional->persona->nombre . ' ' . $profesional->persona->apellido
-            )
-        );
-
-        return back()->with('success', 'Invitación enviada correctamente.');
-    }
-
-    public function showAcceptForm($token)
-    {
-        $invitation = UserInvitation::where('token', $token)->firstOrFail();
-
-        if ($invitation->isExpired()) {
-            return Inertia::render('auth/InvitationExpired');
+        // Verificar que el profesional tenga email
+        if (!$profesional->persona->email) {
+            return back()->with('error', 'El profesional no tiene un email registrado. Por favor, edítalo primero.');
         }
 
-        if ($invitation->isAccepted()) {
-            return Inertia::render('auth/InvitationAlreadyAccepted');
+        // Verificar que el email no esté usado
+        if (User::where('email', $profesional->persona->email)->exists()) {
+            return back()->with('error', 'Ya existe un usuario con ese email.');
         }
 
-        return Inertia::render('auth/AcceptInvitation', [
-            'token' => $token,
-            'email' => $invitation->email,
-            'profesional' => $invitation->profesional->load('persona'),
-        ]);
-    }
+        DB::beginTransaction();
+        try {
+            // Generar contraseña temporal aleatoria
+            $temporalPassword = \Illuminate\Support\Str::random(16);
 
-    public function acceptInvitation(Request $request, $token)
-    {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-        ]);
-
-        $invitation = UserInvitation::where('token', $token)->firstOrFail();
-
-        if ($invitation->isExpired() || $invitation->isAccepted()) {
-            return back()->with('error', 'Invitación no válida.');
-        }
-
-        DB::transaction(function () use ($request, $invitation) {
             // Crear usuario
             $user = User::create([
-                'name' => $request->name,
-                'email' => $invitation->email,
-                'password' => Hash::make($request->password),
+                'name' => $profesional->persona->nombre . ' ' . $profesional->persona->apellido,
+                'email' => $profesional->persona->email,
+                'password' => Hash::make($temporalPassword),
                 'email_verified_at' => now(),
             ]);
 
-            // Asignar rol
-            $user->assignRole($invitation->role);
+            // Asignar rol profesional
+            $user->assignRole('profesional');
 
             // Asociar con profesional
-            $invitation->profesional->update(['user_id' => $user->id]);
+            $profesional->update(['user_id' => $user->id]);
 
-            // Marcar invitación como aceptada
-            $invitation->update(['accepted_at' => now()]);
-        });
+            // Enviar email de restablecimiento de contraseña
+            Password::sendResetLink(['email' => $user->email]);
 
-        return redirect()->route('login')->with('success', 'Cuenta creada correctamente. Ya puedes iniciar sesión.');
+            DB::commit();
+
+            return back()->with('success', 'Usuario creado correctamente. Se ha enviado un email a ' . $user->email . ' para establecer su contraseña.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return back()->with('error', 'Error al crear el usuario: ' . $e->getMessage());
+        }
     }
 }

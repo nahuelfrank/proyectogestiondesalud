@@ -25,9 +25,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // Invitaciones
-Route::post('profesionales/{profesional}/send-invitation', [InvitationController::class, 'sendInvitation'])->name('profesionales.send_invitation')->middleware('auth');
-Route::get('invitation/accept/{token}', [InvitationController::class, 'showAcceptForm'])->name('invitation.accept');
-Route::post('invitation/accept/{token}', [InvitationController::class, 'acceptInvitation'])->name('invitation.process');
+//Route::post('profesionales/{profesional}/send-invitation', [InvitationController::class, 'sendInvitation'])->name('profesionales.send_invitation')->middleware('auth');
+//Route::get('invitation/accept/{token}', [InvitationController::class, 'showAcceptForm'])->name('invitation.accept');
+//Route::post('invitation/accept/{token}', [InvitationController::class, 'acceptInvitation'])->name('invitation.process');
+Route::post('profesionales/{profesional}/invitar', [InvitationController::class, 'inviteProfesional'])->name('invitation.process');
 
 // Roles (protegidas con permisos)
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -71,6 +72,7 @@ Route::get('profesionales/edit/{profesional}', [ProfesionalController::class, 'e
 Route::put('profesionales/{profesional}', [ProfesionalController::class, 'update'])->name('profesionales.update');
 Route::get('profesionales/{profesional}', [ProfesionalController::class, 'show'])->name('profesionales.show');
 Route::get('profesionales/reporte_horarios/{profesional}', [ProfesionalController::class, 'reporteHorarios'])->name('profesionales.reporte_horarios');
+Route::get('profesionales/reporte_horarios_excel/{profesional}', [ProfesionalController::class, 'reporteHorariosExcel'])->name('profesionales.reporte_horarios_excel');
 
 // Rutas para el recurso Atenciones
 Route::get('atenciones', [AtencionController::class, 'index'])->name('atenciones.index');

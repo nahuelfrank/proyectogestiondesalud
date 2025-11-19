@@ -46,6 +46,12 @@ const mainNavItems: NavItem[] = [
         permission: 'view atenciones',
     },
     {
+        title: 'Estadísticas',
+        href: estadisticas.index().url,
+        icon: ChartNoAxesCombined,
+        permission: 'view estadisticas',
+    },
+    {
         title: 'Usuarios',
         href: '/usuarios',
         icon: Users,
@@ -57,11 +63,6 @@ const mainNavItems: NavItem[] = [
         icon: Shield,
         permission: 'view roles',
     },
-    {
-        title: 'Estadísticas',
-        href: estadisticas.index().url,
-        icon: ChartNoAxesCombined,
-    }
 
 ];
 
