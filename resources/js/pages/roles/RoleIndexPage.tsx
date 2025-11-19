@@ -65,6 +65,7 @@ export default function RoleIndexPage({ roles }: RoleIndexPageProps) {
             <Head title="Roles y Permisos" />
 
             <div className="container mx-auto py-10">
+                {/* 
                 <div className="flex justify-between items-center mb-6">
                     <div>
                         <h1 className="text-3xl font-bold">Roles y Permisos</h1>
@@ -82,6 +83,7 @@ export default function RoleIndexPage({ roles }: RoleIndexPageProps) {
                         </Link>
                     )}
                 </div>
+                */}
 
                 <div className="bg-white rounded-lg shadow">
                     <Table>

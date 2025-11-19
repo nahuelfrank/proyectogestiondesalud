@@ -25,9 +25,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // Invitaciones
-Route::post('profesionales/{profesional}/send-invitation', [InvitationController::class, 'sendInvitation'])->name('profesionales.send_invitation')->middleware('auth');
-Route::get('invitation/accept/{token}', [InvitationController::class, 'showAcceptForm'])->name('invitation.accept');
-Route::post('invitation/accept/{token}', [InvitationController::class, 'acceptInvitation'])->name('invitation.process');
+//Route::post('profesionales/{profesional}/send-invitation', [InvitationController::class, 'sendInvitation'])->name('profesionales.send_invitation')->middleware('auth');
+//Route::get('invitation/accept/{token}', [InvitationController::class, 'showAcceptForm'])->name('invitation.accept');
+//Route::post('invitation/accept/{token}', [InvitationController::class, 'acceptInvitation'])->name('invitation.process');
+Route::post('profesionales/{profesional}/invitar', [InvitationController::class, 'inviteProfesional'])->name('invitation.process');
 
 // Roles (protegidas con permisos)
 Route::middleware(['auth', 'verified'])->group(function () {

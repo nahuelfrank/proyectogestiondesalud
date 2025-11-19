@@ -1,6 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { Clock, Eye, Mail, Pencil, Trash2 } from "lucide-react";
+import { Clock, Eye, Mail, Pencil } from "lucide-react";
 import { router } from "@inertiajs/react";
 import {
   Dialog,
@@ -23,9 +23,8 @@ import {
 import { FileText } from 'lucide-react';
 import { usePermissions } from "@/hooks/use-permissions";
 import React from "react";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { usePage } from "@inertiajs/react";
 
 export type Profesional = {
   id: number;
@@ -65,59 +64,6 @@ export type DisponibilidadHoraria = {
   };
 };
 
-function InvitationForm({ profesionalId, profesionalName }: { profesionalId: number, profesionalName: string }) {
-  const [email, setEmail] = React.useState('');
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    router.post(`/profesionales/${profesionalId}/send-invitation`, { email }, {
-      onSuccess: () => {
-        // El dialog se cerrará automáticamente
-      },
-      onError: (errors) => {
-        console.error('Error al enviar invitación:', errors);
-        alert('Error al enviar la invitación');
-      },
-      onFinish: () => {
-        setIsSubmitting(false);
-      }
-    });
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <Label htmlFor="email">Email del profesional</Label>
-        <Input
-          id="email"
-          type="email"
-          placeholder="profesional@ejemplo.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <p className="text-sm text-gray-500 mt-1">
-          Se enviará un email a {profesionalName} para que cree su cuenta.
-        </p>
-      </div>
-
-      <div className="flex gap-2">
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Enviando...' : 'Enviar Invitación'}
-        </Button>
-        <DialogClose asChild>
-          <Button type="button" variant="outline">
-            Cancelar
-          </Button>
-        </DialogClose>
-      </div>
-    </form>
-  );
-}
-
 export const columns: ColumnDef<Profesional>[] = [
   {
     id: "nombre_apellido",
@@ -147,6 +93,20 @@ export const columns: ColumnDef<Profesional>[] = [
     cell: ({ row }) => {
       const profesional = row.original;
       return `${profesional.persona.numero_documento}`;
+    },
+  },
+  {
+    id: "email",
+    header: "Email",
+    enableSorting: true,
+    accessorFn: (row) => row.persona.email ?? "Sin email",
+    cell: ({ row }) => {
+      const profesional = row.original;
+      return profesional.persona.email ? (
+        <span>{profesional.persona.email}</span>
+      ) : (
+        <Badge variant="secondary">Sin email</Badge>
+      );
     },
   },
   {
@@ -267,29 +227,9 @@ export const columns: ColumnDef<Profesional>[] = [
     cell: ({ row }) => {
       const profesional = row.original;
 
-      const handleDelete = () => {
-        if (
-          confirm(
-            `¿Seguro que querés eliminar a ${profesional.persona.nombre} ${profesional.persona.apellido}?`
-          )
-        ) {
-          router.delete(`/profesionales/${profesional.id}`, {
-            preserveScroll: true,
-            onSuccess: () => {
-              // Inertia recarga automáticamente
-            },
-            onError: (errors) => {
-              console.error("Error al eliminar:", errors);
-              alert("Hubo un error al eliminar el profesional");
-            },
-          });
-        }
-      };
-
       return (
         <div>
           {/* Ver */}
-
           <Button
             variant="ghost"
             size="icon"
@@ -308,20 +248,6 @@ export const columns: ColumnDef<Profesional>[] = [
           >
             <Pencil className="h-4 w-4" />
           </Button>
-
-          {/* Eliminar */}
-
-          {/*
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleDelete}
-            title="Eliminar"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-          */
-          }
         </div>
       );
     },
@@ -332,36 +258,50 @@ export const columns: ColumnDef<Profesional>[] = [
     enableSorting: false,
     cell: ({ row }) => {
       const profesional = row.original;
-      const { can } = usePermissions();
+      const { auth } = usePage<{ auth: { user: { roles: Array<{ name: string }> } } }>().props;
 
+      // Verificar si el usuario actual es super-admin
+      const isSuperAdmin = auth.user.roles.some(role => role.name === 'super-admin');
+
+      // Si el profesional ya tiene usuario
       if (profesional.user_id) {
-        return <Badge variant="outline">Cuenta activa</Badge>;
+        return <Badge variant="outline" className="bg-green-50 text-green-700">Cuenta activa</Badge>;
       }
 
-      if (!can('invite profesionales')) {
+      // Si no tiene email
+      if (!profesional.persona.email) {
+        return <Badge variant="secondary">Sin email registrado</Badge>;
+      }
+
+      // Si no es super-admin, mostrar badge sin acción
+      if (!isSuperAdmin) {
         return <Badge variant="secondary">Sin cuenta</Badge>;
       }
 
+      // Si es super-admin y el profesional no tiene usuario, mostrar botón invitar
+      const handleInvite = () => {
+        if (confirm(`¿Deseas crear una cuenta de usuario para ${profesional.persona.nombre} ${profesional.persona.apellido}?\n\nSe enviará un email a: ${profesional.persona.email}`)) {
+          router.post(`/profesionales/${profesional.id}/invitar`, {}, {
+            preserveScroll: true,
+            onSuccess: () => {
+              // Success message handled by flash
+            },
+            onError: (errors) => {
+              console.error('Error al crear usuario:', errors);
+            },
+          });
+        }
+      };
+
       return (
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm">
-              <Mail className="h-4 w-4 mr-2" />
-              Invitar
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Enviar Invitación</DialogTitle>
-              <DialogDescription>
-                Enviar invitación a {profesional.persona.nombre} {profesional.persona.apellido}
-              </DialogDescription>
-            </DialogHeader>
-            <InvitationForm
-              profesionalId={profesional.id}
-              profesionalName={`${profesional.persona.nombre} ${profesional.persona.apellido}`} />
-          </DialogContent>
-        </Dialog>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleInvite}
+        >
+          <Mail className="h-4 w-4 mr-2" />
+          Invitar
+        </Button>
       );
     },
   },
