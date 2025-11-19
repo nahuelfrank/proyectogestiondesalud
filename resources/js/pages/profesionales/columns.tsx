@@ -1,6 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { Clock, Eye, Mail, Pencil } from "lucide-react";
+import { Clock, Eye, Mail, Pencil, FileSpreadsheet } from "lucide-react";
 import { router } from "@inertiajs/react";
 import {
   Dialog,
@@ -192,6 +192,13 @@ export const columns: ColumnDef<Profesional>[] = [
               >
                 <FileText className="h-4 w-4" />
                 PDF
+              </Button>
+              <Button
+                className="flex items-center gap-2 mr-2"
+                onClick={() => window.open(`/profesionales/reporte_horarios_excel/${profesional.id}`, '_blank')}
+              >
+                <FileSpreadsheet className="h-4 w-4" />
+                Excel
               </Button>
               <DialogClose asChild>
                 <Button variant="outline">Cerrar</Button>

@@ -12,10 +12,12 @@ use App\Models\Genero;
 use App\Models\Persona;
 use App\Models\Profesional;
 use App\Models\TipoDocumento;
+use App\Exports\ProfesionalHorariosExport;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProfesionalController extends Controller
 {
@@ -244,5 +246,13 @@ class ProfesionalController extends Controller
                 'horariosPorDia'   => $horariosAgrupados
             ]
         )->stream("horarios_profesional_{$profesional->id}.pdf");
+    }
+
+    public function reporteHorariosExcel(Profesional $profesional)
+    {
+        return Excel::download(
+            new ProfesionalHorariosExport($profesional),
+            "horarios_profesional_{$profesional->id}.xlsx"
+        );
     }
 }
