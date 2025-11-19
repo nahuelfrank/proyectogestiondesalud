@@ -18,6 +18,7 @@ class AtencionAtributo extends Model
     protected $fillable = [
         'atencion_id',
         'atributo_id',
+        'valor', // Agregar este campo
     ];
 
     /**
@@ -43,5 +44,4 @@ class AtencionAtributo extends Model
             ['atributo_id', 'atributo_id']
         );
     }
-
 }

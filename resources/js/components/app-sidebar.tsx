@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookPlus, BriefcaseMedicalIcon, ChartNoAxesCombined, NotebookPen, Shield, UserRound, Users } from 'lucide-react';
+import { BookPlus, BriefcaseMedicalIcon, ChartNoAxesCombined, ClipboardList, NotebookPen, Shield, UserRound, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 import personas from '@/routes/personas';
 import profesionales from '@/routes/profesionales';
@@ -63,6 +63,13 @@ const mainNavItems: NavItem[] = [
         icon: Shield,
         permission: 'view roles',
     },
+    // Agregar este objeto al array mainNavItems:
+    {
+        title: 'Historia Clínica',
+        href: '/historias-clinicas/lista-espera',
+        icon: ClipboardList,
+        permission: 'view atenciones', // Ajustar según tus permisos
+    }
 
 ];
 

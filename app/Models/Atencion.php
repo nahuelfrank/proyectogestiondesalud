@@ -135,4 +135,22 @@ class Atencion extends Model
         return $query->whereNotNull('hora')
             ->whereNotNull('hora_inicio_atencion');
     }
+
+
+    // Relación con atributos clínicos
+    public function atenciones_atributos()
+    {
+        return $this->hasMany(AtencionAtributo::class, 'atencion_id');
+    }
+
+    // También se puede agregar una relación many-to-many directa con Atributo
+    public function atributos()
+    {
+        return $this->belongsToMany(
+            Atributo::class,
+            'atenciones_atributos',
+            'atencion_id',
+            'atributo_id'
+        )->withPivot('valor')->withTimestamps();
+    }
 }

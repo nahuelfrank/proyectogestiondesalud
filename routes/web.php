@@ -8,6 +8,7 @@ use App\Http\Controllers\ProfesionalController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ServicioController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\HistoriaClinicaController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -79,7 +80,7 @@ Route::get('atenciones', [AtencionController::class, 'index'])->name('atenciones
 Route::get('atenciones/registrar_atencion', [AtencionController::class, 'crearAtencion'])->name('atenciones.crear_atencion');
 Route::get('atenciones/modificar_estado/{atencion}', [AtencionController::class, 'modificarEstadoAtencion'])->name('atenciones.modificar_estado');
 Route::put('atenciones/actualizar_estado/{atencion}', [AtencionController::class, 'actualizarEstadoAtencion'])->name('atenciones.actualizar_estado');
-Route::post('atenciones/guardar_atencion',[AtencionController::class, 'guardarAtencion'])->name('atenciones.guardar_atencion');
+Route::post('atenciones/guardar_atencion', [AtencionController::class, 'guardarAtencion'])->name('atenciones.guardar_atencion');
 Route::get('atenciones/editar_atencion/{atencion}', [AtencionController::class, 'editarAtencion'])->name('atenciones.editar_atencion');
 Route::put('atenciones/{atencion}', [AtencionController::class, 'actualizarAtencion'])->name('atenciones.actualizar_atencion');
 Route::get('atenciones/detalles/{persona}', [AtencionController::class, 'verAtencion'])->name('atenciones.ver_atencion');
@@ -93,5 +94,31 @@ Route::get('estadisticas', [EstadisticasController::class, 'index'])->name('esta
 // Rutas de exportación
 Route::get('/estadisticas/exportar-pdf', [EstadisticasController::class, 'exportarPDF'])->name('estadisticas.exportar-pdf');
 Route::get('/estadisticas/exportar-excel', [EstadisticasController::class, 'exportarExcel'])->name('estadisticas.exportar-excel');
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Lista de espera del profesional
+    Route::get('historias-clinicas/lista-espera', [HistoriaClinicaController::class, 'listaEspera'])
+        ->name('historias-clinicas.lista-espera');
+
+    // Ver historia clínica del paciente
+    Route::get('historias-clinicas/{atencion}/ver', [HistoriaClinicaController::class, 'verHistoriaClinica'])
+        ->name('historias-clinicas.ver');
+
+    // Registrar atención
+    Route::get('historias-clinicas/{atencion}/registrar', [HistoriaClinicaController::class, 'registrarAtencion'])
+        ->name('historias-clinicas.registrar');
+
+    // Guardar atención
+    Route::post('historias-clinicas/{atencion}/guardar', [HistoriaClinicaController::class, 'guardarAtencion'])
+        ->name('historias-clinicas.guardar');
+
+    // Ver detalle de una atención específica
+    Route::get('historias-clinicas/atenciones/{atencion}/detalle', [HistoriaClinicaController::class, 'verDetalleAtencion'])
+        ->name('historias-clinicas.detalle-atencion');
+
+    // API para obtener profesionales por servicio
+    Route::get('historias-clinicas/servicios/{servicio}/profesionales', [HistoriaClinicaController::class, 'obtenerProfesionalesPorServicio'])
+        ->name('historias-clinicas.profesionales-por-servicio');
+});
 
 require __DIR__ . '/settings.php';
