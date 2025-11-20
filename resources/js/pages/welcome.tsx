@@ -60,11 +60,11 @@ export default function Welcome({
                             </h1>
 
                             <p className="mb-4 text-base leading-relaxed text-[#1b1b18]/80 dark:text-[#EDEDEC]/80">
-                                Bienvenido al sistema de gestión de salud universitaria de la Dirección de Salud Universitaria.
+                                Bienvenido a la plataforma de la Dirección de Salud Universitaria.
                             </p>
 
                             <p className="text-sm leading-relaxed text-[#1b1b18]/70 dark:text-[#EDEDEC]/70">
-                                Servicio Médico para toda la comunidad universitaria.
+                                Atención médica para toda la comunidad universitaria.
                             </p>
                         </div>
 

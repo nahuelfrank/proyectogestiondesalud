@@ -8,7 +8,7 @@ export default function AppLogo() {
             </div>
             <div className="ml-1 grid flex-1 text-left text-sm">
                 <span className="mb-0.5 truncate leading-tight font-semibold">
-                    Sistema de Gestión de Salud Universitaria
+                    Sanidad
                 </span>
                 <span className="text-xs text-sidebar-secondary-foreground truncate leading-tight">
                     Administración

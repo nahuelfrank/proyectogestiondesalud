@@ -14,7 +14,7 @@ class RoleController extends Controller
 
     public function index()
     {
-        $this->authorize('view roles');
+        $this->authorize('ver roles');
 
         $roles = Role::with('permissions')
             ->withCount('users')
@@ -28,7 +28,7 @@ class RoleController extends Controller
 
     public function create()
     {
-        $this->authorize('create roles');
+        $this->authorize('crear roles');
 
         $permissions = Permission::all()->groupBy(function ($permission) {
             // Agrupar por el primer palabra (view, create, edit, delete)
@@ -42,7 +42,7 @@ class RoleController extends Controller
 
     public function store(Request $request)
     {
-        $this->authorize('create roles');
+        $this->authorize('crear roles');
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', 'unique:roles,name'],
@@ -63,7 +63,7 @@ class RoleController extends Controller
 
     public function edit(Role $role)
     {
-        $this->authorize('edit roles');
+        $this->authorize('editar roles');
 
         // Prevenir edición de super-admin
         if ($role->name === 'super-admin') {
@@ -86,7 +86,7 @@ class RoleController extends Controller
 
     public function update(Request $request, Role $role)
     {
-        $this->authorize('edit roles');
+        $this->authorize('editar roles');
 
         if ($role->name === 'super-admin') {
             return back()->with('error', 'No puedes editar el rol de Super Admin.');
@@ -107,7 +107,7 @@ class RoleController extends Controller
 
     public function destroy(Role $role)
     {
-        $this->authorize('delete roles');
+        $this->authorize('eliminar roles');
 
         if ($role->name === 'super-admin') {
             return back()->with('error', 'No puedes eliminar el rol de Super Admin.');

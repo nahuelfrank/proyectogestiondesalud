@@ -42,6 +42,7 @@ class DatabaseSeeder extends Seeder
             PersonaSeeder::class,
             ProfesionalSeeder::class,
             AtencionSeeder::class,
+            RolePermissionSeeder::class,
         ]);
     }
 }

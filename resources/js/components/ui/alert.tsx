@@ -8,9 +8,39 @@ const alertVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-card text-card-foreground",
-        destructive:
-          "text-destructive bg-card [&>svg]:text-current *:data-[slot=alert-description]:text-destructive/90",
+        default: "bg-card text-card-foreground border",
+
+        // --- SUCCESS ---
+        success: `
+          bg-[var(--success)]
+          text-[var(--success-foreground)]
+          border-[var(--success)]
+          [&>svg]:text-[var(--success-foreground)]
+        `,
+
+        // --- ERROR ---
+        destructive: `
+          bg-[var(--destructive)]
+          text-[var(--destructive-foreground)]
+          border-[var(--destructive)]
+          [&>svg]:text-[var(--destructive-foreground)]
+        `,
+
+        // --- WARNING ---
+        warning: `
+          bg-[var(--warning)]
+          text-[var(--warning-foreground)]
+          border-[var(--warning)]
+          [&>svg]:text-[var(--warning-foreground)]
+        `,
+
+        // --- INFO ---
+        info: `
+          bg-[var(--info)]
+          text-[var(--info-foreground)]
+          border-[var(--info)]
+          [&>svg]:text-[var(--info-foreground)]
+        `,
       },
     },
     defaultVariants: {
@@ -18,6 +48,7 @@ const alertVariants = cva(
     },
   }
 )
+
 
 function Alert({
   className,
@@ -55,7 +86,7 @@ function AlertDescription({
     <div
       data-slot="alert-description"
       className={cn(
-        "text-muted-foreground col-start-2 grid justify-items-start gap-1 text-sm [&_p]:leading-relaxed",
+        "text-[hsl(var(--foreground))] col-start-2 grid justify-items-start gap-1 text-sm [&_p]:leading-relaxed",
         className
       )}
       {...props}

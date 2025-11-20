@@ -19,7 +19,7 @@ class RolePermissionSeeder extends Seeder
      * 
      * ESTRUCTURA DE PERMISOS:
      * - Los permisos siguen el patrón: "acción recurso"
-     * - Ejemplos: "view pacientes", "create atenciones", "edit roles"
+     * - Ejemplos: "ver pacientes", "crer atenciones", "edit roles"
      * - Se agrupan automáticamente por recurso en la interfaz
      */
     public function run(): void
@@ -34,40 +34,44 @@ class RolePermissionSeeder extends Seeder
         // y ejecuta el seeder nuevamente
         $permissions = [
             // Pacientes
-            'view pacientes',
-            'create pacientes',
-            'edit pacientes',
-            'delete pacientes',
+            'ver pacientes',
+            'crear pacientes',
+            'editar pacientes',
+            'eliminar pacientes',
 
             // Profesionales
-            'view profesionales',
-            'create profesionales',
-            'edit profesionales',
-            'delete profesionales',
-            'invite profesionales',
+            'ver profesionales',
+            'crear profesionales',
+            'editar profesionales',
+            'eliminar profesionales',
+            'invitar profesionales',
+            'ver-espera profesionales',
 
             // Atenciones
-            'view atenciones',
-            'create atenciones',
-            'edit atenciones',
-            'delete atenciones',
+            'ver atenciones',
+            'crear atenciones',
+            'editar atenciones',
+            'eliminar atenciones',
 
             // Servicios
-            'view servicios',
-            'create servicios',
-            'edit servicios',
-            'delete servicios',
+            'ver servicios',
+            'crear servicios',
+            'editar servicios',
+            'eliminar servicios',
 
             // Roles y Permisos
-            'view roles',
-            'create roles',
-            'edit roles',
-            'delete roles',
-            'assign permissions',
+            'ver roles',
+            'crear roles',
+            'editar roles',
+            'eliminar roles',
+            'asignar permisos',
 
             // Reportes
-            'view reportes',
-            'generate reportes',
+            'ver reportes',
+            'generar reportes',
+
+            // Estadisticas
+            'ver estadisticas',
         ];
 
         // Crear todos los permisos definidos
@@ -81,53 +85,30 @@ class RolePermissionSeeder extends Seeder
 
         // Crear o actualizar roles
         $superAdmin = Role::firstOrCreate(['name' => 'super-admin']);
-        $admin = Role::firstOrCreate(['name' => 'admin']);
         $profesional = Role::firstOrCreate(['name' => 'profesional']);
-        $recepcionista = Role::firstOrCreate(['name' => 'recepcionista']);
+        $administrativo = Role::firstOrCreate(['name' => 'administrativo']);
 
         // Super Admin - Tiene TODOS los permisos
         $superAdmin->syncPermissions(Permission::all());
 
-        // Admin - Gestión completa excepto super-admin
-        $admin->syncPermissions([
-            'view pacientes',
-            'create pacientes',
-            'edit pacientes',
-            'delete pacientes',
-            'view profesionales',
-            'create profesionales',
-            'edit profesionales',
-            'view atenciones',
-            'create atenciones',
-            'edit atenciones',
-            'view servicios',
-            'create servicios',
-            'edit servicios',
-            'view reportes',
-            'generate reportes',
-        ]);
-
         // Profesional - Puede trabajar con pacientes y atenciones
         $profesional->syncPermissions([
-            'view pacientes',
-            'create pacientes',
-            'edit pacientes',
-            'view profesionales',
-            'view atenciones',
-            'create atenciones',
-            'edit atenciones',
-            'view servicios',
+            'ver-espera profesionales',
+            'crear atenciones',
+            'editar atenciones',
         ]);
 
-        // Recepcionista - Principalmente gestión de pacientes y consulta
-        $recepcionista->syncPermissions([
-            'view pacientes',
-            'create pacientes',
-            'edit pacientes',
-            'view profesionales',
-            'view atenciones',
-            'create atenciones',
-            'view servicios',
+        // Administrativo - Principalmente gestión de pacientes y consulta
+        $administrativo->syncPermissions([
+            'ver pacientes',
+            'crear pacientes',
+            'editar pacientes',
+            'crear profesionales',
+            'ver profesionales',
+            'editar profesionales',
+            'ver atenciones',
+            'crear atenciones',
+            'ver servicios',
         ]);
 
         // ==========================================
@@ -143,7 +124,7 @@ class RolePermissionSeeder extends Seeder
             ]
         );
 
-        // Asignar rol super-admin
+        // Asignar rol administrador-del-sistema
         if (!$user->hasRole('super-admin')) {
             $user->assignRole('super-admin');
         }
@@ -161,7 +142,7 @@ class RolePermissionSeeder extends Seeder
         //    - O agrégalo aquí en el seeder
         //
         // 3. Los permisos se agrupan automáticamente por la segunda palabra
-        //    Ejemplo: "view pacientes" se agrupa en "pacientes"
+        //    Ejemplo: "ver pacientes" se agrupa en "pacientes"
         //
         // 4. El rol 'super-admin' está protegido y no se puede:
         //    - Editar desde la interfaz

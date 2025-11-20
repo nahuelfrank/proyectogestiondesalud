@@ -86,6 +86,28 @@ interface Props {
     pacienteCargaRapida?: PacienteCargaRapida;
 }
 
+const variants = {
+    success: 'success',
+    error: 'destructive',
+    warning: 'warning',
+    info: 'info'
+} as const;
+
+const icons = {
+    success: <CheckCircle className="h-4 w-4" />,
+    error: <AlertCircle className="h-4 w-4" />,
+    warning: <AlertCircle className="h-4 w-4" />,
+    info: <AlertCircle className="h-4 w-4" />,
+};
+
+const titles = {
+    success: 'Éxito',
+    error: 'Error',
+    warning: 'Advertencia',
+    info: 'Información'
+};
+
+
 export default function AtencionCreatePage({
     especialidadesServicios,
     tiposAtenciones,
@@ -107,13 +129,6 @@ export default function AtencionCreatePage({
     const [mostrarAlertaHorario, setMostrarAlertaHorario] = useState(false);
     const [notificacion, setNotificacion] = useState<{ tipo: string; mensaje: string } | null>(null);
     const [fechaHoraActual, setFechaHoraActual] = useState({ fecha: '', hora: '' });
-
-    const styles = {
-        success: 'bg-[var(--success)] text-[var(--success-foreground)] border-[var(--success)]',
-        error: 'bg-[var(--destructive)] text-[var(--destructive-foreground)] border-[var(--destructive)]',
-        warning: 'bg-[var(--warning)] text-[var(--warning-foreground)] border-[var(--warning)]',
-        info: 'bg-[var(--info)] text-[var(--info-foreground)] border-[var(--info)]',
-    };
 
     const { data, setData, post, errors, processing } = useForm({
         fecha: "",
@@ -249,28 +264,6 @@ export default function AtencionCreatePage({
         }
     };
 
-    const handleEspecialidadChange = (especialidadId: string) => {
-        setEspecialidadSeleccionada(especialidadId);
-        setData('profesional_id', '');
-
-        // Validar compatibilidad entre especialidad y servicio
-        const esCompatible = especialidadesServicios.some(
-            es => es.especialidad_id === parseInt(especialidadId) &&
-                es.servicio_id === parseInt(data.servicio_id)
-        );
-
-        if (!esCompatible) {
-            setNotificacion({ tipo: 'error', mensaje: 'La especialidad seleccionada no es compatible con el servicio.' });
-            return;
-        }
-
-        // Filtrar profesionales por especialidad
-        const profesionalesFiltrados = profesionales.filter(
-            p => p.especialidad_id === parseInt(especialidadId)
-        );
-
-        setProfesionalesDisponibles(profesionalesFiltrados);
-    };
 
     const validarDisponibilidad = () => {
         if (!data.fecha || !data.hora || !data.profesional_id) return true;
@@ -379,19 +372,12 @@ export default function AtencionCreatePage({
                 <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                     {/* Notificaciones */}
                     {notificacion && (
-                        <Alert className={`mb-4 pr-8 ${styles[notificacion.tipo]}`}>
-                            {notificacion.tipo === 'success' ? <CheckCircle className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
-                            <AlertTitle>
-                                {notificacion.tipo === 'success' ? 'Éxito' : notificacion.tipo === 'error' ? 'Error' : 'Información'}
-                            </AlertTitle>
-                            <AlertDescription
-                                className={notificacion.tipo === "error" ? "text-[hsl(var(--foreground))]" : ""}
-                            >
-                                {notificacion.mensaje}
-                            </AlertDescription>
+                        <Alert variant={variants[notificacion.tipo]} className="mb-4 pr-8">
+                            {icons[notificacion.tipo]}
+                            <AlertTitle>{titles[notificacion.tipo]}</AlertTitle>
+                            <AlertDescription>{notificacion.mensaje}</AlertDescription>
                         </Alert>
                     )}
-
                     {/* Diálogo paciente reciente */}
                     <AlertDialog open={mostrarDialogoReciente} onOpenChange={setMostrarDialogoReciente}>
                         <AlertDialogContent>

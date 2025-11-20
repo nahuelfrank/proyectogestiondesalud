@@ -25,50 +25,50 @@ const mainNavItems: NavItem[] = [
         title: 'Servicios',
         href: servicios.index().url,
         icon: BookPlus,
-        permission: 'view servicios',
+        permission: 'ver servicios',
     },
     {
         title: 'Pacientes',
         href: personas.index().url,
         icon: UserRound,
-        permission: 'view pacientes',
+        permission: 'ver pacientes',
     },
     {
         title: 'Profesionales',
         href: profesionales.index().url,
         icon: BriefcaseMedicalIcon,
-        permission: 'view profesionales',
+        permission: 'ver profesionales',
     },
     {
         title: 'Atenciones',
         href: atenciones.index().url,
         icon: NotebookPen,
-        permission: 'view atenciones',
+        permission: 'ver atenciones',
     },
     {
         title: 'Estadísticas',
         href: estadisticas.index().url,
         icon: ChartNoAxesCombined,
-        permission: 'view estadisticas',
+        permission: 'ver estadisticas',
     },
     {
         title: 'Usuarios',
         href: '/usuarios',
         icon: Users,
-        permission: 'view usuarios',
+        permission: 'ver usuarios',
     },
     {
         title: 'Roles y Permisos',
         href: '/roles',
         icon: Shield,
-        permission: 'view roles',
+        permission: 'ver roles',
     },
     // Agregar este objeto al array mainNavItems:
     {
-        title: 'Historia Clínica',
+        title: 'Lista de Espera',
         href: '/historias-clinicas/lista-espera',
         icon: ClipboardList,
-        permission: 'view atenciones', // Ajustar según tus permisos
+        permission: 'ver-espera profesionales', // Ajustar según tus permisos
     }
 
 ];
