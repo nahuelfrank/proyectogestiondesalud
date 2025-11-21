@@ -10,29 +10,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import atenciones from '@/routes/atenciones';
 import { useDebounce } from "@/hooks/use-debounce";
+import { useAlert } from '@/components/alert-provider';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Atenciones', href: atenciones.index.url() },
     { title: 'Registrar Atención', href: atenciones.crear_atencion.url() },
 ];
 
-interface TipoDocumento {
-    id: number;
-    nombre: string;
-}
-
+interface TipoDocumento { id: number; nombre: string; }
 interface Persona {
     id: number;
     nombre: string;
@@ -40,7 +27,6 @@ interface Persona {
     numero_documento: string;
     tipo_documento: TipoDocumento;
 }
-
 interface Profesional {
     id: number;
     persona: Persona;
@@ -51,24 +37,14 @@ interface Profesional {
         hora_fin_atencion: string;
     }>;
 }
-
 interface EspecialidadServicio {
     especialidad_id: number;
     servicio_id: number;
     especialidad: { id: number; nombre: string };
     servicio: { id: number; nombre: string };
 }
-
-interface TipoAtencion {
-    id: number;
-    nombre: string;
-}
-
-interface EstadoAtencion {
-    id: number;
-    nombre: string;
-}
-
+interface TipoAtencion { id: number; nombre: string; }
+interface EstadoAtencion { id: number; nombre: string; }
 interface PacienteCargaRapida {
     nombre: string;
     apellido: string;
@@ -107,7 +83,6 @@ const titles = {
     info: 'Información'
 };
 
-
 export default function AtencionCreatePage({
     especialidadesServicios,
     tiposAtenciones,
@@ -116,6 +91,8 @@ export default function AtencionCreatePage({
     pacienteReciente,
     pacienteCargaRapida
 }: Props) {
+    const { confirm } = useAlert();
+
     const [busquedaDoc, setBusquedaDoc] = useState('');
     const debouncedBusquedaDoc = useDebounce(busquedaDoc, 500);
     const [resultadosBusqueda, setResultadosBusqueda] = useState<Persona[]>([]);
@@ -125,10 +102,9 @@ export default function AtencionCreatePage({
     const [especialidadesDisponibles, setEspecialidadesDisponibles] = useState<Array<{ id: number; nombre: string }>>([]);
     const [especialidadSeleccionada, setEspecialidadSeleccionada] = useState<string>('');
     const [profesionalesDisponibles, setProfesionalesDisponibles] = useState<Profesional[]>([]);
-    const [mostrarDialogoReciente, setMostrarDialogoReciente] = useState(false);
-    const [mostrarAlertaHorario, setMostrarAlertaHorario] = useState(false);
-    const [notificacion, setNotificacion] = useState<{ tipo: string; mensaje: string } | null>(null);
+    const [notificacion, setNotificacion] = useState<{ tipo: keyof typeof variants; mensaje: string } | null>(null);
     const [fechaHoraActual, setFechaHoraActual] = useState({ fecha: '', hora: '' });
+    const [permitirFueraHorario, setPermitirFueraHorario] = useState(false);
 
     const { data, setData, post, errors, processing } = useForm({
         fecha: "",
@@ -154,11 +130,10 @@ export default function AtencionCreatePage({
 
         actualizarFechaHora();
         const intervalo = setInterval(actualizarFechaHora, 60000);
-
         return () => clearInterval(intervalo);
     }, []);
 
-    // Verificar paciente reciente o carga rápida al cargar
+    // Procesar paciente de carga rápida o paciente reciente al cargar
     useEffect(() => {
         if (pacienteCargaRapida) {
             const pacienteEncontrado = pacientes.find(p =>
@@ -190,9 +165,21 @@ export default function AtencionCreatePage({
                     mensaje: 'No se encontró el paciente de carga rápida en el sistema.'
                 });
             }
-        }
-        else if (pacienteReciente) {
-            setMostrarDialogoReciente(true);
+        } else if (pacienteReciente) {
+            // Mostrar confirm usando AlertProvider
+            (async () => {
+                const ok = await confirm({
+                    title: "Paciente Registrado Recientemente",
+                    description: `${pacienteReciente.nombre} ${pacienteReciente.apellido} (${pacienteReciente.tipo_documento.nombre}: ${pacienteReciente.numero_documento})\n\n¿Desea asignarle una atención a este paciente?`,
+                    okText: "Asignar Atención",
+                    cancelText: "Buscar Otro Paciente",
+                    icon: "info",
+                });
+
+                if (ok) {
+                    seleccionarPaciente(pacienteReciente);
+                }
+            })();
         }
     }, [pacienteCargaRapida, pacienteReciente]);
 
@@ -204,7 +191,7 @@ export default function AtencionCreatePage({
         setServiciosDisponibles(serviciosUnicos);
     }, [especialidadesServicios]);
 
-    // Buscar paciente por documento
+    // Buscar paciente por documento (debounced)
     useEffect(() => {
         if (debouncedBusquedaDoc.trim() === "") {
             setResultadosBusqueda([]);
@@ -224,21 +211,21 @@ export default function AtencionCreatePage({
         setResultadosBusqueda([]);
         setBusquedaDoc('');
         setEsCargaRapida(false);
+        setNotificacion(null);
     };
 
     const asignarPacienteReciente = () => {
         if (pacienteReciente) {
             seleccionarPaciente(pacienteReciente);
         }
-        setMostrarDialogoReciente(false);
     };
 
     const handleServicioChange = (servicioId: string) => {
         setData('servicio_id', servicioId);
         setData('profesional_id', '');
         setEspecialidadSeleccionada('');
+        setPermitirFueraHorario(false); // reset flag cuando cambia servicio
 
-        // Filtrar especialidades compatibles con el servicio
         const especialidadesCompatibles = especialidadesServicios
             .filter(es => es.servicio_id === parseInt(servicioId))
             .map(es => es.especialidad);
@@ -249,12 +236,10 @@ export default function AtencionCreatePage({
 
         setEspecialidadesDisponibles(especialidadesUnicas);
 
-        // Si solo hay una especialidad, seleccionarla automáticamente
         if (especialidadesUnicas.length === 1) {
             const especialidadUnica = especialidadesUnicas[0];
             setEspecialidadSeleccionada(especialidadUnica.id.toString());
 
-            // Filtrar profesionales por esta especialidad
             const profesionalesFiltrados = profesionales.filter(
                 p => p.especialidad_id === especialidadUnica.id
             );
@@ -264,14 +249,13 @@ export default function AtencionCreatePage({
         }
     };
 
-
     const validarDisponibilidad = () => {
         if (!data.fecha || !data.hora || !data.profesional_id) return true;
 
         const fecha = new Date(data.fecha);
         const diaSemana = fecha.getDay() === 0 ? 7 : fecha.getDay();
 
-        const profesional = profesionalesDisponibles.find(
+        const profesional = profesionales.find(
             p => p.id === parseInt(data.profesional_id)
         );
 
@@ -290,56 +274,38 @@ export default function AtencionCreatePage({
         return disponibilidad;
     };
 
-    // Validar horario cuando cambie el profesional
+    // Cuando se selecciona profesional — verificar disponibilidad y pedir confirmación inmediata si está fuera
     useEffect(() => {
-        if (data.profesional_id && data.fecha && data.hora) {
-            const dentroDisponibilidad = validarDisponibilidad();
-            if (!dentroDisponibilidad) {
-                setMostrarAlertaHorario(true);
+        const checkAndPrompt = async () => {
+            if (!data.profesional_id || !data.fecha || !data.hora) return;
+
+            const dentro = validarDisponibilidad();
+
+            if (!dentro) {
+                const ok = await confirm({
+                    title: "Fuera del Horario de Atención",
+                    description:
+                        "La fecha y hora seleccionadas están fuera de la disponibilidad horaria del profesional. ¿Desea continuar de todos modos?",
+                    okText: "Continuar",
+                    cancelText: "Cancelar",
+                    icon: "warning",
+                });
+
+                if (!ok) {
+                    setData("profesional_id", "");
+                    setPermitirFueraHorario(false);
+                    return;
+                }
+
+                // Solo marca que se permite fuera de horario
+                setPermitirFueraHorario(true);
+            } else {
+                setPermitirFueraHorario(false);
             }
-        }
+        };
+
+        checkAndPrompt();
     }, [data.profesional_id]);
-
-    const registrarAtencion = () => {
-        if (!pacienteSeleccionado || !data.tipo_atencion_id || !data.servicio_id || !data.profesional_id || !data.fecha || !data.hora) {
-            setNotificacion({ tipo: 'error', mensaje: 'Por favor complete todos los campos requeridos.' });
-            return;
-        }
-
-        const dentroDisponibilidad = validarDisponibilidad();
-
-        if (!dentroDisponibilidad) {
-            setMostrarAlertaHorario(true);
-            return;
-        }
-
-        post(atenciones.guardar_atencion.url(), {
-            onSuccess: () => {
-                setNotificacion({ tipo: 'success', mensaje: 'Atención registrada exitosamente' });
-                setTimeout(() => {
-                    window.location.href = atenciones.index.url();
-                }, 1500);
-            },
-            onError: () => {
-                setNotificacion({ tipo: 'error', mensaje: 'Error al registrar la atención' });
-            }
-        });
-    };
-
-    const confirmarRegistroFueraHorario = () => {
-        setMostrarAlertaHorario(false);
-        post(atenciones.guardar_atencion.url(), {
-            onSuccess: () => {
-                setNotificacion({ tipo: 'success', mensaje: 'Atención registrada exitosamente' });
-                setTimeout(() => {
-                    window.location.href = atenciones.index.url();
-                }, 1500);
-            },
-            onError: () => {
-                setNotificacion({ tipo: 'error', mensaje: 'Error al registrar la atención' });
-            }
-        });
-    };
 
     const tiposAtencionPermitidos = esCargaRapida
         ? tiposAtenciones.filter(t =>
@@ -347,6 +313,53 @@ export default function AtencionCreatePage({
             t.nombre.toLowerCase().includes('urgencia')
         )
         : tiposAtenciones;
+
+    const registrarAtencion = async () => {
+        if (!pacienteSeleccionado || !data.tipo_atencion_id || !data.servicio_id ||
+            !data.profesional_id || !data.fecha || !data.hora) {
+
+            setNotificacion({
+                tipo: 'error',
+                mensaje: 'Por favor complete todos los campos requeridos.'
+            });
+            return;
+        }
+
+        const dentroDisponibilidad = validarDisponibilidad();
+
+        // Si está fuera de horario y aún NO lo permitimos, pedir confirmación aquí
+        if (!dentroDisponibilidad && !permitirFueraHorario) {
+            const ok = await confirm({
+                title: "Fuera del Horario de Atención",
+                description:
+                    "La fecha y hora seleccionadas están fuera de la disponibilidad horaria del profesional. ¿Desea continuar de todos modos?",
+                okText: "Continuar",
+                cancelText: "Cancelar",
+                icon: "warning",
+            });
+
+            if (!ok) return;
+            setPermitirFueraHorario(true);
+        }
+
+        post(atenciones.guardar_atencion.url(), {
+            onSuccess: () => {
+                setNotificacion({
+                    tipo: 'success',
+                    mensaje: 'Atención registrada exitosamente'
+                });
+                setTimeout(() => {
+                    window.location.href = atenciones.index.url();
+                }, 1500);
+            },
+            onError: () => {
+                setNotificacion({
+                    tipo: 'error',
+                    mensaje: 'Error al registrar la atención'
+                });
+            }
+        });
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -378,53 +391,6 @@ export default function AtencionCreatePage({
                             <AlertDescription>{notificacion.mensaje}</AlertDescription>
                         </Alert>
                     )}
-                    {/* Diálogo paciente reciente */}
-                    <AlertDialog open={mostrarDialogoReciente} onOpenChange={setMostrarDialogoReciente}>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Paciente Registrado Recientemente</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    {pacienteReciente && (
-                                        <div className="mt-2 space-y-1">
-                                            <p className="font-semibold text-foreground">
-                                                {pacienteReciente.nombre} {pacienteReciente.apellido}
-                                            </p>
-                                            <p>{pacienteReciente.tipo_documento.nombre}: {pacienteReciente.numero_documento}</p>
-                                            <p className="mt-3">¿Desea asignarle una atención a este paciente?</p>
-                                        </div>
-                                    )}
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Buscar Otro Paciente</AlertDialogCancel>
-                                <AlertDialogAction onClick={asignarPacienteReciente}>
-                                    Asignar Atención
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
-
-                    {/* Alerta fuera de horario */}
-                    <AlertDialog open={mostrarAlertaHorario} onOpenChange={setMostrarAlertaHorario}>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle className="flex items-center gap-2">
-                                    <AlertCircle className="h-5 w-5 text-orange-500" />
-                                    Fuera del Horario de Atención
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    La fecha y hora seleccionadas están fuera de la disponibilidad horaria del profesional.
-                                    ¿Desea continuar de todos modos?
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction onClick={confirmarRegistroFueraHorario}>
-                                    Continuar
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
 
                     {/* Contenido Principal */}
                     <Card>
@@ -434,7 +400,7 @@ export default function AtencionCreatePage({
                         </CardHeader>
                         <CardContent className="space-y-6">
                             {/* Buscar Paciente */}
-                            {!pacienteSeleccionado && !mostrarDialogoReciente && (
+                            {!pacienteSeleccionado && (
                                 <div className="space-y-2">
                                     <Label htmlFor="busqueda">Buscar Paciente por Documento</Label>
                                     <div className="flex gap-2">
@@ -503,6 +469,7 @@ export default function AtencionCreatePage({
                                                 setNotificacion(null);
                                                 setData('persona_id', '');
                                                 setData('tipo_atencion_id', '');
+                                                setPermitirFueraHorario(false);
                                             }}
                                         >
                                             <X className="h-4 w-4" />
@@ -595,7 +562,10 @@ export default function AtencionCreatePage({
                                             <Label htmlFor="profesional">Profesional <span className="text-red-500">*</span></Label>
                                             <Select
                                                 value={data.profesional_id}
-                                                onValueChange={(value) => setData('profesional_id', value)}
+                                                onValueChange={(value) => {
+                                                    setData('profesional_id', value);
+                                                    setPermitirFueraHorario(false); // reset flag al cambiar profesional
+                                                }}
                                             >
                                                 <SelectTrigger id="profesional">
                                                     <SelectValue placeholder="Seleccione profesional" />

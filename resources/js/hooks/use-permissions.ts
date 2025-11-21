@@ -3,6 +3,7 @@ import { usePage } from "@inertiajs/react";
 type AuthProps = {
     auth?: {
         permissions?: string[];
+        roles?: string[];
     }
 }
 
@@ -20,4 +21,15 @@ export function usePermissions() {
         permissionsArray.every(permission => permissions.includes(permission));
 
     return { can, canAny, canAll, permissions };
+}
+
+export function useAuthData() {
+    const { props } = usePage<AuthProps>();
+
+    const permissions = props.auth?.permissions || [];
+    const roles = props.auth?.roles || [];
+
+    const can = (permission: string) => permissions.includes(permission);
+
+    return { permissions, roles, can };
 }

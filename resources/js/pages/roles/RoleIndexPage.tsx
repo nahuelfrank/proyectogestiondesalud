@@ -11,8 +11,9 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Shield, Users } from 'lucide-react';
+import { Eye, Pencil, Shield, Trash2, Users } from 'lucide-react';
 import { usePermissions } from '@/hooks/use-permissions';
+import { useAlert } from '@/components/alert-provider';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -41,6 +42,29 @@ type RoleIndexPageProps = {
 export default function RoleIndexPage({ roles }: RoleIndexPageProps) {
     const { can } = usePermissions();
 
+    const { confirm } = useAlert();
+
+    const handleDelete = async (role: Role) => {
+        
+        const ok = await confirm({
+            title: "Eliminar Rol",
+            description: `¿Seguro que deseas eliminar el rol "${role.name}"? Esta acción no se puede deshacer.`,
+            okText: "Eliminar",
+            cancelText: "Cancelar",
+            icon: "warning",
+        });
+
+        if (!ok) return;
+
+        router.delete(`/roles/${role.id}`, {
+            preserveScroll: true,
+            onSuccess: () => { },
+            onError: (errors) => {
+                console.error("Error al eliminar:", errors);
+            },
+        });
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Roles y Permisos" />
@@ -52,8 +76,8 @@ export default function RoleIndexPage({ roles }: RoleIndexPageProps) {
                         Gestiona los roles y permisos del sistema
                     </p>
 
-                    {can('create roles') && (
-                        <Link href="/roles/create" className="inline-block">
+                    {can('crear roles') && (
+                        <Link href="/roles/crear_rol" className="inline-block mb-4">
                             <Button className="flex items-center gap-2">
                                 <Shield className="h-4 w-4" />
                                 Crear Rol
@@ -110,18 +134,45 @@ export default function RoleIndexPage({ roles }: RoleIndexPageProps) {
 
                                         <TableCell className="text-right">
                                             <div className="flex items-center justify-end gap-2">
-                                                {can('editar roles') && role.name !== 'super-admin' && (
+
+                                                {/* Ver rol */}
+                                                {can("ver roles") && (
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
-                                                        onClick={() => router.get(`/roles/${role.id}/edit`)}
+                                                        onClick={() => router.get(`/roles/${role.id}`)}
+                                                        title="Ver Rol"
+                                                    >
+                                                        <Eye className="h-4 w-4" />
+                                                    </Button>
+                                                )}
+
+                                                {/* Editar rol (excepto super-admin) */}
+                                                {can("editar roles") && role.name !== "super-admin" && (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => router.get(`/roles/editar_role/${role.id}`)}
                                                         title="Editar"
                                                     >
                                                         <Pencil className="h-4 w-4" />
                                                     </Button>
                                                 )}
+
+                                                {/* Eliminar rol (excepto super-admin) */}
+                                                {can("eliminar roles") && role.name !== "super-admin" && (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => handleDelete(role)}
+                                                        title="Eliminar"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                )}
                                             </div>
                                         </TableCell>
+
                                     </TableRow>
                                 ))}
                             </TableBody>

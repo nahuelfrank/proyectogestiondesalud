@@ -5,7 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { type BreadcrumbItem } from '@/types';
-import { CheckCircle2, XCircle } from 'lucide-react';
+import { CheckCircle2, Undo2, XCircle } from 'lucide-react';
+import usuarios from '@/routes/usuarios';
 
 type Role = {
     id: number;
@@ -92,8 +93,12 @@ export default function UserShowPage({ user }: UserShowPageProps) {
                             Detalles de la cuenta de usuario.
                         </p>
 
-                        <Link href="/usuarios" className="inline-block">
-                            <Button>Volver a la lista de Usuarios</Button>
+
+                        <Link href={usuarios.index.url()} className="inline-block">
+                            <Button className="flex items-center gap-2">
+                                <Undo2 className="h-4 w-4" />
+                                Volver
+                            </Button>
                         </Link>
                     </div>
 

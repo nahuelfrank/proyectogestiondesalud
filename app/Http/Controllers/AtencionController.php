@@ -98,7 +98,6 @@ class AtencionController extends Controller
 
     public function guardarAtencion(Request $request)
     {
-
         $validated = $request->validate([
             'fecha' => 'required|date',
             'hora' => 'required',
@@ -144,53 +143,14 @@ class AtencionController extends Controller
             'estado_atencion_id' => 'required|exists:estados_atenciones,id',
         ]);
 
-        // Guardamos el estado anterior antes de actualizar
-        $estadoAnterior = $atencion->estado_atencion_id;
-
         // Aplicamos cambios
         $atencion->update($validated);
-
-        // Si el estado cambia a 2 ("En atención")
-        if ($validated['estado_atencion_id'] == 2 && $estadoAnterior != 2) {
-            $this->iniciarAtencion($atencion);
-        }
-
-        // Si el estado cambia a 3 ("Atendido")
-        if ($validated['estado_atencion_id'] == 3 && $estadoAnterior != 3) {
-            $this->finalizarAtencion($request, $atencion);
-        }
 
         return redirect()->route('atenciones.index')
             ->with('success', 'El estado de atención fue modificado exitosamente.');
     }
 
 
-    public function iniciarAtencion(Atencion $atencion)
-    {
-        $atencion->update([
-            'hora_inicio_atencion' => now()->format('H:i:s'),
-            'estado_atencion_id' => 2, // "En Atención"
-        ]);
-
-        return response()->json([
-            'message' => 'Atención iniciada',
-            'tiempo_espera' => $atencion->tiempo_espera . ' minutos'
-        ]);
-    }
-
-    public function finalizarAtencion(Request $request, Atencion $atencion)
-    {
-        $atencion->update([
-            'hora_fin_atencion' => now()->format('H:i:s'),
-            'estado_atencion_id' => 3
-        ]);
-
-        return response()->json([
-            'message' => 'Atención finalizada',
-            'duracion' => $atencion->duracion_atencion . ' minutos',
-            'tiempo_total' => $atencion->tiempo_total . ' minutos'
-        ]);
-    }
 
     public function editarAtencion()
     {

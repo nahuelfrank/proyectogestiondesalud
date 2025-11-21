@@ -2,8 +2,10 @@
 
 namespace Database\Factories;
 
+use App\Models\EstadoCivil;
 use App\Models\Persona;
 use App\Models\Genero;
+use App\Models\TipoDocumento;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class PersonaFactory extends Factory
@@ -24,8 +26,8 @@ class PersonaFactory extends Factory
             'nacionalidad' => fake()->country(),
             'email' => fake()->unique()->safeEmail(),
             'genero_id' => Genero::inRandomOrder()->value('id') ?? 1,
-            'estado_civil_id' => 1, // puedes randomizarlo si tienes seeder
-            'tipo_documento_id' => 1, // idem arriba
+            'estado_civil_id' => EstadoCivil::inRandomOrder()->value('id') ?? 1,
+            'tipo_documento_id' => TipoDocumento::inRandomOrder()->value('id') ?? 1,
         ];
     }
 

@@ -32,7 +32,6 @@ class EstadisticasController extends Controller
             ],
             'pacientesPorDia' => $this->getPacientesPorDia($fechaInicioCarbon, $fechaFinCarbon),
             'distribucionGenero' => $this->getDistribucionGenero($fechaInicioCarbon, $fechaFinCarbon),
-            'motivosConsultaFrecuentes' => $this->getMotivosConsultaFrecuentes($fechaInicioCarbon, $fechaFinCarbon),
             'consultasPorEspecialidad' => $this->getConsultasPorEspecialidad($fechaInicioCarbon, $fechaFinCarbon),
             'promedioConsultasPorPaciente' => $this->getPromedioConsultasPorPaciente($fechaInicioCarbon, $fechaFinCarbon),
             'distribucionTipoAtencion' => $this->getDistribucionTipoAtencion($fechaInicioCarbon, $fechaFinCarbon),
@@ -41,9 +40,7 @@ class EstadisticasController extends Controller
             'distribucionRangoEtario' => $this->getDistribucionRangoEtario($fechaInicioCarbon, $fechaFinCarbon),
             'estadisticasGenerales' => $this->getEstadisticasGenerales($fechaInicioCarbon, $fechaFinCarbon),
             'comparativaMensual' => $this->getComparativaMensual(),
-            'prediccionDemanda' => $this->getPrediccionDemanda(),
             'mapaCalor' => $this->getMapaCalor($fechaInicioCarbon, $fechaFinCarbon),
-            'tiempoEsperaPorServicio' => $this->getTiempoEsperaPorServicio($fechaInicioCarbon, $fechaFinCarbon),
         ]);
     }
 
@@ -75,21 +72,6 @@ class EstadisticasController extends Controller
                 DB::raw('COUNT(DISTINCT personas.id) as total')
             )
             ->groupBy('generos.id', 'generos.nombre')
-            ->get();
-    }
-
-    private function getMotivosConsultaFrecuentes($fechaInicio, $fechaFin)
-    {
-        return Atencion::whereBetween('fecha', [$fechaInicio, $fechaFin])
-            ->whereNotNull('motivo_de_consulta')
-            ->where('motivo_de_consulta', '!=', '')
-            ->select(
-                'motivo_de_consulta',
-                DB::raw('COUNT(*) as total')
-            )
-            ->groupBy('motivo_de_consulta')
-            ->orderByDesc('total')
-            ->limit(10)
             ->get();
     }
 
@@ -255,59 +237,6 @@ class EstadisticasController extends Controller
         ];
     }
 
-    private function getPrediccionDemanda()
-    {
-        // Obtener datos de los últimos 6 meses
-        $datos = Atencion::select(
-            DB::raw('EXTRACT(YEAR FROM fecha) as anio'),
-            DB::raw('EXTRACT(MONTH FROM fecha) as mes'),
-            DB::raw('COUNT(*) as total')
-        )
-            ->where('fecha', '>=', Carbon::now()->subMonths(6))
-            ->groupBy('anio', 'mes')
-            ->orderBy('anio')
-            ->orderBy('mes')
-            ->get();
-
-        if ($datos->count() < 3) {
-            return [
-                'proximo_mes' => 0,
-                'confianza' => 'baja',
-                'tendencia' => 'insuficiente_datos'
-            ];
-        }
-
-        // Regresión lineal simple
-        $n = $datos->count();
-        $sumX = 0;
-        $sumY = 0;
-        $sumXY = 0;
-        $sumX2 = 0;
-
-        foreach ($datos as $index => $dato) {
-            $x = $index + 1;
-            $y = $dato->total;
-            $sumX += $x;
-            $sumY += $y;
-            $sumXY += $x * $y;
-            $sumX2 += $x * $x;
-        }
-
-        $pendiente = ($n * $sumXY - $sumX * $sumY) / ($n * $sumX2 - $sumX * $sumX);
-        $interseccion = ($sumY - $pendiente * $sumX) / $n;
-
-        $prediccion = round($pendiente * ($n + 1) + $interseccion);
-        $promedio = $sumY / $n;
-        $confianza = abs($pendiente) > ($promedio * 0.1) ? 'alta' : 'media';
-
-        return [
-            'proximo_mes' => max(0, $prediccion),
-            'confianza' => $confianza,
-            'tendencia' => $pendiente > 0 ? 'creciente' : 'decreciente',
-            'historico' => $datos->map(fn($d) => $d->total)->toArray()
-        ];
-    }
-    
     private function getMapaCalor($fechaInicio, $fechaFin)
     {
         $datos = Atencion::whereBetween('fecha', [$fechaInicio, $fechaFin])
@@ -343,61 +272,6 @@ class EstadisticasController extends Controller
         }
 
         return $mapa;
-    }
-
-    private function getTiempoEsperaPorServicio($fechaInicio, $fechaFin)
-    {
-        return Atencion::whereBetween('atenciones.fecha', [$fechaInicio, $fechaFin])
-            ->whereNotNull('atenciones.hora')
-            ->whereNotNull('atenciones.hora_inicio_atencion')
-            ->join('servicios', 'atenciones.servicio_id', '=', 'servicios.id')
-            ->select(
-                'servicios.nombre as servicio',
-                DB::raw('COUNT(*) as total_atenciones'),
-                DB::raw("
-                    ROUND(AVG(
-                        CASE 
-                            WHEN hora_inicio_atencion >= hora THEN 
-                                EXTRACT(EPOCH FROM (hora_inicio_atencion - hora)) / 60
-                            ELSE 
-                                EXTRACT(EPOCH FROM (hora_inicio_atencion + INTERVAL '1 day' - hora)) / 60
-                        END
-                    )::numeric, 2) as promedio_minutos
-                "),
-                DB::raw("
-                    MIN(
-                        CASE 
-                            WHEN hora_inicio_atencion >= hora THEN 
-                                EXTRACT(EPOCH FROM (hora_inicio_atencion - hora)) / 60
-                            ELSE 
-                                EXTRACT(EPOCH FROM (hora_inicio_atencion + INTERVAL '1 day' - hora)) / 60
-                        END
-                    )::integer as minimo_minutos
-                "),
-                DB::raw("
-                    MAX(
-                        CASE 
-                            WHEN hora_inicio_atencion >= hora THEN 
-                                EXTRACT(EPOCH FROM (hora_inicio_atencion - hora)) / 60
-                            ELSE 
-                                EXTRACT(EPOCH FROM (hora_inicio_atencion + INTERVAL '1 day' - hora)) / 60
-                        END
-                    )::integer as maximo_minutos
-                ")
-            )
-            ->groupBy('servicios.id', 'servicios.nombre')
-            ->having(DB::raw('COUNT(*)'), '>', 0)
-            ->orderBy('promedio_minutos', 'desc')
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'servicio' => $item->servicio,
-                    'total_atenciones' => $item->total_atenciones,
-                    'promedio_minutos' => round($item->promedio_minutos, 1),
-                    'minimo_minutos' => max(0, $item->minimo_minutos), // Asegurar que no sea negativo
-                    'maximo_minutos' => $item->maximo_minutos,
-                ];
-            });
     }
 
     public function exportarPDF(Request $request)

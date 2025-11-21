@@ -19,6 +19,8 @@ import profesionales from '@/routes/profesionales';
 import atenciones from '@/routes/atenciones';
 import servicios from '@/routes/servicios';
 import estadisticas from '@/routes/estadisticas';
+import { useRoles } from "@/hooks/use-roles";
+import { getHomeRoute } from '@/utils/role-utils';
 
 const mainNavItems: NavItem[] = [
     {
@@ -77,13 +79,16 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
+    const { roles } = useRoles();
+    const homeHref = getHomeRoute(roles);
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={personas.index.url()} prefetch>
+                            <Link href={homeHref} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

@@ -25,7 +25,7 @@ class HistoriaClinicaController extends Controller
         $profesional = $user->profesional;
 
         if (!$profesional) {
-            return redirect()->route('dashboard')
+            return redirect()->route('roles.index')
                 ->with('error', 'No tienes un perfil de profesional asociado.');
         }
 

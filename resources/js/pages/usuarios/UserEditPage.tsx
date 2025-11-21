@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -14,6 +14,8 @@ import {
     FieldLabel,
 } from "@/components/ui/field";
 import React from 'react';
+import { Undo2 } from 'lucide-react';
+import usuarios from '@/routes/usuarios';
 
 type Role = {
     id: number;
@@ -105,15 +107,25 @@ export default function UserEditPage({ user, roles, currentRole }: UserEditPageP
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Editar Usuario - ${user.name}`} />
 
-            <div className="container max-w-2xl mx-auto py-10">
-                <div className="mb-6">
-                    <h1 className="text-3xl font-bold mb-2">Editar Usuario</h1>
-                    <p className="text-gray-500">
+            <div className="container mx-auto py-10">
+                <div>
+                    <h1 className="text-3xl font-semibold tracking-tight mb-2">
+                        Editar Usuario
+                    </h1>
+                    <p className="text-muted-foreground mb-4">
                         Modifica la información del usuario.
                     </p>
+
+                    <Link href={usuarios.index.url()} className="inline-block">
+                        <Button className="flex items-center gap-2">
+                            <Undo2 className="h-4 w-4" />
+                            Volver
+                        </Button>
+                    </Link>
                 </div>
 
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+
+                <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-2xl mx-auto py-2">
                     {/* Información del Usuario */}
                     <Card>
                         <CardHeader>
@@ -176,7 +188,7 @@ export default function UserEditPage({ user, roles, currentRole }: UserEditPageP
                     </Card>
 
                     {/* Información sobre la Contraseña */}
-                    <Card>
+                    <Card className='mt-4'>
                         <CardHeader>
                             <CardTitle>Contraseña</CardTitle>
                         </CardHeader>
@@ -189,10 +201,7 @@ export default function UserEditPage({ user, roles, currentRole }: UserEditPageP
                     </Card>
 
                     {/* Botones */}
-                    <div className="flex gap-4">
-                        <Button disabled={isSubmitting} type="submit">
-                            {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
-                        </Button>
+                    <div className="flex justify-end gap-2 border-t pt-4 mt-4">
                         <Button
                             type="button"
                             variant="outline"
@@ -200,6 +209,9 @@ export default function UserEditPage({ user, roles, currentRole }: UserEditPageP
                             disabled={isSubmitting}
                         >
                             Cancelar
+                        </Button>
+                        <Button disabled={isSubmitting} type="submit">
+                            {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
                         </Button>
                     </div>
                 </form>

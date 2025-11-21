@@ -96,8 +96,7 @@ export default function PersonaFastCreatePage({ tiposDocumento }: FastCreateProp
             <div className="container mx-auto py-10">
 
                 <div className="ml-5">
-                    <h1 className="text-3xl font-semibold mb-2">Registrar Nuevo Paciente (Carga Rápida)</h1>
-
+                    <h1 className="text-3xl font-semibold mb-2">Registrar Nuevo Paciente</h1>
                     <p className="text-muted-foreground mb-4">Los campos con <span className="text-destructive">*</span> son obligatorios.</p>
 
                     <Link

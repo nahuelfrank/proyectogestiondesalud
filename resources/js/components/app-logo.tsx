@@ -1,6 +1,18 @@
-import { Hospital } from 'lucide-react';
+import { Hospital } from "lucide-react";
+import { useAuthData } from "@/hooks/use-roles"
 
 export default function AppLogo() {
+    const { roles } = useAuthData();
+
+    const roleLabel =
+        roles.includes("super-admin")
+            ? "Super Usuario"
+            : roles.includes("administrativo")
+            ? "Administrativo"
+            : roles.includes("profesional")
+            ? "Profesional"
+            : "Usuario";
+
     return (
         <>
             <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
@@ -11,7 +23,7 @@ export default function AppLogo() {
                     Sanidad
                 </span>
                 <span className="text-xs text-sidebar-secondary-foreground truncate leading-tight">
-                    Administración
+                    {roleLabel}
                 </span>
             </div>
         </>

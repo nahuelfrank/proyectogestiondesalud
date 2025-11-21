@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -14,6 +14,8 @@ import {
     FieldLabel,
 } from "@/components/ui/field";
 import React from 'react';
+import { Undo2 } from 'lucide-react';
+import usuarios from '@/routes/usuarios';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -99,23 +101,34 @@ export default function UserCreatePage({ roles }: UserCreatePageProps) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Crear Usuario" />
 
-            <div className="container max-w-2xl mx-auto py-10">
-                <div className="mb-6">
-                    <h1 className="text-3xl font-bold mb-2">Crear Nuevo Usuario</h1>
-                    <p className="text-gray-500">
-                        Al crear el usuario, se enviará automáticamente un email para que establezca su contraseña.
+            <div className="container mx-auto py-10">
+                <div className="ml-5">
+                    <h1 className="text-3xl font-semibold mb-2">Crear Nuevo Usuario</h1>
+                    <p className="text-muted-foreground mb-4">Al crear el usuario, se enviará automáticamente un email para que establezca su contraseña.
+                        Los campos con <span className="text-destructive">*</span> son obligatorios.
                     </p>
+                    <Link
+                        href={usuarios.index.url()}
+                        className="inline-block"
+                    >
+                        <Button
+                            className="flex items-center gap-2"
+                        >
+                            <Undo2 className="h-4 w-4" />
+                            Volver
+                        </Button>
+                    </Link>
                 </div>
 
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-2xl mx-auto py-2">
                     {/* Información del Usuario */}
                     <Card>
                         <CardHeader>
                             <CardTitle>Información del Usuario</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <Field data-invalid={!!form.formState.errors.name}>
-                                <FieldLabel htmlFor="name">Nombre Completo *</FieldLabel>
+                            <Field >
+                                <FieldLabel htmlFor="name">Nombre Completo <span className="text-red-500">*</span></FieldLabel>
                                 <Input
                                     id="name"
                                     placeholder="Ej: Juan Pérez"
@@ -126,8 +139,8 @@ export default function UserCreatePage({ roles }: UserCreatePageProps) {
                                 )}
                             </Field>
 
-                            <Field data-invalid={!!form.formState.errors.email}>
-                                <FieldLabel htmlFor="email">Email *</FieldLabel>
+                            <Field>
+                                <FieldLabel htmlFor="email">Email <span className="text-red-500">*</span></FieldLabel>
                                 <Input
                                     id="email"
                                     type="email"
@@ -139,8 +152,8 @@ export default function UserCreatePage({ roles }: UserCreatePageProps) {
                                 )}
                             </Field>
 
-                            <Field data-invalid={!!form.formState.errors.role}>
-                                <FieldLabel htmlFor="role">Rol *</FieldLabel>
+                            <Field>
+                                <FieldLabel htmlFor="role">Rol <span className="text-red-500">*</span></FieldLabel>
                                 <Controller
                                     name="role"
                                     control={form.control}
@@ -170,7 +183,7 @@ export default function UserCreatePage({ roles }: UserCreatePageProps) {
                     </Card>
 
                     {/* Contraseña Temporal */}
-                    <Card>
+                    <Card className='mt-4'>
                         <CardHeader>
                             <CardTitle>Contraseña Temporal</CardTitle>
                             <p className="text-sm text-gray-500 mt-1">
@@ -178,8 +191,8 @@ export default function UserCreatePage({ roles }: UserCreatePageProps) {
                             </p>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <Field data-invalid={!!form.formState.errors.password}>
-                                <FieldLabel htmlFor="password">Contraseña *</FieldLabel>
+                            <Field>
+                                <FieldLabel htmlFor="password">Contraseña <span className="text-red-500">*</span></FieldLabel>
                                 <Input
                                     id="password"
                                     type="password"
@@ -191,8 +204,8 @@ export default function UserCreatePage({ roles }: UserCreatePageProps) {
                                 )}
                             </Field>
 
-                            <Field data-invalid={!!form.formState.errors.password_confirmation}>
-                                <FieldLabel htmlFor="password_confirmation">Confirmar Contraseña *</FieldLabel>
+                            <Field>
+                                <FieldLabel htmlFor="password_confirmation">Confirmar Contraseña <span className="text-red-500">*</span></FieldLabel>
                                 <Input
                                     id="password_confirmation"
                                     type="password"
@@ -205,12 +218,8 @@ export default function UserCreatePage({ roles }: UserCreatePageProps) {
                             </Field>
                         </CardContent>
                     </Card>
-
                     {/* Botones */}
-                    <div className="flex gap-4">
-                        <Button disabled={isSubmitting} type="submit">
-                            {isSubmitting ? 'Creando...' : 'Crear Usuario y Enviar Email'}
-                        </Button>
+                    <div className="flex justify-end gap-2 border-t pt-4 mt-4">
                         <Button
                             type="button"
                             variant="outline"
@@ -219,7 +228,11 @@ export default function UserCreatePage({ roles }: UserCreatePageProps) {
                         >
                             Cancelar
                         </Button>
+                        <Button disabled={isSubmitting} type="submit">
+                            {isSubmitting ? 'Creando...' : 'Crear Usuario y Enviar Email'}
+                        </Button>
                     </div>
+
                 </form>
             </div>
         </AppLayout>

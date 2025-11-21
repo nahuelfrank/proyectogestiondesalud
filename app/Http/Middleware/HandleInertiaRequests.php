@@ -52,6 +52,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
                 // Esos permisos se utilizarán para habilitar o deshabilitar botones o links.
                 'permissions' => $request->user() ? $request->user()->getAllPermissions()->pluck('name') : [],
+                'roles' => $request->user()?->getRoleNames() ?? [],
             ],
 
             'sidebarOpen' => ! $request->hasCookie('sidebar_state')

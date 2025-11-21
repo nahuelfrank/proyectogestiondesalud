@@ -23,7 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Users, Activity, Stethoscope, Calendar, TrendingUp, Download, FileText, FileSpreadsheet, ArrowUp, ArrowDown, Clock, TrendingUpIcon } from 'lucide-react';
+import { Users, Activity, Stethoscope, Calendar, TrendingUp, FileText, FileSpreadsheet, ArrowUp, ArrowDown, Clock, TrendingUpIcon } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 ChartJS.register(
@@ -46,27 +46,27 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-  const StatCard = ({ 
-        title, 
-        value, 
-        icon: Icon, 
-        colorClass 
-    }: { 
-        title: string; 
-        value: number; 
-        icon: any; 
-        colorClass: string 
-    }) => (
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{title}</CardTitle>
-                <Icon className={`h-4 w-4 ${colorClass}`} />
-            </CardHeader>
-            <CardContent>
-                <div className={`text-2xl font-bold ${colorClass}`}>{value.toLocaleString()}</div>
-            </CardContent>
-        </Card>
-    );
+const StatCard = ({
+    title,
+    value,
+    icon: Icon,
+    colorClass
+}: {
+    title: string;
+    value: number;
+    icon: any;
+    colorClass: string
+}) => (
+    <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{title}</CardTitle>
+            <Icon className={`h-4 w-4 ${colorClass}`} />
+        </CardHeader>
+        <CardContent>
+            <div className={`text-2xl font-bold ${colorClass}`}>{value.toLocaleString()}</div>
+        </CardContent>
+    </Card>
+);
 
 
 interface EstadisticasProps {
@@ -76,7 +76,6 @@ interface EstadisticasProps {
     };
     pacientesPorDia: Array<{ fecha: string; total: number }>;
     distribucionGenero: Array<{ genero: string; total: number }>;
-    motivosConsultaFrecuentes: Array<{ motivo_de_consulta: string; total: number }>;
     consultasPorEspecialidad: Array<{ especialidad: string; total: number }>;
     promedioConsultasPorPaciente: number;
     distribucionTipoAtencion: Array<{ tipo: string; total: number }>;
@@ -97,25 +96,13 @@ interface EstadisticasProps {
         porcentaje: number;
         tendencia: string;
     };
-    prediccionDemanda: {
-        proximo_mes: number;
-        confianza: string;
-        tendencia: string;
-    };
     mapaCalor: number[][];
-    tiempoEsperaPorServicio: Array<{ 
-        servicio: string; 
-        total_atenciones: number; 
-        promedio_minutos: number;
-        minimo_minutos: number;
-        maximo_minutos: number;
-    }>;}
+}
 
 export default function EstadisticasIndexPage({
     filtros,
     pacientesPorDia,
     distribucionGenero,
-    motivosConsultaFrecuentes,
     consultasPorEspecialidad,
     promedioConsultasPorPaciente,
     distribucionTipoAtencion,
@@ -124,9 +111,7 @@ export default function EstadisticasIndexPage({
     distribucionRangoEtario,
     estadisticasGenerales,
     comparativaMensual,
-    prediccionDemanda,
     mapaCalor,
-    tiempoEsperaPorServicio
 }: EstadisticasProps) {
 
     const [fechaInicio, setFechaInicio] = useState(filtros.fecha_inicio);
@@ -192,19 +177,6 @@ export default function EstadisticasIndexPage({
             label: 'Distribución por Género',
             data: distribucionGenero.map(item => item.total),
             backgroundColor: chartColors.slice(0, distribucionGenero.length),
-        }]
-    };
-
-    const motivosConsultaData = {
-        labels: motivosConsultaFrecuentes.map(item => 
-            item.motivo_de_consulta.length > 30 
-                ? item.motivo_de_consulta.substring(0, 30) + '...' 
-                : item.motivo_de_consulta
-        ),
-        datasets: [{
-            label: 'Cantidad de Consultas',
-            data: motivosConsultaFrecuentes.map(item => item.total),
-            backgroundColor: colors.secondary,
         }]
     };
 
@@ -287,6 +259,7 @@ export default function EstadisticasIndexPage({
                 <Card>
                     <CardHeader>
                         <CardTitle>Filtros y Exportación</CardTitle>
+                        <CardDescription>Seleccione una fecha de inicio y una de fin para filtrar por periodo</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="flex flex-wrap gap-4 items-end">
@@ -328,13 +301,13 @@ export default function EstadisticasIndexPage({
                 {/* Tarjetas de resumen */}
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
                     <StatCard
-                        title="Total Atenciones"
+                        title="Total Atenciones en el Periodo Seleccionado"
                         value={estadisticasGenerales.total_atenciones}
                         icon={Activity}
                         colorClass="text-blue-600"
                     />
                     <StatCard
-                        title="Total Pacientes"
+                        title="Total Pacientes en el Periodo Seleccionado"
                         value={estadisticasGenerales.total_pacientes}
                         icon={Users}
                         colorClass="text-green-600"
@@ -346,13 +319,13 @@ export default function EstadisticasIndexPage({
                         colorClass="text-purple-600"
                     />
                     <StatCard
-                        title="Atenciones Hoy"
+                        title="Atenciones del Día de Hoy"
                         value={estadisticasGenerales.atenciones_hoy}
                         icon={Calendar}
                         colorClass="text-orange-600"
                     />
                     <StatCard
-                        title="Este Mes"
+                        title="Atenciones de Este Mes"
                         value={estadisticasGenerales.atenciones_este_mes}
                         icon={TrendingUp}
                         colorClass="text-cyan-600"
@@ -395,28 +368,12 @@ export default function EstadisticasIndexPage({
 
                     <Card>
                         <CardHeader>
-                            <CardTitle>Predicción de Demanda</CardTitle>
-                            <CardDescription>Proyección para el próximo mes</CardDescription>
+                            <CardTitle>Tipo de Atención</CardTitle>
+                            <CardDescription>Distribución por tipo</CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="flex flex-col items-center justify-center py-4">
-                                <TrendingUpIcon className="h-12 w-12 text-purple-600 mb-4" />
-                                <p className="text-5xl font-bold text-purple-600">{prediccionDemanda.proximo_mes}</p>
-                                <p className="text-sm text-muted-foreground mt-2">atenciones estimadas</p>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                                <div>
-                                    <p className="text-muted-foreground">Confianza</p>
-                                    <Badge variant={prediccionDemanda.confianza === 'alta' ? 'default' : 'secondary'}>
-                                        {prediccionDemanda.confianza}
-                                    </Badge>
-                                </div>
-                                <div>
-                                    <p className="text-muted-foreground">Tendencia</p>
-                                    <Badge variant="outline">
-                                        {prediccionDemanda.tendencia}
-                                    </Badge>
-                                </div>
+                        <CardContent>
+                            <div className="h-80 flex items-center justify-center">
+                                <Pie data={tipoAtencionData} options={chartOptions} />
                             </div>
                         </CardContent>
                     </Card>
@@ -446,8 +403,8 @@ export default function EstadisticasIndexPage({
                                             {diasSemana.map((_, diaIndex) => {
                                                 const valor = mapaCalor[diaIndex]?.[hora] || 0;
                                                 const intensidad = maxValue > 0 ? (valor / maxValue) : 0;
-                                                const bgColor = intensidad === 0 
-                                                    ? 'bg-gray-50' 
+                                                const bgColor = intensidad === 0
+                                                    ? 'bg-gray-50'
                                                     : `rgba(59, 130, 246, ${intensidad})`;
                                                 return (
                                                     <td
@@ -465,66 +422,6 @@ export default function EstadisticasIndexPage({
                                 </tbody>
                             </table>
                         </div>
-                    </CardContent>
-                </Card>
-
-                {/* Tiempo de Espera */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Tiempo de Espera por Servicio</CardTitle>
-                        <CardDescription>Promedio calculado desde llegada hasta inicio de atención</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Servicio</TableHead>
-                                    <TableHead className="text-right">Total Atenciones</TableHead>
-                                    <TableHead className="text-right">Tiempo Promedio</TableHead>
-                                    <TableHead className="text-right">Mínimo</TableHead>
-                                    <TableHead className="text-right">Máximo</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {tiempoEsperaPorServicio.length > 0 ? (
-                                    tiempoEsperaPorServicio.map((servicio, index) => (
-                                        <TableRow key={index}>
-                                            <TableCell className="font-medium">{servicio.servicio}</TableCell>
-                                            <TableCell className="text-right">{servicio.total_atenciones}</TableCell>
-                                            <TableCell className="text-right">
-                                                <Badge 
-                                                    variant="outline" 
-                                                    className={`gap-1 ${
-                                                        servicio.promedio_minutos <= 15 ? 'border-green-500 text-green-700' :
-                                                        servicio.promedio_minutos <= 30 ? 'border-yellow-500 text-yellow-700' :
-                                                        'border-red-500 text-red-700'
-                                                    }`}
-                                                >
-                                                    <Clock className="h-3 w-3" />
-                                                    {servicio.promedio_minutos} min
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell className="text-right text-sm text-muted-foreground">
-                                                {servicio.minimo_minutos} min
-                                            </TableCell>
-                                            <TableCell className="text-right text-sm text-muted-foreground">
-                                                {servicio.maximo_minutos} min
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                                ) : (
-                                    <TableRow>
-                                        <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                                            No hay datos de tiempo de espera disponibles.
-                                            <br />
-                                            <span className="text-sm">
-                                                Asegúrate de registrar hora de inicio de atención en las atenciones.
-                                            </span>
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
                     </CardContent>
                 </Card>
 
@@ -558,18 +455,6 @@ export default function EstadisticasIndexPage({
                 <div className="grid gap-4 md:grid-cols-2">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Motivos de Consulta Más Frecuentes</CardTitle>
-                            <CardDescription>Top 10 motivos registrados</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="h-80">
-                                <Bar data={motivosConsultaData} options={barOptions} />
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader>
                             <CardTitle>Consultas por Especialidad</CardTitle>
                             <CardDescription>Distribución total de consultas</CardDescription>
                         </CardHeader>
@@ -579,21 +464,6 @@ export default function EstadisticasIndexPage({
                             </div>
                         </CardContent>
                     </Card>
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Tipo de Atención</CardTitle>
-                            <CardDescription>Distribución por tipo</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="h-80 flex items-center justify-center">
-                                <Pie data={tipoAtencionData} options={chartOptions} />
-                            </div>
-                        </CardContent>
-                    </Card>
-
                     <Card>
                         <CardHeader>
                             <CardTitle>Promedio de Consultas por Paciente</CardTitle>
@@ -622,7 +492,6 @@ export default function EstadisticasIndexPage({
                             </div>
                         </CardContent>
                     </Card>
-
                     <Card>
                         <CardHeader>
                             <CardTitle>Distribución por Rango Etario</CardTitle>
@@ -635,7 +504,6 @@ export default function EstadisticasIndexPage({
                         </CardContent>
                     </Card>
                 </div>
-
                 {/* Top profesionales */}
                 <Card>
                     <CardHeader>

@@ -19,7 +19,7 @@ class RolePermissionSeeder extends Seeder
      * 
      * ESTRUCTURA DE PERMISOS:
      * - Los permisos siguen el patrón: "acción recurso"
-     * - Ejemplos: "ver pacientes", "crer atenciones", "edit roles"
+     * - Ejemplos: "ver pacientes", "crear atenciones", "editar roles"
      * - Se agrupan automáticamente por recurso en la interfaz
      */
     public function run(): void
@@ -52,7 +52,7 @@ class RolePermissionSeeder extends Seeder
             'crear atenciones',
             'editar atenciones',
             'eliminar atenciones',
-
+            
             // Servicios
             'ver servicios',
             'crear servicios',
@@ -72,6 +72,13 @@ class RolePermissionSeeder extends Seeder
 
             // Estadisticas
             'ver estadisticas',
+
+            // Usuarios
+            'ver usuarios',
+            'crear usuarios',
+            'editar usuarios',
+            'eliminar usuarios',
+
         ];
 
         // Crear todos los permisos definidos
@@ -108,7 +115,10 @@ class RolePermissionSeeder extends Seeder
             'editar profesionales',
             'ver atenciones',
             'crear atenciones',
+            'editar atenciones',
             'ver servicios',
+            'editar servicios',
+            'eliminar servicios',
         ]);
 
         // ==========================================

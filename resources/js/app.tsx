@@ -8,6 +8,8 @@ import { initializeTheme } from './hooks/use-appearance';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
+import { AlertProvider } from './components/alert-provider';
+
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     resolve: (name) =>
@@ -20,7 +22,10 @@ createInertiaApp({
 
         root.render(
             <StrictMode>
-                <App {...props} />
+                 <AlertProvider>
+                    <App {...props} />
+                </AlertProvider>
+                
             </StrictMode>,
         );
     },
