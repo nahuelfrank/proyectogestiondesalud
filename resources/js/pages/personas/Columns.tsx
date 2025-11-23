@@ -1,6 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, Eye, Pencil, Trash2 } from "lucide-react";
+import { AlertCircle, Eye, Pencil } from "lucide-react";
 import { Link } from "@inertiajs/react";
 import { DeletePersonaButton } from "@/pages/personas/AlertDialogDeletePersona";
 import personas from "@/routes/personas";

@@ -1,3 +1,4 @@
+import { useAuthData } from '@/hooks/use-permissions';
 import { dashboard, login, register } from '@/routes';
 import personas from '@/routes/personas';
 import { type SharedData } from '@/types';
@@ -9,6 +10,23 @@ export default function Welcome({
     canRegister?: boolean;
 }) {
     const { auth } = usePage<SharedData>().props;
+    const { roles } = useAuthData();
+
+    const getDashboardRoute = () => {
+        if (roles.includes("super-admin")) {
+            return "/roles";
+        }
+
+        if (roles.includes("profesional")) {
+            return "/historias-clinicas/lista-espera";
+        }
+
+        if (roles.includes("administrativo")) {
+            return "/pacientes";
+        }
+
+        return "/dashboard";
+    };
 
     return (
         <>
@@ -23,8 +41,9 @@ export default function Welcome({
                 <header className="mb-6 w-full max-w-[335px] text-sm not-has-[nav]:hidden lg:max-w-4xl">
                     <nav className="flex items-center justify-end gap-4">
                         {auth.user ? (
+
                             <Link
-                                href={personas.index.url()}
+                                href={getDashboardRoute()}
                                 className="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
                             >
                                 Panel
@@ -37,6 +56,8 @@ export default function Welcome({
                                 >
                                     Iniciar Sesión
                                 </Link>
+
+                                {/*
                                 {canRegister && (
                                     <Link
                                         href={register()}
@@ -45,6 +66,7 @@ export default function Welcome({
                                         Registrarse
                                     </Link>
                                 )}
+                                */}
                             </>
                         )}
                     </nav>

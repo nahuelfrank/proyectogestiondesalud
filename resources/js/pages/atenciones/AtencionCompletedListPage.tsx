@@ -1,19 +1,16 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { columns } from './Columns';
 import { DataTable } from '@/components/ui/data-table';
 import { Atencion } from '@/types/atenciones/atencion';
-import { Button } from '@/components/ui/button';
-import { FilePlus } from 'lucide-react';
 import atenciones from '@/routes/atenciones';
 import { useEffect } from 'react';
 
-
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Atenciones',
-        href: atenciones.index.url(),
+        title: 'Atenciones Hechas',
+        href: atenciones.index_atendidas().url
     },
 ];
 
@@ -32,7 +29,7 @@ interface AtencionIndexPageProps {
     };
 }
 
-export default function AtencionIndexPage({ items, meta, filters }: AtencionIndexPageProps) {
+export default function AtencionCompletedListPage({ items, meta, filters }: AtencionIndexPageProps) {
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -46,33 +43,21 @@ export default function AtencionIndexPage({ items, meta, filters }: AtencionInde
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Atenciones" />
+            <Head title="Atenciones Hechas" />
             <div className="container mx-auto py-10">
 
                 <div className="ml-5">
 
-                    <h1 className="text-3xl font-semibold mb-3">Lista de Atenciones</h1>
-
-                    <p className="text-muted-foreground mb-3">
-                        Solo se muestran las atenciones del día actual.
-                    </p>
-
-                    <Link href={atenciones.crear_atencion.url()} className="inline-block">
-                        <Button className="flex items-center gap-2 mr-2">
-                            <FilePlus className="h-4 w-4" />
-                            Registrar atención
-                        </Button>
-                    </Link>
-
+                    <h1 className="text-3xl font-semibold mb-3">Atenciones Hechas</h1>
                 </div>
 
-                <div className="m-3">
+                <div className='m-3'>
                     <DataTable
                         columns={columns}
                         data={items}
                         meta={meta}
                         filters={filters}
-                        routeName={atenciones.index.url()}
+                        routeName={atenciones.index_atendidas().url}
                         searchPlaceholder="Buscar paciente o profesional..."
                     />
                 </div>

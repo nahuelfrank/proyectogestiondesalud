@@ -69,10 +69,69 @@ class AtencionController extends Controller
         // ORDEN DE LLEGADA (primero las más tempranas)
         $query->orderBy('hora', 'asc');
 
+        // NUEVO: ORDEN POR CAMBIOS RECIENTES
+        $query->orderBy('updated_at', 'desc');
+
         // Paginación
         $atenciones = $query->paginate($request->input('perPage', 10))->withQueryString();
 
         return Inertia::render('atenciones/AtencionIndexPage', [
+            'items' => $atenciones->items(),
+            'meta' => [
+                'current_page' => $atenciones->currentPage(),
+                'last_page' => $atenciones->lastPage(),
+                'per_page' => $atenciones->perPage(),
+                'total' => $atenciones->total(),
+            ],
+            'filters' => $request->only(['search', 'perPage']),
+        ]);
+    }
+
+    public function indexAtendidas(Request $request)
+    {
+        $estadoAtendido = 'Atendido';
+
+        $query = Atencion::query()
+            ->with([
+                'servicio:id,nombre',
+                'tipo_atencion:id,nombre',
+                'estado_atencion:id,nombre',
+                'profesional.persona:id,nombre,apellido',
+                'persona:id,nombre,apellido,email',
+            ])
+            ->whereHas('estado_atencion', function ($q) use ($estadoAtendido) {
+                $q->where('nombre', $estadoAtendido);
+            });
+
+        // Filtro search general: paciente o profesional
+        if ($search = $request->input('search')) {
+            $search = strtolower($search);
+
+            $query->where(function ($q) use ($search) {
+
+                // Paciente
+                $q->whereHas('persona', function ($q2) use ($search) {
+                    $q2->whereRaw("LOWER(nombre) LIKE ?", ["%$search%"])
+                        ->orWhereRaw("LOWER(apellido) LIKE ?", ["%$search%"]);
+                })
+
+                    // Profesional
+                    ->orWhereHas('profesional.persona', function ($q3) use ($search) {
+                        $q3->whereRaw("LOWER(nombre) LIKE ?", ["%$search%"])
+                            ->orWhereRaw("LOWER(apellido) LIKE ?", ["%$search%"]);
+                    });
+
+            });
+        }
+
+        // Ordenar por más recientes (fecha y hora)
+        $query->orderBy('fecha', 'desc')
+            ->orderBy('hora', 'desc');
+
+        // Paginado
+        $atenciones = $query->paginate($request->input('perPage', 10))->withQueryString();
+
+        return Inertia::render('atenciones/AtencionCompletedListPage', [
             'items' => $atenciones->items(),
             'meta' => [
                 'current_page' => $atenciones->currentPage(),
@@ -131,7 +190,7 @@ class AtencionController extends Controller
             'persona.tipo_documento',
         ]);
 
-        return Inertia::render('atenciones/AtencionEditPage', [
+        return Inertia::render('atenciones/AtencionEditStatusPage', [
             'atencion' => $atencion,
             'estadosAtenciones' => EstadoAtencion::all(),
         ]);
@@ -152,8 +211,18 @@ class AtencionController extends Controller
 
 
 
-    public function editarAtencion()
+    public function editarAtencion(Atencion $atencion)
     {
+        $atencion->load([
+            'servicio',
+            'tipo_atencion',
+            'persona',
+        ]);
+
+        return Inertia::render('atenciones/AtencionEditPage', [
+            'atencion' => $atencion,
+            'pacientes' => Persona::with('tipo_documento')->get(),
+        ]);
     }
 
     public function actualizarAtencion()

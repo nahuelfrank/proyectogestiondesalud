@@ -270,7 +270,7 @@ export const columns: ColumnDef<Profesional>[] = [
 
       // Si el profesional ya tiene usuario
       if (profesional.user_id) {
-        return <Badge variant="outline" className="bg-success text-muted-foreground">Cuenta activa</Badge>;
+        return <Badge variant="outline" className="bg-success text-success-foreground">Cuenta activa</Badge>;
       }
 
       // Si no tiene email

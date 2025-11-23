@@ -196,6 +196,12 @@
   .bg-destructive { background-color: var(--destructive); }
   .text-destructive-foreground { color: var(--destructive-foreground); }
 
+  .bg-success { background-color: var(--success); }
+  .text-success-foreground { color: var(--success-foreground); }
+
+  .bg-accent { background-color: var(--accent); }
+  .text-accent-foreground { color: var(--accent-foreground); }
+
   .bg-muted { background-color: var(--muted); }
   .text-muted-foreground { color: var(--muted-foreground); }
 

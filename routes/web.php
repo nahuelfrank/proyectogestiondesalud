@@ -188,6 +188,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('atenciones.index')
         ->middleware('permission:ver atenciones');
 
+    Route::get('atenciones/hechas', [AtencionController::class, 'indexAtendidas'])
+        ->name('atenciones.index_atendidas')
+        ->middleware('permission:ver atenciones');
+
     Route::get('atenciones/registrar_atencion', [AtencionController::class, 'crearAtencion'])
         ->name('atenciones.crear_atencion')
         ->middleware('permission:crear atenciones');
@@ -255,8 +259,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
      * así que (por ahora) no se pueden proteger con Spatie.
      */
     Route::get('historias-clinicas/lista-espera', [HistoriaClinicaController::class, 'listaEspera'])
-        ->name('historias-clinicas.lista-espera')
-        ->middleware('permission:ver-espera profesionales');
+        ->name('historias-clinicas.lista-espera');
 
     Route::get('historias-clinicas/{atencion}/ver', [HistoriaClinicaController::class, 'verHistoriaClinica'])
         ->name('historias-clinicas.ver');

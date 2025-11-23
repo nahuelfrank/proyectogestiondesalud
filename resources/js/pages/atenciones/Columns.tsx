@@ -45,7 +45,6 @@ export const columns: ColumnDef<Atencion>[] = [
       const tipo = row.original.tipo_atencion?.nombre ?? "—";
       const isEmergencia = tipo === "Emergencia";
       const isUrgencia = tipo === "Urgencia";
-
       const base = "px-2 py-0.5 rounded-full text-xs font-semibold";
 
       return (
@@ -96,14 +95,14 @@ export const columns: ColumnDef<Atencion>[] = [
       let classes = "bg-muted text-muted-foreground";
 
       if (estado === "En Espera") {
-        classes = "bg-warning text-warning-foreground";
+        classes = "bg-accent text-accent-foreground";
       } else if (estado === "En Atención") {
         classes = "bg-info text-info-foreground";
       } else if (estado === "Cancelado") {
         classes = "bg-destructive text-destructive-foreground";
+      } else if (estado === "Atendido") {
+        classes = "bg-success text-success-foreground";
       }
-
-
       return <span className={`${base} ${classes}`}>{estado}</span>;
     },
   },
@@ -114,10 +113,11 @@ export const columns: ColumnDef<Atencion>[] = [
     enableSorting: false,
     cell: ({ row }) => {
       const atencion = row.original;
+      const isFastCreate = !atencion.persona.email;
+      const estado = row.original.estado_atencion?.nombre;
 
       return (
         <div>
-
           {/* Ver */}
           <Link href={atenciones.ver_atencion(atencion.id).url}>
             <Button variant="ghost" size="icon" title="Ver">
@@ -125,12 +125,22 @@ export const columns: ColumnDef<Atencion>[] = [
             </Button>
           </Link>
 
-          {/* Editar Estado */}
-          <Link href={atenciones.modificar_estado(atencion.id).url}>
-            <Button variant="ghost" size="icon" title="Modificar estado">
-              <Pencil className="h-4 w-4" />
-            </Button>
-          </Link>
+          {/* Editar / Completar datos */}
+          {isFastCreate && estado === "Atendido" && (
+            <Link href={atenciones.editar_atencion(atencion.id).url}>
+              <Button variant="ghost" size="icon" title="Modificar estado">
+                <Pencil className="h-4 w-4" />
+              </Button>
+            </Link>
+          )}
+
+           {estado !== "Atendido" && (
+            <Link href={atenciones.modificar_estado(atencion.id).url}>
+              <Button variant="ghost" size="icon" title="Modificar estado">
+                <Pencil className="h-4 w-4" />
+              </Button>
+            </Link>
+          )}
 
         </div>
       );

@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookPlus, BriefcaseMedicalIcon, ChartNoAxesCombined, ClipboardList, NotebookPen, Shield, UserRound, Users } from 'lucide-react';
+import { BookPlus, BriefcaseMedicalIcon, ChartNoAxesCombined, ClipboardCheck, ClipboardList, NotebookPen, Shield, UserRound, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 import personas from '@/routes/personas';
 import profesionales from '@/routes/profesionales';
@@ -25,31 +25,37 @@ import { getHomeRoute } from '@/utils/role-utils';
 const mainNavItems: NavItem[] = [
     {
         title: 'Servicios',
-        href: servicios.index().url,
+        href: servicios.index.url(),
         icon: BookPlus,
         permission: 'ver servicios',
     },
     {
         title: 'Pacientes',
-        href: personas.index().url,
+        href: personas.index.url(),
         icon: UserRound,
         permission: 'ver pacientes',
     },
     {
         title: 'Profesionales',
-        href: profesionales.index().url,
+        href: profesionales.index.url(),
         icon: BriefcaseMedicalIcon,
         permission: 'ver profesionales',
     },
     {
         title: 'Atenciones',
-        href: atenciones.index().url,
+        href: atenciones.index.url(),
         icon: NotebookPen,
         permission: 'ver atenciones',
     },
     {
+        title: 'Atenciones Hechas',
+        href: atenciones.index_atendidas.url(),
+        icon: ClipboardCheck,
+        permission: 'ver atenciones',
+    },
+    {
         title: 'Estadísticas',
-        href: estadisticas.index().url,
+        href: estadisticas.index.url(),
         icon: ChartNoAxesCombined,
         permission: 'ver estadisticas',
     },

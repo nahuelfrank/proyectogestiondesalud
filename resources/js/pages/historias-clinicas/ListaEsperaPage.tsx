@@ -1,10 +1,11 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Clock, User, FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { useEffect } from 'react';
 
 interface Persona {
     id: number;
@@ -58,6 +59,17 @@ interface ListaEsperaPageProps {
 }
 
 export default function ListaEsperaPage({ atenciones, profesional }: ListaEsperaPageProps) {
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            router.reload({
+                only: ["atenciones"],
+            });
+        }, 2500);
+
+        return () => clearInterval(interval);
+    }, []);
+
     const formatFecha = (fecha: string) => {
         return new Date(fecha).toLocaleDateString('es-AR', {
             day: '2-digit',

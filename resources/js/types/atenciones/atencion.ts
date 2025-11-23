@@ -3,6 +3,7 @@ export interface PersonaBasic {
   id: number;
   nombre: string;
   apellido: string;
+  email: string | null;
 }
 
 // Servicio asociado a la atención
