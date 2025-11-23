@@ -5,6 +5,13 @@ import { BreadcrumbItem } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useState } from 'react';
@@ -57,11 +64,12 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Modificar Atención', href: '#' },
 ];
 
-export default function AtencionEditPage({ atencion, pacientes, }: Props) {
+export default function AtencionEditPage({ atencion, pacientes, tiposDocumento = [] }: Props) {
     const [busquedaRealizada, setBusquedaRealizada] = useState(false);
     const [pacienteEncontrado, setPacienteEncontrado] = useState<Persona | null>(null);
 
     const { data, setData, post, processing, errors } = useForm({
+        tipo_documento_id: '',
         numero_documento: '',
         persona_id: '',
     });
@@ -70,12 +78,14 @@ export default function AtencionEditPage({ atencion, pacientes, }: Props) {
     const esPacienteTemporal = !atencion.persona.email; 
 
     const handleBuscarPaciente = () => {
-        if (!data.numero_documento) {
+        if (!data.tipo_documento_id || !data.numero_documento) {
             return;
         }
+
         // Buscar paciente en la lista
         const paciente = pacientes.find(
             (p) => 
+                p.tipo_documento.id.toString() === data.tipo_documento_id && 
                 p.numero_documento === data.numero_documento
         );
 
@@ -105,6 +115,7 @@ export default function AtencionEditPage({ atencion, pacientes, }: Props) {
         // Redirigir a la página de registro de paciente con datos de búsqueda
         router.visit(route('pacientes.create'), {
             data: {
+                tipo_documento_id: data.tipo_documento_id,
                 numero_documento: data.numero_documento,
                 from_atencion: atencion.id,
             }
@@ -206,6 +217,34 @@ export default function AtencionEditPage({ atencion, pacientes, }: Props) {
                             <div className="space-y-6">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
+                                        <Label htmlFor="tipo_documento_id">
+                                            Tipo de Documento <span className="text-red-500">*</span>
+                                        </Label>
+                                        <Select
+                                            value={data.tipo_documento_id}
+                                            onValueChange={(value) => {
+                                                setData('tipo_documento_id', value);
+                                                setBusquedaRealizada(false);
+                                                setPacienteEncontrado(null);
+                                            }}
+                                        >
+                                            <SelectTrigger id="tipo_documento_id">
+                                                <SelectValue placeholder="Seleccione tipo de documento" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {tiposDocumento.map((tipo) => (
+                                                    <SelectItem key={tipo.id} value={tipo.id.toString()}>
+                                                        {tipo.nombre}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        {errors.tipo_documento_id && (
+                                            <p className="text-sm text-red-500">{errors.tipo_documento_id}</p>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-2">
                                         <Label htmlFor="numero_documento">
                                             Número de Documento <span className="text-red-500">*</span>
                                         </Label>
@@ -228,7 +267,7 @@ export default function AtencionEditPage({ atencion, pacientes, }: Props) {
 
                                 <Button 
                                     onClick={handleBuscarPaciente}
-                                    disabled={!data.numero_documento || processing}
+                                    disabled={!data.tipo_documento_id || !data.numero_documento || processing}
                                     className="w-full md:w-auto"
                                 >
                                     <Search className="mr-2 h-4 w-4" />
