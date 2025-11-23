@@ -11,7 +11,9 @@ class Atencion extends Model
     use HasFactory;
 
     protected $table = 'atenciones';
-
+    protected $casts = [
+        'hora' => 'datetime:H:i',
+    ];
     protected $fillable = [
         'fecha',
         'hora',

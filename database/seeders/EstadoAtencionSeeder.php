@@ -18,6 +18,7 @@ class EstadoAtencionSeeder extends Seeder
             ['nombre' => 'En Atención', 'created_at' => now(), 'updated_at' => now()],
             ['nombre' => 'Atendido', 'created_at' => now(), 'updated_at' => now()],
             ['nombre' => 'Cancelado', 'created_at' => now(), 'updated_at' => now()],
+            ['nombre' => 'Derivado', 'created_at' => now(), 'updated_at' => now()],
         ]);
     }
 }

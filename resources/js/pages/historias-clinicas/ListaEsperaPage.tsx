@@ -89,9 +89,9 @@ export default function ListaEsperaPage({ atenciones, profesional }: ListaEspera
             <div className="container mx-auto py-10">
                 {/* Header */}
                 <div className="mb-6">
-                    <h1 className="text-3xl font-bold mb-2">Lista de Espera</h1>
+                    <h1 className="text-3xl font-bold mb-2">Lista de Espera - {profesional.especialidad.nombre}</h1>
                     <p className="text-muted-foreground">
-                        Profesional: {profesional.persona.nombre} {profesional.persona.apellido} - {profesional.especialidad.nombre}
+                        Profesional: {profesional.persona.nombre} {profesional.persona.apellido}
                     </p>
                 </div>
 
@@ -172,7 +172,6 @@ export default function ListaEsperaPage({ atenciones, profesional }: ListaEspera
                                                     {atencion.persona.nombre} {atencion.persona.apellido}
                                                 </TableCell>
                                                 <TableCell>
-                                                    {atencion.persona.tipo_documento.nombre}{' '}
                                                     {atencion.persona.numero_documento}
                                                 </TableCell>
                                                 <TableCell>
