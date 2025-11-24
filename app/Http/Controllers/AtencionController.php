@@ -10,6 +10,7 @@ use App\Models\EstadoAtencion;
 use App\Models\Persona;
 use App\Models\Profesional;
 use App\Models\TipoAtencion;
+use App\Models\TipoDocumento;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rules\In;
@@ -24,7 +25,7 @@ class AtencionController extends Controller
         $hoy = Carbon::today()->toDateString();
 
         // Estados permitidos
-        $estados = ['En Espera', 'En Atención', 'Cancelado', 'Derivado'];
+        $estados = ['En Espera', 'En Atención', 'Cancelado'];
 
         $query = Atencion::query()
             ->with([
@@ -89,7 +90,7 @@ class AtencionController extends Controller
 
     public function indexAtendidas(Request $request)
     {
-        $estadoAtendido = 'Atendido';
+        $estados = ['Atendido', 'Derivado'];
 
         $query = Atencion::query()
             ->with([
@@ -99,8 +100,8 @@ class AtencionController extends Controller
                 'profesional.persona:id,nombre,apellido',
                 'persona:id,nombre,apellido,email',
             ])
-            ->whereHas('estado_atencion', function ($q) use ($estadoAtendido) {
-                $q->where('nombre', $estadoAtendido);
+            ->whereHas('estado_atencion', function ($q) use ($estados) {
+                $q->whereIn('nombre', $estados);
             });
 
         // Filtro search general: paciente o profesional
@@ -169,6 +170,16 @@ class AtencionController extends Controller
             'motivo_de_consulta' => 'required|string|max:5000',
         ]);
 
+        // Obtener el profesional y su persona vinculada
+        $profesional = Profesional::with('persona')->findOrFail($request->profesional_id);
+
+        // Regla: NO puede atenderse a sí mismo
+        if ($profesional->persona_id == $request->persona_id) {
+            return back()->withErrors([
+                'profesional_id' => 'El profesional no puede atenderse a sí mismo.',
+            ])->withInput();
+        }
+
         // Crear la atención directamente
         Atencion::create($validated);
 
@@ -216,14 +227,48 @@ class AtencionController extends Controller
         $atencion->load([
             'servicio',
             'tipo_atencion',
-            'persona',
+            'persona.tipo_documento',
         ]);
 
         return Inertia::render('atenciones/AtencionEditPage', [
             'atencion' => $atencion,
-            'pacientes' => Persona::with('tipo_documento')->get(),
+            'pacientes' => Persona::with('tipo_documento')
+                ->where('id', '!=', $atencion->persona_id)
+                ->get(),
+            'tiposDocumento' => TipoDocumento::all()
         ]);
     }
+
+    // En tu controlador de atenciones:
+    public function asociarPaciente(Atencion $atencion, Request $request)
+    {
+        $request->validate([
+            'persona_id' => 'required|exists:personas,id'
+        ]);
+
+        if ($request->persona_id == $atencion->persona_id) {
+            return back()->withErrors([
+                'persona_id' => 'No puedes volver a asignar la misma persona.'
+            ]);
+        }
+
+        $pacienteAnteriorId = $atencion->persona_id;
+
+        // Asociar nuevo paciente
+        $atencion->persona_id = $request->persona_id;
+        $atencion->save();
+
+        // Borrar físicamente el paciente anterior si existía
+        if ($pacienteAnteriorId) {
+            Persona::withTrashed()
+                ->where('id', $pacienteAnteriorId)
+                ->forceDelete();   // <- Elimina REALMENTE de la BD
+        }
+
+        return redirect()->route('atenciones.index_atendidas')
+            ->with('success', 'Paciente asociado correctamente');
+    }
+
 
     public function actualizarAtencion()
     {

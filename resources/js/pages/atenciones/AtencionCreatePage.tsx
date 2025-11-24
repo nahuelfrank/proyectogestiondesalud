@@ -252,16 +252,21 @@ export default function AtencionCreatePage({
     const validarDisponibilidad = () => {
         if (!data.fecha || !data.hora || !data.profesional_id) return true;
 
-        const fecha = new Date(data.fecha);
-        const diaSemana = fecha.getDay() === 0 ? 7 : fecha.getDay();
+        const [y, m, d] = data.fecha.split("-").map(Number);
+        const fechaJS = new Date(y, m - 1, d);
+
+        let diaSemana = fechaJS.getDay();
+        diaSemana = diaSemana === 0 ? 7 : diaSemana;
 
         const profesional = profesionales.find(
             p => p.id === parseInt(data.profesional_id)
         );
 
+        console.log("dispo horarias:", profesional?.disponibilidades_horarias);
+        
         if (!profesional?.disponibilidades_horarias) return true;
 
-        const disponibilidad = profesional.disponibilidades_horarias.some(d => {
+        return profesional.disponibilidades_horarias.some(d => {
             if (d.dia_id !== diaSemana) return false;
 
             const horaSeleccionada = data.hora;
@@ -270,14 +275,38 @@ export default function AtencionCreatePage({
 
             return horaSeleccionada >= horaInicio && horaSeleccionada < horaFin;
         });
-
-        return disponibilidad;
     };
+
+
+    // Valida que un profesional no pueda atenderse a si mismo
+    useEffect(() => {
+        if (!pacienteSeleccionado || !data.profesional_id) return;
+
+        const profesional = profesionales.find(
+            p => p.id === parseInt(data.profesional_id)
+        );
+
+        if (profesional?.persona?.id === pacienteSeleccionado.id) {
+            setNotificacion({
+                tipo: "error",
+                mensaje: "El profesional no puede atenderse a sí mismo."
+            });
+            setData("profesional_id", "");
+        }
+    }, [data.profesional_id]);
+
 
     // Cuando se selecciona profesional — verificar disponibilidad y pedir confirmación inmediata si está fuera
     useEffect(() => {
         const checkAndPrompt = async () => {
+
             if (!data.profesional_id || !data.fecha || !data.hora) return;
+
+            const profesional = profesionales.find(
+                p => p.id === parseInt(data.profesional_id)
+            );
+
+            if (profesional?.persona?.id === pacienteSeleccionado.id) return;
 
             const dentro = validarDisponibilidad();
 

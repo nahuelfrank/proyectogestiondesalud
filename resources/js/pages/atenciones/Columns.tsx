@@ -102,7 +102,10 @@ export const columns: ColumnDef<Atencion>[] = [
         classes = "bg-destructive text-destructive-foreground";
       } else if (estado === "Atendido") {
         classes = "bg-success text-success-foreground";
+      } else if (estado === "Derivado") {
+        classes = "bg-info text-info-foreground";
       }
+
       return <span className={`${base} ${classes}`}>{estado}</span>;
     },
   },
@@ -126,7 +129,7 @@ export const columns: ColumnDef<Atencion>[] = [
           </Link>
 
           {/* Editar / Completar datos */}
-          {isFastCreate && estado === "Atendido" && (
+          {isFastCreate && (estado === "Atendido" || estado === "Derivado") && (
             <Link href={atenciones.editar_atencion(atencion.id).url}>
               <Button variant="ghost" size="icon" title="Modificar estado">
                 <Pencil className="h-4 w-4" />
@@ -134,7 +137,7 @@ export const columns: ColumnDef<Atencion>[] = [
             </Link>
           )}
 
-           {estado !== "Atendido" && (
+          {estado !== "Atendido" && estado !== "Derivado" && (
             <Link href={atenciones.modificar_estado(atencion.id).url}>
               <Button variant="ghost" size="icon" title="Modificar estado">
                 <Pencil className="h-4 w-4" />

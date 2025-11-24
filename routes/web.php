@@ -204,6 +204,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('atenciones.editar_atencion')
         ->middleware('permission:editar atenciones');
 
+    Route::patch(
+        'atenciones/{atencion}/asociar-paciente',
+        [AtencionController::class, 'asociarPaciente']
+    )->name('atenciones.asociar_paciente')
+        ->middleware('permission:editar atenciones');
+
     Route::put('atenciones/{atencion}', [AtencionController::class, 'actualizarAtencion'])
         ->name('atenciones.actualizar_atencion')
         ->middleware('permission:editar atenciones');
@@ -212,7 +218,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('atenciones.modificar_estado')
         ->middleware('permission:editar atenciones');
 
-    Route::put('atenciones/{atencion}', [AtencionController::class, 'actualizarEstadoAtencion'])
+    Route::patch('atenciones/{atencion}', [AtencionController::class, 'actualizarEstadoAtencion'])
         ->name('atenciones.actualizar_estado')
         ->middleware('permission:editar atenciones');
 

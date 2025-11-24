@@ -399,6 +399,7 @@ class PersonaController extends Controller
         // Validar los datos
         $validated = $request->validated();
 
+
         // Crear dentro de una transacción
         DB::transaction(function () use ($validated) {
             // Crear la Persona
@@ -410,6 +411,12 @@ class PersonaController extends Controller
                 'tipo_documento_id' => $validated['tipo_documento_id'],
                 'numero_documento' => $validated['numero_documento'],
                 'estado_civil_id' => $validated['estado_civil_id'],
+                'nacionalidad' => $validated['nacionalidad'],
+                'email' => $validated['email'],
+                'domicilio' => $validated['domicilio'],
+                'lugar_de_nacimiento' => $validated['lugar_de_nacimiento'],
+                'telefono_fijo' => $validated['telefono_fijo'],
+                'telefono_celular' => $validated['telefono_celular'],
             ]);
 
             // Crear el Profesional y sus horarios usando el método attach

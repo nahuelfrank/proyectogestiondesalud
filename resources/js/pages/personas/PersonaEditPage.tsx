@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import personas from '@/routes/personas';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -264,17 +264,19 @@ export default function PersonaEditPage({
 
                     )}
 
-                    <Link
-                        href={personas.index.url()}
-                        className="inline-block"
+                    <Button
+                        onClick={() => {
+                            if (document.referrer) {
+                                router.visit(document.referrer);
+                            } else {
+                                router.visit(personas.index.url()); // fallback si entra directo por URL
+                            }
+                        }}
+                        className="flex items-center gap-2"
                     >
-                        <Button
-                            className="flex items-center gap-2"
-                        >
-                            <Undo2 className="h-4 w-4" />
-                            Volver
-                        </Button>
-                    </Link>
+                        <Undo2 className="h-4 w-4" />
+                        Volver
+                    </Button>
                 </div>
 
 

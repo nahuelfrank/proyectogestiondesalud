@@ -93,7 +93,8 @@ const formSchema = z.object({
   genero_id: z.string().min(1, "El género es requerido"),
   tipo_documento_id: z.string().min(1, "El tipo de documento es requerido"),
   numero_documento: z.string().min(1, "El número de documento es requerido"),
-  email: z.string().email("Debe ser un email válido").min(1, "El email es requerido"),
+  email: z.email("El correo electrónico no es válido.")
+    .min(1, "Debe ingresar un correo electrónico."),
   estado_civil_id: z.string().min(1, "El estado civil es requerido"),
   especialidad_id: z.string().min(1, "Debe seleccionar una especialidad."),
   estado: z.string().min(1, "Debe seleccionar un estado."),
@@ -412,8 +413,8 @@ export default function ProfesionalCreatePage({
                 </Field>
 
                 {/* Campo Email */}
-                <Field data-invalid={!!form.formState.errors.email}>
-                  <FieldLabel htmlFor="email">Email *</FieldLabel>
+                <Field>
+                  <FieldLabel htmlFor="email">Email <span className='text-red-500'>*</span></FieldLabel>
                   <Input
                     id="email"
                     type="email"

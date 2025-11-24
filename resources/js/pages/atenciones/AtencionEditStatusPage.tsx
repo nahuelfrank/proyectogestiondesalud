@@ -84,12 +84,12 @@ export default function AtencionEditStatusPage({ atencion, estadosAtenciones }: 
 
   console.log(atencion);
 
-  const { data, setData, put, errors, processing } = useForm({
+  const { data, setData, patch, errors, processing } = useForm({
     estado_atencion_id: atencion.estado_atencion_id.toString(),
   });
 
   const handleSubmit = () => {
-    put(atenciones.actualizar_estado.url(atencion.id), {
+    patch(atenciones.actualizar_estado.url(atencion.id), {
       onSuccess: () => {
         setNotificacion({ tipo: 'success', mensaje: 'Estado de atención actualizado exitosamente' });
         setTimeout(() => {

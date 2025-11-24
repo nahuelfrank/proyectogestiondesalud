@@ -26,8 +26,8 @@ class StorePersonaRequest extends FormRequest
             'genero_id' => ['required', 'exists:generos,id'],
             'estado_civil_id' => ['required', 'exists:estados_civiles,id'],
             'tipo_documento_id' => ['required', 'exists:tipos_documento,id'],
-            'nombre' => ['required', 'string'],
-            'apellido' => ['required', 'string'],
+             'nombre' => ['required', 'string', 'max:255'],
+            'apellido' => ['required', 'string', 'max:255'],
             'numero_documento' => ['required', 'string', 'unique:personas,numero_documento'],
             'fecha_de_nacimiento' => ['required', 'date'],
             'domicilio' => ['nullable', 'string'],
@@ -35,7 +35,7 @@ class StorePersonaRequest extends FormRequest
             'telefono_fijo' => ['nullable', 'string'],
             'telefono_celular' => ['required', 'string'],
             'nacionalidad' => ['required', 'string'],
-            'email' => ['required', 'string'],
+            'email' => ['required', 'email', 'max:255', 'unique:personas,email'],
 
             // Reglas de validación basadas en la migración de la tabla personas_dependencias
             'dependencias' => ['required', 'array', 'min:1'],
@@ -99,6 +99,8 @@ class StorePersonaRequest extends FormRequest
             // Email
             'email.required' => 'Debe ingresar un correo electrónico.',
             'email.string' => 'El correo electrónico debe ser una cadena válida.',
+            'email.email' => 'El email debe ser una dirección válida.',
+            'email.unique' => 'El email ya existe en el sistema.',
 
 
             // ---------------------------

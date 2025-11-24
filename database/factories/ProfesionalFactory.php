@@ -18,7 +18,7 @@ class ProfesionalFactory extends Factory
             'persona_id' => Persona::doesntHave('profesionales')->inRandomOrder()->value('id')
                 ?? Persona::factory(),
             'especialidad_id' => Especialidad::inRandomOrder()->value('id') ?? 1,
-            'estado' => 'activo',
+            'estado' => 'Activo',
             'matricula' => $this->faker->unique()->numerify('MAT-#####'),
         ];
     }

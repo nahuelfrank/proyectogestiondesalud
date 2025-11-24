@@ -1,10 +1,11 @@
-import { Head, useForm, router } from '@inertiajs/react';
+import { Head, useForm, router, Link } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import atenciones from '@/routes/atenciones';
 import { BreadcrumbItem } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Badge } from "@/components/ui/badge";
 import {
     Select,
     SelectContent,
@@ -13,9 +14,9 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useState } from 'react';
-import { AlertCircle, Search } from 'lucide-react';
+import { AlertCircle, Calendar, Search, Stethoscope, Undo2, User } from 'lucide-react';
 
 interface TipoDocumento {
     id: number;
@@ -65,6 +66,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function AtencionEditPage({ atencion, pacientes, tiposDocumento = [] }: Props) {
+
+    console.log(atencion);
+
     const [busquedaRealizada, setBusquedaRealizada] = useState(false);
     const [pacienteEncontrado, setPacienteEncontrado] = useState<Persona | null>(null);
 
@@ -75,7 +79,7 @@ export default function AtencionEditPage({ atencion, pacientes, tiposDocumento =
     });
 
     // Verificar si el paciente tiene datos incompletos
-    const esPacienteTemporal = !atencion.persona.email; 
+    const esPacienteTemporal = !atencion.persona.email;
 
     const handleBuscarPaciente = () => {
         if (!data.tipo_documento_id || !data.numero_documento) {
@@ -84,13 +88,13 @@ export default function AtencionEditPage({ atencion, pacientes, tiposDocumento =
 
         // Buscar paciente en la lista
         const paciente = pacientes.find(
-            (p) => 
-                p.tipo_documento.id.toString() === data.tipo_documento_id && 
+            (p) =>
+                p.tipo_documento.id.toString() === data.tipo_documento_id &&
                 p.numero_documento === data.numero_documento
         );
 
         setBusquedaRealizada(true);
-        
+
         if (paciente) {
             setPacienteEncontrado(paciente);
             setData('persona_id', paciente.id.toString());
@@ -103,31 +107,29 @@ export default function AtencionEditPage({ atencion, pacientes, tiposDocumento =
     const handleAsociarPaciente = () => {
         if (!pacienteEncontrado) return;
 
-        // Enviar al backend para asociar el paciente existente
-        post(route('atenciones.asociar-paciente', atencion.id), {
-            onSuccess: () => {
-                // Redirigir o mostrar mensaje de éxito
+        router.patch(
+            atenciones.asociar_paciente(atencion.id).url,
+            { persona_id: pacienteEncontrado.id },
+            {
+                onSuccess: () => {
+                    router.visit(atenciones.index_atendidas().url);
+                }
             }
-        });
+        );
+
     };
 
     const handleIrARegistro = () => {
         // Redirigir a la página de registro de paciente con datos de búsqueda
-        router.visit(route('pacientes.create'), {
-            data: {
-                tipo_documento_id: data.tipo_documento_id,
-                numero_documento: data.numero_documento,
-                from_atencion: atencion.id,
-            }
-        });
+        router.visit(`/pacientes/editar_paciente/${atencion.persona_id}`);
     };
 
     const formatearFecha = (fecha: string) => {
         const date = new Date(fecha);
-        return date.toLocaleDateString('es-AR', { 
-            day: '2-digit', 
-            month: '2-digit', 
-            year: 'numeric' 
+        return date.toLocaleDateString('es-AR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
         });
     };
 
@@ -139,73 +141,113 @@ export default function AtencionEditPage({ atencion, pacientes, tiposDocumento =
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Modificar Atención" />
-            <div className="container mx-auto py-10 px-4 max-w-4xl">
-                <div className="mb-6">
-                    <h1 className="text-3xl font-semibold mb-2">Modificar Atención</h1>
-                    <p className="text-muted-foreground">
+            <div className="container mx-auto py-10">
+
+                <div className="ml-5 mb-6">
+                    <h1 className="text-3xl font-semibold mb-3">Modificar Atención</h1>
+
+                    <p className="text-md text-muted-foreground mb-3">
                         Gestión de atención de emergencia/urgencia
                     </p>
+                    <Link href={atenciones.index_atendidas.url()} className="inline-block">
+                        <Button className="flex items-center gap-2 mr-2">
+                            <Undo2 className="h-4 w-4" />
+                            Volver
+                        </Button>
+                    </Link>
+
                 </div>
 
                 {/* Alerta informativa */}
                 {esPacienteTemporal && (
-                    <Alert className="mb-6 border-amber-500 bg-amber-50">
-                        <AlertCircle className="h-4 w-4 text-amber-600" />
-                        <AlertDescription className="text-amber-800">
-                            Esta atención fue registrada como Emergencia/Urgencia y el paciente quedó sin identificar. 
+                    <Alert className="mb-6" variant="warning">
+                        <AlertCircle />
+                        <AlertDescription>
+                            Esta atención fue registrada como Emergencia/Urgencia y el paciente quedó sin identificar.
                             Debe buscar un paciente existente o completar sus datos.
                         </AlertDescription>
                     </Alert>
                 )}
 
                 {/* Información de la atención (solo lectura) */}
-                <Card className="mb-6">
-                    <CardHeader>
-                        <CardTitle>Datos de la Atención</CardTitle>
-                    </CardHeader>
-                    <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <Label className="text-muted-foreground">Fecha</Label>
-                            <div className="p-3 bg-muted rounded-md">
-                                {formatearFecha(atencion.fecha)}
+                <div className="space-y-4 mb-6">
+                    {/* Fecha y Hora */}
+                    <Alert>
+                        <Calendar className="h-4 w-4" />
+                        <AlertTitle>Fecha y Hora de Atención</AlertTitle>
+                        <AlertDescription>
+                            <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span className="text-muted-foreground">Fecha:</span>
+                                    <span className="ml-2 font-semibold">
+                                        {formatearFecha(atencion.fecha)}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span className="text-muted-foreground">Hora:</span>
+                                    <span className="ml-2 font-semibold">
+                                        {formatearHora(atencion.hora)}
+                                    </span>
+                                </div>
                             </div>
-                        </div>
+                        </AlertDescription>
+                    </Alert>
 
-                        <div className="space-y-2">
-                            <Label className="text-muted-foreground">Hora</Label>
-                            <div className="p-3 bg-muted rounded-md">
-                                {formatearHora(atencion.hora)}
+                    {/* Servicio y Tipo de Atención */}
+                    <Alert>
+                        <Stethoscope className="h-4 w-4" />
+                        <AlertTitle>Información del Servicio</AlertTitle>
+                        <AlertDescription>
+                            <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span className="text-muted-foreground">Servicio:</span>
+                                    <span className="ml-2 font-semibold">
+                                        {atencion.servicio.nombre}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span className="text-muted-foreground">Tipo de Atención:</span>
+                                    <span className="ml-2 font-semibold">
+                                        {atencion.tipo_atencion.nombre}
+                                    </span>
+                                </div>
                             </div>
-                        </div>
+                        </AlertDescription>
+                    </Alert>
 
-                        <div className="space-y-2">
-                            <Label className="text-muted-foreground">Servicio</Label>
-                            <div className="p-3 bg-muted rounded-md">
-                                {atencion.servicio.nombre}
-                            </div>
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label className="text-muted-foreground">Tipo de Atención</Label>
-                            <div className="p-3 bg-muted rounded-md">
-                                {atencion.tipo_atencion.nombre}
-                            </div>
-                        </div>
-
-                        <div className="space-y-2 md:col-span-2">
-                            <Label className="text-muted-foreground">Paciente Actual</Label>
-                            <div className="p-3 bg-muted rounded-md">
-                                {atencion.persona.nombre} {atencion.persona.apellido}
-                                {atencion.persona.numero_documento && 
-                                    ` - ${atencion.persona.tipo_documento?.nombre}: ${atencion.persona.numero_documento}`
-                                }
-                                {esPacienteTemporal && (
-                                    <span className="ml-2 text-amber-600 font-medium">(Temporal)</span>
+                    {/* Paciente Actual */}
+                    <Alert>
+                        <User className="h-4 w-4" />
+                        <AlertTitle>Paciente Actual</AlertTitle>
+                        <AlertDescription>
+                            <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                                <div>
+                                    <span className="text-muted-foreground">Nombre:</span>
+                                    <span className="ml-2 font-semibold">
+                                        {atencion.persona.nombre} {atencion.persona.apellido}
+                                    </span>
+                                </div>
+                                {atencion.persona.numero_documento && (
+                                    <div>
+                                        <span className="text-muted-foreground">Tipo de Documento:</span>
+                                        <span className="ml-2 font-semibold">
+                                            {atencion.persona.tipo_documento?.nombre}
+                                        </span>
+                                        <span className="ml-3 text-muted-foreground">Documento:</span>
+                                        <span className="ml-2 font-semibold">
+                                            {atencion.persona.numero_documento}
+                                        </span>
+                                    </div>
                                 )}
                             </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                            {esPacienteTemporal && (
+                                <Badge variant="secondary" className="mt-2">
+                                    Paciente Temporal - Sin Identificar
+                                </Badge>
+                            )}
+                        </AlertDescription>
+                    </Alert>
+                </div>
 
                 {/* Formulario de búsqueda de paciente */}
                 {esPacienteTemporal && (
@@ -265,7 +307,7 @@ export default function AtencionEditPage({ atencion, pacientes, tiposDocumento =
                                     </div>
                                 </div>
 
-                                <Button 
+                                <Button
                                     onClick={handleBuscarPaciente}
                                     disabled={!data.tipo_documento_id || !data.numero_documento || processing}
                                     className="w-full md:w-auto"
@@ -280,7 +322,7 @@ export default function AtencionEditPage({ atencion, pacientes, tiposDocumento =
                                 <div className="mt-6">
                                     {pacienteEncontrado ? (
                                         <div className="space-y-4">
-                                            <Alert className="border-green-500 bg-green-50">
+                                            <Alert variant="success" className="border-green-500 bg-green-50">
                                                 <AlertDescription className="text-green-800">
                                                     ✓ Paciente encontrado en el sistema
                                                 </AlertDescription>
@@ -294,10 +336,10 @@ export default function AtencionEditPage({ atencion, pacientes, tiposDocumento =
                                                     <div className="grid grid-cols-2 gap-2 text-sm">
                                                         <span className="font-medium">Nombre:</span>
                                                         <span>{pacienteEncontrado.nombre}</span>
-                                                        
+
                                                         <span className="font-medium">Apellido:</span>
                                                         <span>{pacienteEncontrado.apellido}</span>
-                                                        
+
                                                         <span className="font-medium">Documento:</span>
                                                         <span>
                                                             {pacienteEncontrado.tipo_documento.nombre}: {pacienteEncontrado.numero_documento}
@@ -306,7 +348,7 @@ export default function AtencionEditPage({ atencion, pacientes, tiposDocumento =
                                                 </CardContent>
                                             </Card>
 
-                                            <Button 
+                                            <Button
                                                 onClick={handleAsociarPaciente}
                                                 disabled={processing}
                                                 className="w-full"
@@ -316,15 +358,15 @@ export default function AtencionEditPage({ atencion, pacientes, tiposDocumento =
                                         </div>
                                     ) : (
                                         <div className="space-y-4">
-                                            <Alert className="border-blue-500 bg-blue-50">
-                                                <AlertCircle className="h-4 w-4 text-blue-600" />
-                                                <AlertDescription className="text-blue-800">
-                                                    No se encontró ningún paciente con el documento ingresado. 
+                                            <Alert variant="info">
+                                                <AlertCircle />
+                                                <AlertDescription className="text-">
+                                                    No se encontró ningún paciente con el documento ingresado.
                                                     Debe registrar un nuevo paciente.
                                                 </AlertDescription>
                                             </Alert>
 
-                                            <Button 
+                                            <Button
                                                 onClick={handleIrARegistro}
                                                 variant="default"
                                                 className="w-full"
@@ -343,7 +385,7 @@ export default function AtencionEditPage({ atencion, pacientes, tiposDocumento =
                 {!esPacienteTemporal && (
                     <Alert>
                         <AlertDescription>
-                            Esta atención ya tiene un paciente identificado correctamente. 
+                            Esta atención ya tiene un paciente identificado correctamente.
                             No requiere modificación.
                         </AlertDescription>
                     </Alert>
