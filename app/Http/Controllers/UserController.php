@@ -26,7 +26,7 @@ class UserController extends Controller
 
     public function create()
     {
-        $roles = Role::whereIn('name', ['profesional', 'administrativo'])
+        $roles = Role::whereIn('name', ['administrativo'])
             ->orderBy('name')
             ->get();
 
@@ -83,9 +83,15 @@ class UserController extends Controller
                 ->with('error', 'No puedes editar al Super Admin.');
         }
 
-        $roles = Role::whereIn('name', ['profesional', 'administrativo'])
-            ->orderBy('name')
-            ->get();
+        if ($usuario->hasRole('administrativo')) {
+            $roles = Role::whereIn('name', ['administrativo'])
+                ->orderBy('name')
+                ->get();
+        } else {
+            $roles = Role::whereIn('name', ['profesional', 'administrativo'])
+                ->orderBy('name')
+                ->get();
+        }
 
         $usuario->load('roles');
 

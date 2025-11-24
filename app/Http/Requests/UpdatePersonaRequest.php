@@ -24,7 +24,7 @@ class UpdatePersonaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // Reglas de validación al momento de crear una nueva persona (paciente) en el sistema
+            // Reglas de validación al momento de actualizar una nueva persona (paciente) en el sistema
             'genero_id' => ['required', 'exists:generos,id'],
             'estado_civil_id' => ['required', 'exists:estados_civiles,id'],
             'tipo_documento_id' => ['required', 'exists:tipos_documento,id'],
@@ -41,8 +41,12 @@ class UpdatePersonaRequest extends FormRequest
             'telefono_fijo' => ['nullable', 'string'],
             'telefono_celular' => ['required', 'string'],
             'nacionalidad' => ['required', 'string'],
-            'email' => ['required', 'string'],
-
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('personas', 'email')->ignore($this->route('persona'))
+            ],
             // Reglas de validación basadas en la migración de la tabla personas_dependencias
             'dependencias' => ['required', 'array', 'min:1'],
             'dependencias.*.claustro_id' => ['required', 'exists:claustros,id'],
@@ -105,7 +109,8 @@ class UpdatePersonaRequest extends FormRequest
             // Email
             'email.required' => 'Debe ingresar un correo electrónico.',
             'email.string' => 'El correo electrónico debe ser una cadena válida.',
-
+            'email.email' => 'El email debe ser una dirección válida.',
+            'email.unique' => 'El email ya existe en el sistema.',
 
             // ---------------------------
             // DEPENDENCIAS

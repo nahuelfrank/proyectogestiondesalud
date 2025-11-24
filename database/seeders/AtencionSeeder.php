@@ -24,6 +24,13 @@ class AtencionSeeder extends Seeder
             ->enEspera()
             ->create();
 
+        // En espera (5 pacientes fueron derivados)
+        Atencion::factory()
+            ->count(5)
+            ->hoy()
+            ->derivada()
+            ->create();
+
         // En atención (3 siendo atendidos)
         Atencion::factory()
             ->count(3)
@@ -62,6 +69,7 @@ class AtencionSeeder extends Seeder
         $enAtencion = Atencion::where('estado_atencion_id', 2)->count();
         $completadas = Atencion::where('estado_atencion_id', 3)->count();
         $canceladas = Atencion::where('estado_atencion_id', 4)->count();
+        $derivadas = Atencion::where('estado_atencion_id', 5)->count();
 
         $this->command->table(
             ['Estado', 'Cantidad'],
@@ -70,6 +78,7 @@ class AtencionSeeder extends Seeder
                 ['En Atención', $enAtencion],
                 ['Completadas', $completadas],
                 ['Canceladas', $canceladas],
+                ['Derivadas', $derivadas],
                 ['TOTAL', $total],
             ]
         );

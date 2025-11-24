@@ -155,7 +155,6 @@ export default function AtencionEditPage({ atencion, pacientes, tiposDocumento =
                             Volver
                         </Button>
                     </Link>
-
                 </div>
 
                 {/* Alerta informativa */}

@@ -133,7 +133,7 @@ export default function UserEditPage({ user, roles, currentRole }: UserEditPageP
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <Field data-invalid={!!form.formState.errors.name}>
-                                <FieldLabel htmlFor="name">Nombre Completo *</FieldLabel>
+                                <FieldLabel htmlFor="name">Nombre Completo <span className="text-red-500">*</span></FieldLabel>
                                 <Input
                                     id="name"
                                     placeholder="Ej: Juan Pérez"
@@ -145,7 +145,7 @@ export default function UserEditPage({ user, roles, currentRole }: UserEditPageP
                             </Field>
 
                             <Field data-invalid={!!form.formState.errors.email}>
-                                <FieldLabel htmlFor="email">Email *</FieldLabel>
+                                <FieldLabel htmlFor="email">Email <span className="text-red-500">*</span></FieldLabel>
                                 <Input
                                     id="email"
                                     type="email"
@@ -158,7 +158,7 @@ export default function UserEditPage({ user, roles, currentRole }: UserEditPageP
                             </Field>
 
                             <Field data-invalid={!!form.formState.errors.role}>
-                                <FieldLabel htmlFor="role">Rol *</FieldLabel>
+                                <FieldLabel htmlFor="role">Rol <span className="text-red-500">*</span></FieldLabel>
                                 <Controller
                                     name="role"
                                     control={form.control}

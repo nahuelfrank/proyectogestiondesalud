@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePersonaRequest;
 use App\Http\Requests\UpdatePersonaRequest;
+use App\Http\Requests\UpdateProfesionalRequest;
 use App\Models\Claustro;
 use App\Models\DependenciaArea;
 use App\Models\EstadoCivil;
@@ -470,7 +471,7 @@ class PersonaController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function actualizarProfesional(StoreProfesionalRequest $request, Persona $persona)
+    public function actualizarProfesional(UpdateProfesionalRequest $request, Persona $persona)
     {
         $validated = $request->validated();
 
@@ -484,6 +485,12 @@ class PersonaController extends Controller
                 'tipo_documento_id' => $validated['tipo_documento_id'],
                 'numero_documento' => $validated['numero_documento'],
                 'estado_civil_id' => $validated['estado_civil_id'],
+                'nacionalidad' => $validated['nacionalidad'],
+                'email' => $validated['email'],
+                'domicilio' => $validated['domicilio'],
+                'lugar_de_nacimiento' => $validated['lugar_de_nacimiento'],
+                'telefono_fijo' => $validated['telefono_fijo'],
+                'telefono_celular' => $validated['telefono_celular'],
             ]);
 
             // 2. Actualizar datos del Profesional

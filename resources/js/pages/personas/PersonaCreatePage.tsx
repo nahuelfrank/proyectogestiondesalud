@@ -248,7 +248,7 @@ export default function PersonaCreatePage({ generos, estadosCiviles, tiposDocume
 
                     <Link href={personas.fastCreate.url()} className="inline-block">
                         <Button
-                        variant="destructive"
+                            variant="destructive"
                             className="flex items-center gap-2"
                         >
                             <Siren className="h-4 w-4" />
@@ -447,14 +447,27 @@ export default function PersonaCreatePage({ generos, estadosCiviles, tiposDocume
                             </Field>
 
                             <Field>
-                                <FieldLabel htmlFor="nacionalidad">Nacionalidad <span className="text-red-500">*</span></FieldLabel>
-                                <Input
-                                    id="nacionalidad"
+                                <FieldLabel htmlFor="nacionalidad">
+                                    Nacionalidad <span className="text-red-500">*</span>
+                                </FieldLabel>
+
+                                <Select
+                                    onValueChange={(value) => setData('nacionalidad', value)}
                                     value={data.nacionalidad}
-                                    onChange={(e) => setData('nacionalidad', e.target.value)}
-                                    placeholder="Nacionalidad"
-                                />
-                                {getError('nacionalidad') && <FieldError>{getError('nacionalidad')}</FieldError>}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Seleccione una nacionalidad" />
+                                    </SelectTrigger>
+
+                                    <SelectContent>
+                                        <SelectItem value="Argentino">Argentino/a</SelectItem>
+                                        <SelectItem value="Extranjero">Extranjero/a</SelectItem>
+                                    </SelectContent>
+                                </Select>
+
+                                {getError('nacionalidad') && (
+                                    <FieldError>{getError('nacionalidad')}</FieldError>
+                                )}
                             </Field>
 
                         </CardContent>

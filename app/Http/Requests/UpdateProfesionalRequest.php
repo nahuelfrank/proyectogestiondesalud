@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateProfesionalRequest extends FormRequest
 {
@@ -16,29 +17,36 @@ class UpdateProfesionalRequest extends FormRequest
         $profesionalId = $this->route('profesional')->id;
         $personaId = $this->route('profesional')->persona_id;
 
+
         return [
             // Datos de Persona
-            'nombre' => ['required', 'string', 'max:255'],
-            'apellido' => ['required', 'string', 'max:255'],
-            'fecha_de_nacimiento' => ['required', 'date'],
-            'genero_id' => ['required', 'integer', 'exists:generos,id'],
-            'tipo_documento_id' => ['required', 'integer', 'exists:tipos_documento,id'],
+            'genero_id' => ['required', 'exists:generos,id'],
+            'estado_civil_id' => ['required', 'exists:estados_civiles,id'],
+            'tipo_documento_id' => ['required', 'exists:tipos_documento,id'],
+            'nombre' => ['required', 'string'],
+            'apellido' => ['required', 'string'],
             'numero_documento' => [
                 'required',
                 'string',
-                'unique:personas,numero_documento,' . $personaId
+                Rule::unique('personas', 'numero_documento')->ignore($personaId)
+
             ],
-            'estado_civil_id' => ['required', 'integer', 'exists:estados_civiles,id'],
-            'email' => [ 
+            'fecha_de_nacimiento' => ['required', 'date'],
+            'domicilio' => ['nullable', 'string'],
+            'lugar_de_nacimiento' => ['nullable', 'string'],
+            'telefono_fijo' => ['nullable', 'string'],
+            'telefono_celular' => ['required', 'string'],
+            'nacionalidad' => ['required', 'string'],
+            'email' => [
                 'required',
                 'email',
                 'max:255',
-                'unique:personas,email,' . $personaId
+                Rule::unique('personas', 'email')->ignore($personaId)
             ],
 
             // Datos de Profesional
             'especialidad_id' => ['required', 'integer', 'exists:especialidades,id'],
-            'estado' => ['required', 'string', 'in:activo,inactivo'],
+            'estado' => ['required', 'string', 'in:Activo,Inactivo'],
             'matricula' => ['required', 'string', 'max:255'],
 
             // Disponibilidades Horarias (opcional)
@@ -68,6 +76,7 @@ class UpdateProfesionalRequest extends FormRequest
             'email.unique' => 'El email ya existe en el sistema.',
             'especialidad_id.required' => 'La especialidad es requerida.',
             'estado.required' => 'El estado es requerido.',
+            'estado.in' => 'El estado seleccionado no es válido. Solo puede ser "Activo" o "Inactivo".',
             'matricula.required' => 'La matrícula es requerida.',
             'disponibilidades_horarias.*.hora_fin_atencion.after' => 'La hora de fin debe ser mayor que la hora de inicio.',
         ];

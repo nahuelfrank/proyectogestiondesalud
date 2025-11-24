@@ -37,10 +37,9 @@ class StoreProfesionalRequest extends FormRequest
             'nacionalidad' => ['required', 'string'],
             'email' => ['required', 'email', 'max:255', 'unique:personas,email'],
 
-
             // Datos de Profesional
             'especialidad_id' => ['required', 'exists:especialidades,id'],
-            'estado' => ['required', 'string', 'in:activo,inactivo'],
+            'estado' => ['required', 'string', 'in:Activo,Inactivo'],
             'matricula' => ['required', 'string', 'max:255'],
 
             // Disponibilidades Horarias (opcional)
@@ -110,6 +109,7 @@ class StoreProfesionalRequest extends FormRequest
 
             'especialidad_id.required' => 'La especialidad es requerida.',
             'estado.required' => 'El estado es requerido.',
+            'estado.in' => 'El estado seleccionado no es válido. Solo puede ser "Activo" o "Inactivo".',
             'matricula.required' => 'La matrícula es requerida.',
             'disponibilidades_horarias.*.hora_fin_atencion.after' => 'La hora de fin debe ser mayor que la hora de inicio.',
             'disponibilidades_horarias.*.hora_inicio_atencion.required' => 'La hora de inicio es requerida.',

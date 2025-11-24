@@ -280,4 +280,19 @@ class AtencionController extends Controller
 
     }
 
+    public function verAtencionAdministrativos(Atencion $atencion)
+    {
+        $atencion->load([
+            'servicio',
+            'tipo_atencion',
+            'estado_atencion',
+            'profesional.persona',
+            'persona.tipo_documento',
+        ]);
+
+        return Inertia::render('atenciones/AtencionShowPage', [
+            'atencion' => $atencion,
+        ]);
+    }
+
 }

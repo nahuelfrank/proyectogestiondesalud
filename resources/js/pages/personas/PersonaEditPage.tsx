@@ -470,14 +470,27 @@ export default function PersonaEditPage({
                             </Field>
 
                             <Field>
-                                <FieldLabel htmlFor="nacionalidad">Nacionalidad <span className="text-red-500">*</span></FieldLabel>
-                                <Input
-                                    id="nacionalidad"
+                                <FieldLabel htmlFor="nacionalidad">
+                                    Nacionalidad <span className="text-red-500">*</span>
+                                </FieldLabel>
+
+                                <Select
+                                    onValueChange={(value) => setData('nacionalidad', value)}
                                     value={data.nacionalidad}
-                                    onChange={(e) => setData('nacionalidad', e.target.value)}
-                                    placeholder="Nacionalidad"
-                                />
-                                {getError('nacionalidad') && <FieldError>{getError('nacionalidad')}</FieldError>}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Seleccione una nacionalidad" />
+                                    </SelectTrigger>
+
+                                    <SelectContent>
+                                        <SelectItem value="Argentino/a">Argentino/a</SelectItem>
+                                        <SelectItem value="Extranjero/a">Extranjero/a</SelectItem>
+                                    </SelectContent>
+                                </Select>
+
+                                {getError('nacionalidad') && (
+                                    <FieldError>{getError('nacionalidad')}</FieldError>
+                                )}
                             </Field>
 
                         </CardContent>

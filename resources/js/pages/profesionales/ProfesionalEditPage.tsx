@@ -66,6 +66,11 @@ type Persona = {
   numero_documento: string;
   email: string,
   genero_id: number;
+  domicilio: string
+  lugar_de_nacimiento?: string | null;
+  telefono_celular: string;
+  nacionalidad: string;
+  telefono_fijo?: string | null;
   tipo_documento_id: number;
   estado_civil_id: number;
   genero: {
@@ -141,7 +146,13 @@ const formSchema = z.object({
   genero_id: z.string().min(1, "El género es requerido"),
   tipo_documento_id: z.string().min(1, "El tipo de documento es requerido"),
   numero_documento: z.string().min(1, "El número de documento es requerido"),
-  email: z.string().email("Debe ser un email válido").min(1, "El email es requerido"),
+  email: z.email("El correo electrónico no es válido.")
+    .min(1, "Debe ingresar un correo electrónico."),
+  domicilio: z.string().optional(),
+  lugar_de_nacimiento: z.string().optional(),
+  telefono_fijo: z.string().optional(),
+  telefono_celular: z.string().min(1, "Debe ingresar un teléfono celular."),
+  nacionalidad: z.string().min(1, "Debe ingresar la nacionalidad.").nullable(),
   estado_civil_id: z.string().min(1, "El estado civil es requerido"),
   especialidad_id: z.string().min(1, "Debe seleccionar una especialidad."),
   estado: z.string().min(1, "Debe seleccionar un estado."),
@@ -159,6 +170,7 @@ export default function ProfesionalEditPage({
   dias,
 }: ProfesionalEditPageProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [erroresHorarios, setErroresHorarios] = React.useState<Map<string, string>>(new Map());
 
   // Pre-cargar días seleccionados desde los horarios existentes
   const diasIniciales = React.useMemo(() => {
@@ -198,6 +210,11 @@ export default function ProfesionalEditPage({
       genero_id: String(persona.genero_id),
       tipo_documento_id: String(persona.tipo_documento_id),
       numero_documento: persona.numero_documento,
+      domicilio: persona.domicilio ?? "",
+      lugar_de_nacimiento: persona.lugar_de_nacimiento ?? "",
+      telefono_fijo: persona.telefono_fijo ?? "",
+      telefono_celular: persona.telefono_celular,
+      nacionalidad: persona.nacionalidad,
       email: persona.email,
       estado_civil_id: String(persona.estado_civil_id),
       especialidad_id: String(profesional.especialidad_id),
@@ -282,7 +299,24 @@ export default function ProfesionalEditPage({
     nuevoMapa.set(diaId, horariosActualizados);
     setHorariosPorDia(nuevoMapa);
     sincronizarConForm(nuevoMapa);
+
+    // --- VALIDACIÓN DE HORARIO ---
+    const inicio = horariosActualizados[index].hora_inicio_atencion;
+    const fin = horariosActualizados[index].hora_fin_atencion;
+
+    const key = `${diaId}-${index}`;
+
+    const nuevosErrores = new Map(erroresHorarios);
+
+    if (inicio && fin && inicio >= fin) {
+      nuevosErrores.set(key, "La hora de fin debe ser mayor que la hora de inicio.");
+    } else {
+      nuevosErrores.delete(key);
+    }
+
+    setErroresHorarios(nuevosErrores);
   };
+
 
   const onSubmit = (rhfData: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
@@ -297,7 +331,11 @@ export default function ProfesionalEditPage({
       numero_documento: rhfData.numero_documento,
       email: rhfData.email,
       estado_civil_id: parseInt(rhfData.estado_civil_id),
-
+      domicilio: rhfData.domicilio,
+      lugar_de_nacimiento: rhfData.lugar_de_nacimiento,
+      telefono_fijo: rhfData.telefono_fijo,
+      telefono_celular: rhfData.telefono_celular,
+      nacionalidad: rhfData.nacionalidad,
       // Datos de Profesional
       especialidad_id: parseInt(rhfData.especialidad_id),
       estado: rhfData.estado,
@@ -305,12 +343,19 @@ export default function ProfesionalEditPage({
       disponibilidades_horarias: rhfData.disponibilidades_horarias || [],
     };
 
+    console.log(payload);
+
     router.put(`/profesionales/${profesional.id}`, payload, {
       onSuccess: () => {
         // Redirige al index
       },
       onError: (errors) => {
-        console.error('Error al actualizar profesional:', errors);
+        Object.entries(errors).forEach(([key, message]) => {
+          form.setError(key as keyof typeof formSchema.shape, {
+            type: "server",
+            message: message as string,
+          });
+        });
       },
       onFinish: () => {
         setIsSubmitting(false);
@@ -326,7 +371,7 @@ export default function ProfesionalEditPage({
         <div className="ml-5 mb-4">
           <h1 className="text-3xl font-semibold mb-2">Modificar Datos de Profesional</h1>
 
-          <p className="text-sm text-muted-foreground mb-4">Modifique los datos del profesional.
+          <p className="text-muted-foreground mb-4">Modifique los datos del profesional.
             Los campos con <span className="text-red-500">*</span> son obligatorios.</p>
 
           <Link
@@ -477,20 +522,106 @@ export default function ProfesionalEditPage({
                   )}
                 </Field>
 
-                {/* Campo Email */}
-                <Field data-invalid={!!form.formState.errors.email}>
-                  <FieldLabel htmlFor="email">Email <span className="text-red-500">*</span></FieldLabel>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="ejemplo@email.com"
-                    {...form.register("email")}
-                  />
-                  {form.formState.errors.email && (
-                    <FieldError>{form.formState.errors.email.message}</FieldError>
-                  )}
-                </Field>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Contacto */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Contacto</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+              {/* Campo Email */}
+              <Field>
+                <FieldLabel htmlFor="email">Email <span className='text-red-500'>*</span></FieldLabel>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="ejemplo@email.com"
+                  {...form.register("email")}
+                />
+                {form.formState.errors.email && (
+                  <FieldError>{form.formState.errors.email.message}</FieldError>
+                )}
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="domicilio">Domicilio</FieldLabel>
+                <Input
+                  id="domicilio"
+                  placeholder='Domicilio'
+                  {...form.register("domicilio")}
+                />
+                {form.formState.errors.domicilio && (
+                  <FieldError>{form.formState.errors.domicilio.message}</FieldError>
+                )}
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="lugar_de_nacimiento">Lugar de Nacimiento</FieldLabel>
+                <Input
+                  id="lugar_de_nacimiento"
+                  placeholder="Lugar de Nacimiento"
+                  {...form.register("lugar_de_nacimiento")}
+                />
+                {form.formState.errors.lugar_de_nacimiento && (
+                  <FieldError>{form.formState.errors.lugar_de_nacimiento.message}</FieldError>
+                )}
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="telefono_fijo">Teléfono Fijo</FieldLabel>
+                <Input
+                  id="telefono_fijo"
+                  placeholder="Teléfono Fijo"
+                  {...form.register("telefono_fijo")}
+                />
+                {form.formState.errors.telefono_fijo && (
+                  <FieldError>{form.formState.errors.telefono_fijo.message}</FieldError>
+                )}
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="telefono_celular">Teléfono Celular  <span className="text-red-500">*</span></FieldLabel>
+                <Input
+                  id="telefono_celular"
+                  placeholder="Teléfono Celular"
+                  {...form.register("telefono_celular")}
+                />
+                {form.formState.errors.telefono_celular && (
+                  <FieldError>{form.formState.errors.telefono_celular.message}</FieldError>
+                )}
+              </Field>
+
+              <Controller
+                name="nacionalidad"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel htmlFor="nacionalidad">
+                      Nacionalidad <span className="text-red-500">*</span>
+                    </FieldLabel>
+
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger id="nacionalidad">
+                        <SelectValue placeholder="Seleccione una nacionalidad" />
+                      </SelectTrigger>
+
+                      <SelectContent>
+                        <SelectItem value="Argentino/a">Argentino/a</SelectItem>
+                        <SelectItem value="Extranjero/a">Extranjero/a</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+
             </CardContent>
           </Card>
 
@@ -549,8 +680,8 @@ export default function ProfesionalEditPage({
                           <SelectValue placeholder="Seleccionar" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="activo">Activo</SelectItem>
-                          <SelectItem value="inactivo">Inactivo</SelectItem>
+                          <SelectItem value="Activo">Activo</SelectItem>
+                          <SelectItem value="Inactivo">Inactivo</SelectItem>
                         </SelectContent>
                       </Select>
                       {fieldState.invalid && (
@@ -624,6 +755,11 @@ export default function ProfesionalEditPage({
                             value={horario.hora_fin_atencion}
                             onChange={(e) => handleHorarioChange(dia.id, index, 'hora_fin_atencion', e.target.value)}
                           />
+                          {erroresHorarios.get(`${dia.id}-${index}`) && (
+                            <FieldError>
+                              {erroresHorarios.get(`${dia.id}-${index}`)}
+                            </FieldError>
+                          )}
                         </Field>
 
                         {horariosDelDia.length > 1 && (

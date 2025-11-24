@@ -166,7 +166,12 @@ class ProfesionalController extends Controller
                 'tipo_documento_id' => $validated['tipo_documento_id'],
                 'numero_documento' => $validated['numero_documento'],
                 'estado_civil_id' => $validated['estado_civil_id'],
+                'nacionalidad' => $validated['nacionalidad'],
                 'email' => $validated['email'],
+                'domicilio' => $validated['domicilio'],
+                'lugar_de_nacimiento' => $validated['lugar_de_nacimiento'],
+                'telefono_fijo' => $validated['telefono_fijo'],
+                'telefono_celular' => $validated['telefono_celular'],
             ]);
 
             // 2. Actualizar datos del Profesional
@@ -256,8 +261,8 @@ class ProfesionalController extends Controller
         return Pdf::loadView(
             'profesionales.reporte_horarios',
             [
-                'profesional'      => $profesional,
-                'horariosPorDia'   => $horariosAgrupados
+                'profesional' => $profesional,
+                'horariosPorDia' => $horariosAgrupados
             ]
         )->stream("horarios_profesional_{$profesional->id}.pdf");
     }

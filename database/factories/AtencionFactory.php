@@ -95,6 +95,15 @@ class AtencionFactory extends Factory
         });
     }
 
+     public function derivada()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'estado_atencion_id' => 5, // "Derivada"
+            ];
+        });
+    }
+
     /** Estado para atenciones en espera (sin hora de inicio) */
     public function enEspera()
     {

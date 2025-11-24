@@ -95,6 +95,11 @@ const formSchema = z.object({
   numero_documento: z.string().min(1, "El número de documento es requerido"),
   email: z.email("El correo electrónico no es válido.")
     .min(1, "Debe ingresar un correo electrónico."),
+  domicilio: z.string().optional(),
+  lugar_de_nacimiento: z.string().optional(),
+  telefono_fijo: z.string().optional(),
+  telefono_celular: z.string().min(1, "Debe ingresar un teléfono celular."),
+  nacionalidad: z.string().min(1, "Debe ingresar la nacionalidad.").nullable(),
   estado_civil_id: z.string().min(1, "El estado civil es requerido"),
   especialidad_id: z.string().min(1, "Debe seleccionar una especialidad."),
   estado: z.string().min(1, "Debe seleccionar un estado."),
@@ -111,6 +116,7 @@ export default function ProfesionalCreatePage({
 }: ProfesionalCreatePageProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [diasSeleccionados, setDiasSeleccionados] = React.useState<number[]>([]);
+  const [erroresHorarios, setErroresHorarios] = React.useState<Map<string, string>>(new Map());
 
   // Estado local para manejar horarios - CLAVE para que funcione
   const [horariosPorDia, setHorariosPorDia] = React.useState<Map<number, Horario[]>>(
@@ -127,6 +133,11 @@ export default function ProfesionalCreatePage({
       tipo_documento_id: "",
       numero_documento: "",
       email: "",
+      domicilio: "",
+      lugar_de_nacimiento: "",
+      telefono_fijo: "",
+      telefono_celular: "",
+      nacionalidad: "",
       estado_civil_id: "",
       especialidad_id: "",
       estado: "",
@@ -165,6 +176,7 @@ export default function ProfesionalCreatePage({
     setHorariosPorDia(nuevoMapa);
     sincronizarConForm(nuevoMapa);
   };
+
 
   // Agregar un horario adicional al mismo día
   const handleAgregarHorario = (diaId: number) => {
@@ -218,7 +230,24 @@ export default function ProfesionalCreatePage({
     nuevoMapa.set(diaId, horariosActualizados);
     setHorariosPorDia(nuevoMapa);
     sincronizarConForm(nuevoMapa);
+
+    // --- VALIDACIÓN DE HORARIO ---
+    const inicio = horariosActualizados[index].hora_inicio_atencion;
+    const fin = horariosActualizados[index].hora_fin_atencion;
+
+    const key = `${diaId}-${index}`;
+
+    const nuevosErrores = new Map(erroresHorarios);
+
+    if (inicio && fin && inicio >= fin) {
+      nuevosErrores.set(key, "La hora de fin debe ser mayor que la hora de inicio.");
+    } else {
+      nuevosErrores.delete(key);
+    }
+
+    setErroresHorarios(nuevosErrores);
   };
+
 
   const onSubmit = (rhfData: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
@@ -231,6 +260,11 @@ export default function ProfesionalCreatePage({
       tipo_documento_id: parseInt(rhfData.tipo_documento_id),
       numero_documento: rhfData.numero_documento,
       email: rhfData.email,
+      domicilio: rhfData.domicilio,
+      lugar_de_nacimiento: rhfData.lugar_de_nacimiento,
+      telefono_celular: rhfData.telefono_celular,
+      telefono_fijo: rhfData.telefono_fijo,
+      nacionalidad: rhfData.nacionalidad,
       estado_civil_id: parseInt(rhfData.estado_civil_id),
       especialidad_id: parseInt(rhfData.especialidad_id),
       estado: rhfData.estado,
@@ -245,7 +279,12 @@ export default function ProfesionalCreatePage({
         // Redirige al index
       },
       onError: (errors) => {
-        console.error('Error al crear profesional:', errors);
+        Object.entries(errors).forEach(([key, message]) => {
+          form.setError(key as keyof typeof formSchema.shape, {
+            type: "server",
+            message: message as string,
+          });
+        });
       },
       onFinish: () => {
         setIsSubmitting(false);
@@ -412,20 +451,107 @@ export default function ProfesionalCreatePage({
                   )}
                 </Field>
 
-                {/* Campo Email */}
-                <Field>
-                  <FieldLabel htmlFor="email">Email <span className='text-red-500'>*</span></FieldLabel>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="ejemplo@email.com"
-                    {...form.register("email")}
-                  />
-                  {form.formState.errors.email && (
-                    <FieldError>{form.formState.errors.email.message}</FieldError>
-                  )}
-                </Field>
               </div>
+            </CardContent>
+          </Card>
+
+
+          {/* Contacto */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Contacto</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+              {/* Campo Email */}
+              <Field>
+                <FieldLabel htmlFor="email">Email <span className='text-red-500'>*</span></FieldLabel>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="ejemplo@email.com"
+                  {...form.register("email")}
+                />
+                {form.formState.errors.email && (
+                  <FieldError>{form.formState.errors.email.message}</FieldError>
+                )}
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="domicilio">Domicilio</FieldLabel>
+                <Input
+                  id="domicilio"
+                  placeholder='Domicilio'
+                  {...form.register("domicilio")}
+                />
+                {form.formState.errors.domicilio && (
+                  <FieldError>{form.formState.errors.domicilio.message}</FieldError>
+                )}
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="lugar_de_nacimiento">Lugar de Nacimiento</FieldLabel>
+                <Input
+                  id="lugar_de_nacimiento"
+                  placeholder="Lugar de Nacimiento"
+                  {...form.register("lugar_de_nacimiento")}
+                />
+                {form.formState.errors.lugar_de_nacimiento && (
+                  <FieldError>{form.formState.errors.lugar_de_nacimiento.message}</FieldError>
+                )}
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="telefono_fijo">Teléfono Fijo</FieldLabel>
+                <Input
+                  id="telefono_fijo"
+                  placeholder="Teléfono Fijo"
+                  {...form.register("telefono_fijo")}
+                />
+                {form.formState.errors.telefono_fijo && (
+                  <FieldError>{form.formState.errors.telefono_fijo.message}</FieldError>
+                )}
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="telefono_celular">Teléfono Celular  <span className="text-red-500">*</span></FieldLabel>
+                <Input
+                  id="telefono_celular"
+                  placeholder="Teléfono Celular"
+                  {...form.register("telefono_celular")}
+                />
+                {form.formState.errors.telefono_celular && (
+                  <FieldError>{form.formState.errors.telefono_celular.message}</FieldError>
+                )}
+              </Field>
+
+              <Controller
+                name="nacionalidad"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel htmlFor="nacionalidad">
+                      Nacionalidad <span className="text-red-500">*</span>
+                    </FieldLabel>
+
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger id="nacionalidad">
+                        <SelectValue placeholder="Seleccione una nacionalidad" />
+                      </SelectTrigger>
+
+                      <SelectContent>
+                        <SelectItem value="Argentino/a">Argentino/a</SelectItem>
+                        <SelectItem value="Extranjero/a">Extranjero/a</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+
             </CardContent>
           </Card>
 
@@ -484,8 +610,8 @@ export default function ProfesionalCreatePage({
                           <SelectValue placeholder="Seleccionar" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="activo">Activo</SelectItem>
-                          <SelectItem value="inactivo">Inactivo</SelectItem>
+                          <SelectItem value="Activo">Activo</SelectItem>
+                          <SelectItem value="Inactivo">Inactivo</SelectItem>
                         </SelectContent>
                       </Select>
                       {fieldState.invalid && (
@@ -559,6 +685,11 @@ export default function ProfesionalCreatePage({
                             value={horario.hora_fin_atencion}
                             onChange={(e) => handleHorarioChange(dia.id, index, 'hora_fin_atencion', e.target.value)}
                           />
+                          {erroresHorarios.get(`${dia.id}-${index}`) && (
+                            <FieldError>
+                              {erroresHorarios.get(`${dia.id}-${index}`)}
+                            </FieldError>
+                          )}
                         </Field>
 
                         {horariosDelDia.length > 1 && (

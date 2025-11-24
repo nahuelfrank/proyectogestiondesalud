@@ -230,6 +230,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('atenciones.ver_atencion')
         ->middleware('permission:ver atenciones');
 
+    Route::get('atenciones/ver_atencion_administrativo/{atencion}', [AtencionController::class, 'verAtencionAdministrativos'])
+        ->name('atenciones.ver_atencion_administrativo')
+        ->middleware('permission:ver atenciones');
 
     /**
      * ============================

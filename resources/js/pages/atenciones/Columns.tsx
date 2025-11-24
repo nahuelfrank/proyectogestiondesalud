@@ -122,7 +122,7 @@ export const columns: ColumnDef<Atencion>[] = [
       return (
         <div>
           {/* Ver */}
-          <Link href={atenciones.ver_atencion(atencion.id).url}>
+          <Link href={atenciones.ver_atencion_administrativo(atencion.id).url}>
             <Button variant="ghost" size="icon" title="Ver">
               <Eye className="h-4 w-4" />
             </Button>
