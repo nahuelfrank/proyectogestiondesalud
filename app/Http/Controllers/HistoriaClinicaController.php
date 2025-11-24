@@ -134,10 +134,10 @@ class HistoriaClinicaController extends Controller
 
         // Obtener servicios disponibles para derivación (excluyendo el actual)
         // Solo servicios que tengan profesionales activos
-        $servicios = Servicio::where('estado', 'activo')
+        $servicios = Servicio::where('estado', 'Activo')
             ->where('id', '!=', $atencion->servicio_id)
             ->whereHas('especialidades_servicios.especialidad.profesionales', function ($query) use ($profesional) {
-                $query->where('estado', 'activo')
+                $query->where('estado', 'Activo')
                     ->where('id', '!=', $profesional->id);
             })
             ->orderBy('nombre')
@@ -236,7 +236,7 @@ class HistoriaClinicaController extends Controller
 
         $validated = $request->validate($rules);
 
-        DB::transaction(function () use ($validated, $atencionId, $rolProfesional) {
+        DB::transaction(function () use ($validated, $atencionId, $rolProfesional, $profesional) {
             $atencion = Atencion::findOrFail($atencionId);
 
             // Preparar datos de actualización base
@@ -275,7 +275,7 @@ class HistoriaClinicaController extends Controller
                 $atencion->update(['estado_atencion_id' => $estadoDerivado->id]);
 
                 // Crear nueva atención derivada con fecha y hora automáticas
-                $estadoEnEspera = EstadoAtencion::where('nombre', 'En espera')->first();
+                $estadoEnEspera = EstadoAtencion::where('nombre', 'En Espera')->first();
 
                 Atencion::create([
                     'fecha' => now()->format('Y-m-d'),
@@ -285,6 +285,7 @@ class HistoriaClinicaController extends Controller
                     'persona_id' => $atencion->persona_id,
                     'tipo_atencion_id' => $atencion->tipo_atencion_id,
                     'estado_atencion_id' => $estadoEnEspera->id,
+                    'diagnostico_principal' => 'A definir',
                     'motivo_de_consulta' => 'Derivación de ' . $profesional->especialidad->nombre,
                 ]);
             } else {

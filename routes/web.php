@@ -222,7 +222,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('atenciones/detalles/{persona}', [AtencionController::class, 'verAtencion'])
         ->name('atenciones.ver_atencion')
-        ->middleware('permission: ver atenciones');
+        ->middleware('permission:ver atenciones');
 
 
     /**

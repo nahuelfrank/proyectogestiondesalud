@@ -24,7 +24,7 @@ class AtencionController extends Controller
         $hoy = Carbon::today()->toDateString();
 
         // Estados permitidos
-        $estados = ['En Espera', 'En Atención', 'Cancelado'];
+        $estados = ['En Espera', 'En Atención', 'Cancelado', 'Derivado'];
 
         $query = Atencion::query()
             ->with([
