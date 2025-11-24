@@ -267,23 +267,35 @@ Route::middleware(['auth', 'verified'])->group(function () {
      * Los permisos de historias clínicas NO están en el seeder,
      * así que (por ahora) no se pueden proteger con Spatie.
      */
+    // Lista de espera del profesional (incluye pestañas)
     Route::get('historias-clinicas/lista-espera', [HistoriaClinicaController::class, 'listaEspera'])
         ->name('historias-clinicas.lista-espera');
 
-    Route::get('historias-clinicas/{atencion}/ver', [HistoriaClinicaController::class, 'verHistoriaClinica'])
-        ->name('historias-clinicas.ver');
+    // Ver historia clínica completa del paciente
+    Route::get('historias-clinicas/{atencion}/historia', [HistoriaClinicaController::class, 'verHistoriaClinica'])
+        ->name('historias-clinicas.historia');
 
+    // Ver detalle de una atención específica (con atributos clínicos)
+    Route::get('historias-clinicas/detalle/{atencion}', [HistoriaClinicaController::class, 'verDetalleAtencion'])
+        ->name('historias-clinicas.detalle');
+
+    // Registrar atención (iniciar atención desde lista de espera)
     Route::get('historias-clinicas/{atencion}/registrar', [HistoriaClinicaController::class, 'registrarAtencion'])
         ->name('historias-clinicas.registrar');
 
     Route::post('historias-clinicas/{atencion}/guardar', [HistoriaClinicaController::class, 'guardarAtencion'])
         ->name('historias-clinicas.guardar');
 
-    Route::get('historias-clinicas/atenciones/{atencion}/detalle', [HistoriaClinicaController::class, 'verDetalleAtencion'])
-        ->name('historias-clinicas.detalle-atencion');
+    // Editar atención finalizada
+    Route::get('historias-clinicas/editar/{atencion}', [HistoriaClinicaController::class, 'editarAtencionFinalizada'])
+        ->name('historias-clinicas.editar');
 
-    Route::get('historias-clinicas/servicios/{servicio}/profesionales', [HistoriaClinicaController::class, 'obtenerProfesionalesPorServicio'])
-        ->name('historias-clinicas.profesionales-por-servicio');
+    Route::put('historias-clinicas/actualizar/{atencion}', [HistoriaClinicaController::class, 'actualizarAtencionFinalizada'])
+        ->name('historias-clinicas.actualizar');
+
+    // Obtener profesionales por servicio (para derivaciones)
+    Route::get('historias-clinicas/profesionales/{servicio}', [HistoriaClinicaController::class, 'obtenerProfesionalesPorServicio'])
+        ->name('historias-clinicas.profesionales');
 });
 
 require __DIR__ . '/settings.php';

@@ -1,11 +1,11 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Clock, User, FileText } from 'lucide-react';
+import { Clock, User, FileText, Eye, Pencil } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { useEffect } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface Persona {
     id: number;
@@ -54,22 +54,16 @@ interface Profesional {
 }
 
 interface ListaEsperaPageProps {
-    atenciones: Atencion[];
+    atenciones_espera: Atencion[];
+    atenciones_finalizadas: Atencion[];
     profesional: Profesional;
 }
 
-export default function ListaEsperaPage({ atenciones, profesional }: ListaEsperaPageProps) {
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            router.reload({
-                only: ["atenciones"],
-            });
-        }, 2500);
-
-        return () => clearInterval(interval);
-    }, []);
-
+export default function ListaEsperaPage({
+    atenciones_espera,
+    atenciones_finalizadas,
+    profesional
+}: ListaEsperaPageProps) {
     const formatFecha = (fecha: string) => {
         return new Date(fecha).toLocaleDateString('es-AR', {
             day: '2-digit',
@@ -115,104 +109,208 @@ export default function ListaEsperaPage({ atenciones, profesional }: ListaEspera
                             <Clock className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{atenciones.length}</div>
+                            <div className="text-2xl font-bold">{atenciones_espera.length}</div>
                         </CardContent>
                     </Card>
 
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Primer Turno</CardTitle>
+                            <CardTitle className="text-sm font-medium">Atendidos Hoy</CardTitle>
                             <User className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">
-                                {atenciones.length > 0 ? atenciones[0].hora : '-'}
-                            </div>
+                            <div className="text-2xl font-bold">{atenciones_finalizadas.length}</div>
                         </CardContent>
                     </Card>
 
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Último Turno</CardTitle>
+                            <CardTitle className="text-sm font-medium">Total del Día</CardTitle>
                             <FileText className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">
-                                {atenciones.length > 0 ? atenciones[atenciones.length - 1].hora : '-'}
+                                {atenciones_espera.length + atenciones_finalizadas.length}
                             </div>
                         </CardContent>
                     </Card>
                 </div>
 
-                {/* Tabla de atenciones */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Pacientes en Lista de Espera</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        {atenciones.length === 0 ? (
-                            <div className="text-center py-12">
-                                <Clock className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                                    No hay pacientes en espera
-                                </h3>
-                                <p className="text-gray-500">
-                                    No tienes pacientes pendientes de atención en este momento.
-                                </p>
-                            </div>
-                        ) : (
-                            <div className="rounded-md border">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Fecha</TableHead>
-                                            <TableHead>Hora</TableHead>
-                                            <TableHead>Tipo de Atención</TableHead>
-                                            <TableHead>Paciente</TableHead>
-                                            <TableHead>Documento</TableHead>
-                                            <TableHead>Estado</TableHead>
-                                            <TableHead className="text-right">Acciones</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {atenciones.map((atencion) => (
-                                            <TableRow key={atencion.id}>
-                                                <TableCell>{formatFecha(atencion.fecha)}</TableCell>
-                                                <TableCell className="font-medium">{atencion.hora}</TableCell>
-                                                <TableCell>{atencion.tipo_atencion.nombre}</TableCell>
-                                                <TableCell>
-                                                    {atencion.persona.nombre} {atencion.persona.apellido}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {atencion.persona.numero_documento}
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Badge
-                                                        className={getEstadoBadgeColor(
-                                                            atencion.estado_atencion.nombre
-                                                        )}
-                                                    >
-                                                        {atencion.estado_atencion.nombre}
-                                                    </Badge>
-                                                </TableCell>
-                                                <TableCell className="text-right">
-                                                    <Link
-                                                        href={`/historias-clinicas/${atencion.id}/ver`}
-                                                    >
-                                                        <Button size="sm">
-                                                            <FileText className="h-4 w-4 mr-2" />
-                                                            Iniciar Atención
-                                                        </Button>
-                                                    </Link>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
+                {/* Tabs para Lista de Espera y Atenciones Finalizadas */}
+                <Tabs defaultValue="espera" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2 mb-6">
+                        <TabsTrigger value="espera">
+                            Lista de Espera ({atenciones_espera.length})
+                        </TabsTrigger>
+                        <TabsTrigger value="finalizadas">
+                            Atenciones del Día ({atenciones_finalizadas.length})
+                        </TabsTrigger>
+                    </TabsList>
+
+                    {/* Pestaña Lista de Espera */}
+                    <TabsContent value="espera">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Pacientes en Lista de Espera</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                {atenciones_espera.length === 0 ? (
+                                    <div className="text-center py-12">
+                                        <Clock className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                                            No hay pacientes en espera
+                                        </h3>
+                                        <p className="text-gray-500">
+                                            No tienes pacientes pendientes de atención en este momento.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="rounded-md border">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>Fecha</TableHead>
+                                                    <TableHead>Hora</TableHead>
+                                                    <TableHead>Tipo de Atención</TableHead>
+                                                    <TableHead>Paciente</TableHead>
+                                                    <TableHead>Documento</TableHead>
+                                                    <TableHead>Estado</TableHead>
+                                                    <TableHead className="text-right">Acciones</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {atenciones_espera.map((atencion) => (
+                                                    <TableRow key={atencion.id}>
+                                                        <TableCell>{formatFecha(atencion.fecha)}</TableCell>
+                                                        <TableCell className="font-medium">{atencion.hora}</TableCell>
+                                                        <TableCell>{atencion.tipo_atencion.nombre}</TableCell>
+                                                        <TableCell>
+                                                            {atencion.persona.nombre} {atencion.persona.apellido}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {atencion.persona.numero_documento}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Badge
+                                                                className={getEstadoBadgeColor(
+                                                                    atencion.estado_atencion.nombre
+                                                                )}
+                                                            >
+                                                                {atencion.estado_atencion.nombre}
+                                                            </Badge>
+                                                        </TableCell>
+                                                        <TableCell className="text-right">
+                                                            <div className="flex justify-end gap-2">
+                                                                <Link
+                                                                    href={`/historias-clinicas/${atencion.id}/historia`}
+                                                                >
+                                                                    <Button variant="outline" size="sm">
+                                                                        <FileText className="h-4 w-4 mr-2" />
+                                                                        Ver Historia
+                                                                    </Button>
+                                                                </Link>
+                                                                <Link
+                                                                    href={`/historias-clinicas/${atencion.id}/registrar`}
+                                                                >
+                                                                    <Button size="sm">
+                                                                        <User className="h-4 w-4 mr-2" />
+                                                                        Iniciar Atención
+                                                                    </Button>
+                                                                </Link>
+                                                            </div>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+
+                    {/* Pestaña Atenciones Finalizadas */}
+                    <TabsContent value="finalizadas">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Atenciones Finalizadas del Día</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                {atenciones_finalizadas.length === 0 ? (
+                                    <div className="text-center py-12">
+                                        <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                                            No hay atenciones finalizadas
+                                        </h3>
+                                        <p className="text-gray-500">
+                                            Aún no se han finalizado atenciones en el día de hoy.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="rounded-md border">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>Fecha</TableHead>
+                                                    <TableHead>Hora</TableHead>
+                                                    <TableHead>Tipo de Atención</TableHead>
+                                                    <TableHead>Paciente</TableHead>
+                                                    <TableHead>Documento</TableHead>
+                                                    <TableHead>Estado</TableHead>
+                                                    <TableHead className="text-right">Acciones</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {atenciones_finalizadas.map((atencion) => (
+                                                    <TableRow key={atencion.id}>
+                                                        <TableCell>{formatFecha(atencion.fecha)}</TableCell>
+                                                        <TableCell className="font-medium">{atencion.hora}</TableCell>
+                                                        <TableCell>{atencion.tipo_atencion.nombre}</TableCell>
+                                                        <TableCell>
+                                                            {atencion.persona.nombre} {atencion.persona.apellido}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {atencion.persona.numero_documento}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Badge
+                                                                className={getEstadoBadgeColor(
+                                                                    atencion.estado_atencion.nombre
+                                                                )}
+                                                            >
+                                                                {atencion.estado_atencion.nombre}
+                                                            </Badge>
+                                                        </TableCell>
+                                                        <TableCell className="text-right">
+                                                            <div className="flex justify-end gap-2">
+                                                                <Link
+                                                                    href={`/historias-clinicas/detalle/${atencion.id}`}
+                                                                >
+                                                                    <Button variant="outline" size="sm">
+                                                                        <Eye className="h-4 w-4 mr-2" />
+                                                                        Ver
+                                                                    </Button>
+                                                                </Link>
+                                                                <Link
+                                                                    href={`/historias-clinicas/editar/${atencion.id}`}
+                                                                >
+                                                                    <Button variant="outline" size="sm">
+                                                                        <Pencil className="h-4 w-4 mr-2" />
+                                                                        Modificar
+                                                                    </Button>
+                                                                </Link>
+                                                            </div>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+                </Tabs>
             </div>
         </AppLayout>
     );
