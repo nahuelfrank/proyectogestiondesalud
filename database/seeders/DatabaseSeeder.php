@@ -41,9 +41,9 @@ class DatabaseSeeder extends Seeder
             EstadoAtencionSeeder::class,
             TipoAtencionSeeder::class,
             AtributoSeeder::class,
-            PersonaSeeder::class,
-            ProfesionalSeeder::class,
-            AtencionSeeder::class,
+            //PersonaSeeder::class,
+            //ProfesionalSeeder::class,
+            //AtencionSeeder::class,
             RolePermissionSeeder::class,
         ]);
     }
