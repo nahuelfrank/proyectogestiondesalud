@@ -33,7 +33,7 @@ class HistoriaClinicaController extends Controller
         $profesional->load(['persona', 'especialidad']);
 
         // Obtener las atenciones en espera del profesional
-        $atenciones = Atencion::with([
+        $atenciones_espera = Atencion::with([
             'persona.tipo_documento',
             'tipo_atencion',
             'estado_atencion',
@@ -41,14 +41,31 @@ class HistoriaClinicaController extends Controller
         ])
             ->where('profesional_id', $profesional->id)
             ->whereHas('estado_atencion', function ($query) {
-                $query->where('id', '1');
+                $query->where('id', '1'); // Estado "En Espera"
             })
             ->orderBy('fecha', 'asc')
             ->orderBy('hora', 'asc')
             ->get();
 
+        // Obtener las atenciones finalizadas del día (Atendido o Derivado)
+        $atenciones_finalizadas = Atencion::with([
+            'persona.tipo_documento',
+            'tipo_atencion',
+            'estado_atencion',
+            'servicio'
+        ])
+            ->where('profesional_id', $profesional->id)
+            ->whereHas('estado_atencion', function ($query) {
+                $query->whereIn('nombre', ['Atendido', 'Derivado']);
+            })
+            ->whereDate('fecha', today())
+            ->orderBy('hora_fin_atencion', 'desc')
+            ->orderBy('hora', 'desc')
+            ->get();
+
         return Inertia::render('historias-clinicas/ListaEsperaPage', [
-            'atenciones' => $atenciones,
+            'atenciones_espera' => $atenciones_espera,
+            'atenciones_finalizadas' => $atenciones_finalizadas,
             'profesional' => $profesional,
         ]);
     }
@@ -98,22 +115,117 @@ class HistoriaClinicaController extends Controller
     }
 
     /**
-     * Muestra el detalle de una atención específica
+     * Muestra el detalle de una atención específica con sus atributos clínicos
      */
     public function verDetalleAtencion($atencionId)
     {
         $atencion = Atencion::with([
-            'persona',
+            'persona.tipo_documento',
             'servicio',
             'tipo_atencion',
             'profesional.persona',
             'profesional.especialidad',
-            'estado_atencion'
+            'estado_atencion',
+            'atenciones_atributos.atributo' // Cargar los atributos clínicos
         ])->findOrFail($atencionId);
+
+        // Determinar el rol del profesional que registró la atención
+        $rolProfesional = $this->determinarRolProfesional($atencion->profesional->especialidad->nombre);
 
         return Inertia::render('historias-clinicas/DetalleAtencionPage', [
             'atencion' => $atencion,
+            'rol_profesional' => $rolProfesional, // NUEVO: Enviar rol al frontend
         ]);
+    }
+
+    /**
+     * Muestra el formulario para editar una atención finalizada
+     */
+    public function editarAtencionFinalizada($atencionId)
+    {
+        $user = Auth::user();
+        $profesional = $user->profesional;
+
+        $atencion = Atencion::with([
+            'persona.tipo_documento',
+            'servicio',
+            'profesional.persona',
+            'profesional.especialidad',
+            'atenciones_atributos.atributo'
+        ])->findOrFail($atencionId);
+
+        // Verificar que el profesional autenticado sea el mismo que registró la atención
+        if ($atencion->profesional_id !== $profesional->id) {
+            return redirect()->route('historias-clinicas.lista-espera')
+                ->with('error', 'No tienes permiso para editar esta atención.');
+        }
+
+        // Determinar el rol del profesional
+        $rolProfesional = $this->determinarRolProfesional($profesional->especialidad->nombre);
+
+        return Inertia::render('historias-clinicas/EditarAtencionFinalizadaPage', [
+            'atencion' => $atencion,
+            'rol_profesional' => $rolProfesional,
+        ]);
+    }
+
+    /**
+     * Actualiza una atención finalizada
+     */
+    public function actualizarAtencionFinalizada(Request $request, $atencionId)
+    {
+        $user = Auth::user();
+        $profesional = $user->profesional;
+
+        $atencion = Atencion::findOrFail($atencionId);
+
+        // Verificar que el profesional autenticado sea el mismo que registró la atención
+        if ($atencion->profesional_id !== $profesional->id) {
+            return redirect()->route('historias-clinicas.lista-espera')
+                ->with('error', 'No tienes permiso para editar esta atención.');
+        }
+
+        // Determinar el rol del profesional
+        $rolProfesional = $this->determinarRolProfesional($profesional->especialidad->nombre);
+
+        // Obtener reglas de validación según el rol (SIN derivación)
+        $reglas = $this->obtenerReglasValidacionEdicion($rolProfesional);
+
+        // Validar los datos
+        $validated = $request->validate($reglas);
+
+        DB::transaction(function () use ($validated, $atencion, $rolProfesional) {
+            // NO se actualizan las horas de inicio y fin en edición
+            // Solo se actualizan los campos clínicos
+
+            // Eliminar atributos clínicos existentes
+            DB::table('atenciones_atributos')
+                ->where('atencion_id', $atencion->id)
+                ->delete();
+
+            // Preparar y guardar los nuevos atributos según el rol
+            $atributos = $this->prepararAtributos($validated, $rolProfesional);
+
+            // Guardar atributos clínicos
+            foreach ($atributos as $nombreAtributo => $valor) {
+                if (!empty($valor)) {
+                    $atributo = Atributo::where('nombre', $nombreAtributo)->first();
+
+                    if ($atributo) {
+                        DB::table('atenciones_atributos')->insert([
+                            'atencion_id' => $atencion->id,
+                            'atributo_id' => $atributo->id,
+                            'valor' => $valor,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
+                }
+            }
+        });
+
+        return redirect()->route('historias-clinicas.lista-espera')
+            ->with('success', 'Atención actualizada correctamente.');
     }
 
     /**
@@ -222,7 +334,7 @@ class HistoriaClinicaController extends Controller
     }
 
     /**
-     * Guarda la atención registrada
+     * Guarda una nueva atención registrada
      */
     public function guardarAtencion(Request $request, $atencionId)
     {
@@ -363,6 +475,103 @@ class HistoriaClinicaController extends Controller
             default:
                 return $reglasBase;
         }
+    }
+
+    /**
+     * Obtiene las reglas de validación para edición según el rol
+     */
+    private function obtenerReglasValidacionEdicion(string $rol): array
+    {
+        // Sin reglas de derivación
+        $reglasBase = [];
+
+        switch ($rol) {
+            case 'enfermero':
+                return array_merge($reglasBase, [
+                    'respiracion' => ['required', 'numeric', 'min:0'],
+                    'pulso' => ['required', 'numeric', 'min:0'],
+                    'temperatura' => ['required', 'numeric', 'min:0'],
+                    'presion_diastolica' => ['required', 'numeric', 'min:0'],
+                    'presion_sistolica' => ['required', 'numeric', 'min:0'],
+                    'saturacion' => ['required', 'numeric', 'min:0', 'max:100'],
+                    'glucemia' => ['required', 'numeric', 'min:0'],
+                    'motivo_consulta' => ['required', 'string'],
+                    'prestacion_enfermeria' => ['required', 'string'],
+                    'observaciones' => ['nullable', 'string'],
+                ]);
+
+            case 'medico':
+                return array_merge($reglasBase, [
+                    'diagnostico_principal' => ['required', 'string'],
+                    'enfermedad_actual' => ['required', 'string'],
+                    'indicaciones' => ['required', 'string'],
+                    'examen_fisico' => ['required', 'string'],
+                    'detalle' => ['nullable', 'string'],
+                    'observaciones' => ['nullable', 'string'],
+                ]);
+
+            case 'nutricionista':
+                return array_merge($reglasBase, [
+                    'peso' => ['required', 'numeric', 'min:0'],
+                    'altura' => ['required', 'numeric', 'min:0'],
+                    'imc' => ['required', 'numeric', 'min:0'],
+                    'cintura' => ['required', 'numeric', 'min:0'],
+                    'brazo' => ['required', 'numeric', 'min:0'],
+                    'antecedentes_alimentarios' => ['required', 'string'],
+                    'ingesta_calorica_estimada' => ['required', 'numeric', 'min:0'],
+                    'diagnostico_nutricional' => ['required', 'string'],
+                    'plan_dieta' => ['required', 'string'],
+                    'recomendaciones' => ['required', 'string'],
+                ]);
+
+            case 'cardiologo':
+            case 'psicologo':
+                return array_merge($reglasBase, [
+                    'observaciones' => ['required', 'string'],
+                ]);
+
+            default:
+                return $reglasBase;
+        }
+    }
+
+    /**
+     * Prepara los datos para actualización según el rol
+     */
+    private function prepararDatosActualizacion(array $validated, string $rol): array
+    {
+        $datos = [];
+
+        switch ($rol) {
+            case 'enfermero':
+                $datos = [
+                    'motivo_de_consulta' => $validated['motivo_consulta'] ?? null,
+                    'prestacion_de_enfermeria' => $validated['prestacion_enfermeria'] ?? null,
+                    'observaciones' => $validated['observaciones'] ?? null,
+                ];
+                break;
+
+            case 'medico':
+                $datos = [
+                    'diagnostico_principal' => $validated['diagnostico_principal'] ?? null,
+                    'enfermedad_actual' => $validated['enfermedad_actual'] ?? null,
+                    'indicaciones' => $validated['indicaciones'] ?? null,
+                    'examen_fisico' => $validated['examen_fisico'] ?? null,
+                    'detalle_consulta' => $validated['detalle_consulta'] ?? null,
+                    'observaciones' => $validated['observaciones'] ?? null,
+                ];
+                break;
+
+            case 'nutricionista':
+            case 'cardiologo':
+            case 'psicologo':
+                $datos = [
+                    'observaciones' => $validated['observaciones'] ?? null,
+                ];
+                break;
+        }
+
+        return $datos;
     }
 
     /**
