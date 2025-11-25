@@ -214,9 +214,13 @@ class HistoriaClinicaController extends Controller
         $paciente = $atencion->persona;
 
         // Calcular edad
-        $fechaNacimiento = new \DateTime($paciente->fecha_de_nacimiento);
-        $hoy = new \DateTime();
-        $edad = $hoy->diff($fechaNacimiento)->y;
+        $fechaNacimiento = $paciente->fecha_de_nacimiento
+            ? new \DateTime($paciente->fecha_de_nacimiento)
+            : null;
+
+        $edad = $fechaNacimiento
+            ? (new \DateTime())->diff($fechaNacimiento)->y
+            : null;
 
         // Obtener historial de atenciones del paciente
         $historialAtenciones = Atencion::with([
@@ -226,7 +230,7 @@ class HistoriaClinicaController extends Controller
             'estado_atencion'
         ])
             ->where('persona_id', $paciente->id)
-            ->where('id', '!=', $atencionId) // Excluir la atención actual
+            ->where('id', '!=', $atencionId)
             ->orderBy('fecha', 'desc')
             ->orderBy('hora', 'desc')
             ->get();
@@ -235,10 +239,10 @@ class HistoriaClinicaController extends Controller
             'atencionActual' => $atencion,
             'paciente' => [
                 'id' => $paciente->id,
-                'nombre_completo' => $paciente->nombre . ' ' . $paciente->apellido,
+                'nombre_completo' => trim(($paciente->nombre ?? '') . ' ' . ($paciente->apellido ?? '')),
                 'edad' => $edad,
-                'genero' => $paciente->genero->nombre,
-                'tipo_documento' => $paciente->tipo_documento->nombre,
+                'genero' => $paciente->genero->nombre ?? 'No especificado',
+                'tipo_documento' => $paciente->tipo_documento->nombre ?? 'No especificado',
                 'numero_documento' => $paciente->numero_documento,
             ],
             'historialAtenciones' => $historialAtenciones,
@@ -367,6 +371,12 @@ class HistoriaClinicaController extends Controller
         $user = Auth::user();
         $profesional = $user->profesional;
 
+        // Validar que el usuario tenga un profesional asociado
+        if (!$profesional) {
+            abort(403, 'El usuario no está asociado a un profesional.');
+        }
+
+        // Cargar la atención con relaciones (todas pueden ser null)
         $atencion = Atencion::with([
             'persona.genero',
             'persona.tipo_documento',
@@ -375,8 +385,12 @@ class HistoriaClinicaController extends Controller
             'profesional.especialidad'
         ])->findOrFail($atencionId);
 
-        // Obtener servicios disponibles para derivación (excluyendo el actual)
-        // Solo servicios que tengan profesionales activos
+        // EXTRA: validar que la atención tenga persona (por si quedó huérfana)
+        if (!$atencion->persona) {
+            abort(404, 'La atención no tiene un paciente asociado.');
+        }
+
+        // Obtener servicios disponibles para derivación
         $servicios = Servicio::where('estado', 'Activo')
             ->where('id', '!=', $atencion->servicio_id)
             ->whereHas('especialidades_servicios.especialidad.profesionales', function ($query) use ($profesional) {
@@ -386,15 +400,34 @@ class HistoriaClinicaController extends Controller
             ->orderBy('nombre')
             ->get();
 
-        // Determinar el rol del profesional basado en su especialidad
-        $rolProfesional = $this->determinarRolProfesional($profesional->especialidad->nombre);
+        // Obtener especialidad del profesional sin romper si es null
+        $especialidadNombre = $profesional->especialidad->nombre ?? 'General';
+
+        // Rol seguro
+        $rolProfesional = $this->determinarRolProfesional($especialidadNombre);
+
+        // Preparar algunos datos protegidos
+        $paciente = $atencion->persona;
+        $genero = $paciente->genero->nombre ?? 'No especificado';
+        $tipoDocumento = $paciente->tipo_documento->nombre ?? 'No especificado';
 
         return Inertia::render('historias-clinicas/RegistrarAtencionPage', [
             'atencion' => $atencion,
+
+            // Enviar datos protegidos si los necesitás en el frontend
+            'paciente_info' => [
+                'id' => $paciente->id,
+                'nombre_completo' => trim(($paciente->nombre ?? '') . ' ' . ($paciente->apellido ?? '')),
+                'genero' => $genero,
+                'tipo_documento' => $tipoDocumento,
+                'numero_documento' => $paciente->numero_documento,
+            ],
+
             'servicios' => $servicios,
             'rol_profesional' => $rolProfesional,
         ]);
     }
+
 
     /**
      * Determina el rol del profesional según su especialidad

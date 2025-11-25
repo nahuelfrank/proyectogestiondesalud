@@ -878,7 +878,9 @@ export default function RegistrarAtencionPage({
                             </div>
                             <div>
                                 <p className="text-sm text-muted-foreground">Género</p>
-                                <p className="font-medium">{atencion.persona.genero.nombre}</p>
+                                <p className="font-medium">
+                                    {atencion.persona?.genero?.nombre ?? "No especificado"}
+                                </p>
                             </div>
                             <div>
                                 <p className="text-sm text-muted-foreground">Servicio</p>

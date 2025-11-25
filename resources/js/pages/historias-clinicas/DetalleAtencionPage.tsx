@@ -3,7 +3,17 @@ import { Head } from '@inertiajs/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { User, Calendar, Clock, FileText, Activity, Stethoscope, Heart, Scale, Apple } from 'lucide-react';
+import {
+    User,
+    Calendar,
+    Clock,
+    FileText,
+    Activity,
+    Stethoscope,
+    Heart,
+    Scale,
+    Apple
+} from 'lucide-react';
 
 interface Persona {
     nombre: string;
@@ -76,17 +86,16 @@ export default function DetalleAtencionPage({ atencion, rol_profesional }: Detal
     const getEstadoBadgeColor = (estado: string) => {
         switch (estado.toLowerCase()) {
             case 'en espera':
-                return 'bg-yellow-100 text-yellow-800';
+                return 'bg-yellow-200 text-yellow-900 dark:bg-yellow-900 dark:text-yellow-200';
             case 'atendido':
-                return 'bg-green-100 text-green-800';
+                return 'bg-green-200 text-green-900 dark:bg-green-900 dark:text-green-200';
             case 'derivado':
-                return 'bg-blue-100 text-blue-800';
+                return 'bg-blue-200 text-blue-900 dark:bg-blue-900 dark:text-blue-200';
             default:
-                return 'bg-gray-100 text-gray-800';
+                return 'bg-secondary text-secondary-foreground';
         }
     };
 
-    // Función para obtener valor de un atributo
     const getAtributoValor = (nombreAtributo: string): string => {
         const atributo = atencion.atenciones_atributos?.find(
             (aa) => aa.atributo.nombre === nombreAtributo
@@ -94,7 +103,10 @@ export default function DetalleAtencionPage({ atencion, rol_profesional }: Detal
         return atributo?.valor || '-';
     };
 
-    // Renderizar detalles clínicos según el rol
+    const InfoBox = ({ children }: { children: React.ReactNode }) => (
+        <p className="text-base bg-muted p-4 rounded-md">{children}</p>
+    );
+
     const renderDetallesClinicosSegunRol = () => {
         switch (rol_profesional) {
             case 'enfermero':
@@ -110,48 +122,25 @@ export default function DetalleAtencionPage({ atencion, rol_profesional }: Detal
                             </CardHeader>
                             <CardContent>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Respiración</p>
-                                        <p className="text-lg font-semibold">
-                                            {getAtributoValor('Respiración')} <span className="text-sm font-normal text-muted-foreground">rpm</span>
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Pulso</p>
-                                        <p className="text-lg font-semibold">
-                                            {getAtributoValor('Pulso')} <span className="text-sm font-normal text-muted-foreground">bpm</span>
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Temperatura</p>
-                                        <p className="text-lg font-semibold">
-                                            {getAtributoValor('Temperatura')} <span className="text-sm font-normal text-muted-foreground">°C</span>
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Presión Sistólica</p>
-                                        <p className="text-lg font-semibold">
-                                            {getAtributoValor('Presión Sistólica')} <span className="text-sm font-normal text-muted-foreground">mmHg</span>
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Presión Diastólica</p>
-                                        <p className="text-lg font-semibold">
-                                            {getAtributoValor('Presión Diastólica')} <span className="text-sm font-normal text-muted-foreground">mmHg</span>
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Saturación O2</p>
-                                        <p className="text-lg font-semibold">
-                                            {getAtributoValor('Saturación')} <span className="text-sm font-normal text-muted-foreground">%</span>
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Glucemia</p>
-                                        <p className="text-lg font-semibold">
-                                            {getAtributoValor('Glucemia')} <span className="text-sm font-normal text-muted-foreground">mg/dL</span>
-                                        </p>
-                                    </div>
+                                    {[
+                                        ['Respiración', 'rpm'],
+                                        ['Pulso', 'bpm'],
+                                        ['Temperatura', '°C'],
+                                        ['Presión Sistólica', 'mmHg'],
+                                        ['Presión Diastólica', 'mmHg'],
+                                        ['Saturación', '%'],
+                                        ['Glucemia', 'mg/dL'],
+                                    ].map(([nombre, unidad]) => (
+                                        <div key={nombre}>
+                                            <p className="text-sm text-muted-foreground">{nombre}</p>
+                                            <p className="text-lg font-semibold">
+                                                {getAtributoValor(nombre)}{' '}
+                                                <span className="text-sm font-normal text-muted-foreground">
+                                                    {unidad}
+                                                </span>
+                                            </p>
+                                        </div>
+                                    ))}
                                 </div>
                             </CardContent>
                         </Card>
@@ -165,32 +154,18 @@ export default function DetalleAtencionPage({ atencion, rol_profesional }: Detal
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div>
-                                    <p className="text-sm font-semibold text-muted-foreground mb-2">
-                                        Motivo de Consulta
-                                    </p>
-                                    <p className="text-base bg-gray-50 p-4 rounded-md">
-                                        {getAtributoValor('Motivo de Consulta')}
-                                    </p>
-                                </div>
-
-                                <div>
-                                    <p className="text-sm font-semibold text-muted-foreground mb-2">
-                                        Prestación de Enfermería
-                                    </p>
-                                    <p className="text-base bg-gray-50 p-4 rounded-md">
-                                        {getAtributoValor('Prestación de Enfermería')}
-                                    </p>
-                                </div>
-
-                                <div>
-                                    <p className="text-sm font-semibold text-muted-foreground mb-2">
-                                        Observaciones
-                                    </p>
-                                    <p className="text-base bg-gray-50 p-4 rounded-md">
-                                        {getAtributoValor('Observaciones')}
-                                    </p>
-                                </div>
+                                {[
+                                    ['Motivo de Consulta', 'Motivo de Consulta'],
+                                    ['Prestación de Enfermería', 'Prestación de Enfermería'],
+                                    ['Observaciones', 'Observaciones'],
+                                ].map(([label, key]) => (
+                                    <div key={label}>
+                                        <p className="text-sm font-semibold text-muted-foreground mb-2">
+                                            {label}
+                                        </p>
+                                        <InfoBox>{getAtributoValor(key)}</InfoBox>
+                                    </div>
+                                ))}
                             </CardContent>
                         </Card>
                     </>
@@ -206,59 +181,21 @@ export default function DetalleAtencionPage({ atencion, rol_profesional }: Detal
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div>
-                                <p className="text-sm font-semibold text-muted-foreground mb-2">
-                                    Diagnóstico Principal
-                                </p>
-                                <p className="text-base bg-gray-50 p-4 rounded-md">
-                                    {getAtributoValor('Diagnostico Principal')}
-                                </p>
-                            </div>
-
-                            <div>
-                                <p className="text-sm font-semibold text-muted-foreground mb-2">
-                                    Enfermedad Actual
-                                </p>
-                                <p className="text-base bg-gray-50 p-4 rounded-md">
-                                    {getAtributoValor('Enfermedad Actual')}
-                                </p>
-                            </div>
-
-                            <div>
-                                <p className="text-sm font-semibold text-muted-foreground mb-2">
-                                    Examen Físico
-                                </p>
-                                <p className="text-base bg-gray-50 p-4 rounded-md">
-                                    {getAtributoValor('Exámen Físico')}
-                                </p>
-                            </div>
-
-                            <div>
-                                <p className="text-sm font-semibold text-muted-foreground mb-2">
-                                    Indicaciones
-                                </p>
-                                <p className="text-base bg-gray-50 p-4 rounded-md">
-                                    {getAtributoValor('Indicaciones')}
-                                </p>
-                            </div>
-
-                            <div>
-                                <p className="text-sm font-semibold text-muted-foreground mb-2">
-                                    Detalle de la Consulta
-                                </p>
-                                <p className="text-base bg-gray-50 p-4 rounded-md">
-                                    {getAtributoValor('Detalle')}
-                                </p>
-                            </div>
-
-                            <div>
-                                <p className="text-sm font-semibold text-muted-foreground mb-2">
-                                    Observaciones
-                                </p>
-                                <p className="text-base bg-gray-50 p-4 rounded-md">
-                                    {getAtributoValor('Observaciones')}
-                                </p>
-                            </div>
+                            {[
+                                ['Diagnóstico Principal', 'Diagnostico Principal'],
+                                ['Enfermedad Actual', 'Enfermedad Actual'],
+                                ['Examen Físico', 'Exámen Físico'],
+                                ['Indicaciones', 'Indicaciones'],
+                                ['Detalle de la Consulta', 'Detalle'],
+                                ['Observaciones', 'Observaciones'],
+                            ].map(([label, key]) => (
+                                <div key={label}>
+                                    <p className="text-sm font-semibold text-muted-foreground mb-2">
+                                        {label}
+                                    </p>
+                                    <InfoBox>{getAtributoValor(key)}</InfoBox>
+                                </div>
+                            ))}
                         </CardContent>
                     </Card>
                 );
@@ -276,42 +213,24 @@ export default function DetalleAtencionPage({ atencion, rol_profesional }: Detal
                             </CardHeader>
                             <CardContent>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Peso</p>
-                                        <p className="text-lg font-semibold">
-                                            {getAtributoValor('Peso')} <span className="text-sm font-normal text-muted-foreground">kg</span>
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Altura</p>
-                                        <p className="text-lg font-semibold">
-                                            {getAtributoValor('Altura')} <span className="text-sm font-normal text-muted-foreground">cm</span>
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">IMC</p>
-                                        <p className="text-lg font-semibold">
-                                            {getAtributoValor('Índice de Masa Corporal')} <span className="text-sm font-normal text-muted-foreground">kg/m²</span>
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Cintura</p>
-                                        <p className="text-lg font-semibold">
-                                            {getAtributoValor('Cintura')} <span className="text-sm font-normal text-muted-foreground">cm</span>
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Brazo</p>
-                                        <p className="text-lg font-semibold">
-                                            {getAtributoValor('Brazo')} <span className="text-sm font-normal text-muted-foreground">cm</span>
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Ingesta Calórica</p>
-                                        <p className="text-lg font-semibold">
-                                            {getAtributoValor('Ingesta Calórica Estimada')} <span className="text-sm font-normal text-muted-foreground">kcal</span>
-                                        </p>
-                                    </div>
+                                    {[
+                                        ['Peso', 'kg'],
+                                        ['Altura', 'cm'],
+                                        ['Índice de Masa Corporal', 'kg/m²'],
+                                        ['Cintura', 'cm'],
+                                        ['Brazo', 'cm'],
+                                        ['Ingesta Calórica Estimada', 'kcal'],
+                                    ].map(([nombre, unidad]) => (
+                                        <div key={nombre}>
+                                            <p className="text-sm text-muted-foreground">{nombre}</p>
+                                            <p className="text-lg font-semibold">
+                                                {getAtributoValor(nombre)}{' '}
+                                                <span className="text-sm font-normal text-muted-foreground">
+                                                    {unidad}
+                                                </span>
+                                            </p>
+                                        </div>
+                                    ))}
                                 </div>
                             </CardContent>
                         </Card>
@@ -325,41 +244,19 @@ export default function DetalleAtencionPage({ atencion, rol_profesional }: Detal
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div>
-                                    <p className="text-sm font-semibold text-muted-foreground mb-2">
-                                        Antecedentes Alimentarios
-                                    </p>
-                                    <p className="text-base bg-gray-50 p-4 rounded-md">
-                                        {getAtributoValor('Antecedentes Alimentarios')}
-                                    </p>
-                                </div>
-
-                                <div>
-                                    <p className="text-sm font-semibold text-muted-foreground mb-2">
-                                        Diagnóstico Nutricional
-                                    </p>
-                                    <p className="text-base bg-gray-50 p-4 rounded-md">
-                                        {getAtributoValor('Diagnostico Nutricional')}
-                                    </p>
-                                </div>
-
-                                <div>
-                                    <p className="text-sm font-semibold text-muted-foreground mb-2">
-                                        Plan de Dieta
-                                    </p>
-                                    <p className="text-base bg-gray-50 p-4 rounded-md">
-                                        {getAtributoValor('Plan de Dieta')}
-                                    </p>
-                                </div>
-
-                                <div>
-                                    <p className="text-sm font-semibold text-muted-foreground mb-2">
-                                        Recomendaciones
-                                    </p>
-                                    <p className="text-base bg-gray-50 p-4 rounded-md">
-                                        {getAtributoValor('Recomendaciones')}
-                                    </p>
-                                </div>
+                                {[
+                                    ['Antecedentes Alimentarios', 'Antecedentes Alimentarios'],
+                                    ['Diagnóstico Nutricional', 'Diagnostico Nutricional'],
+                                    ['Plan de Dieta', 'Plan de Dieta'],
+                                    ['Recomendaciones', 'Recomendaciones'],
+                                ].map(([label, key]) => (
+                                    <div key={label}>
+                                        <p className="text-sm font-semibold text-muted-foreground mb-2">
+                                            {label}
+                                        </p>
+                                        <InfoBox>{getAtributoValor(key)}</InfoBox>
+                                    </div>
+                                ))}
                             </CardContent>
                         </Card>
                     </>
@@ -379,9 +276,7 @@ export default function DetalleAtencionPage({ atencion, rol_profesional }: Detal
                                 <p className="text-sm font-semibold text-muted-foreground mb-2">
                                     Observaciones
                                 </p>
-                                <p className="text-base bg-gray-50 p-4 rounded-md">
-                                    {getAtributoValor('Observaciones')}
-                                </p>
+                                <InfoBox>{getAtributoValor('Observaciones')}</InfoBox>
                             </div>
                         </CardContent>
                     </Card>
@@ -424,6 +319,7 @@ export default function DetalleAtencionPage({ atencion, rol_profesional }: Detal
                                     {formatFecha(atencion.fecha)}
                                 </p>
                             </div>
+
                             <div>
                                 <p className="text-sm text-muted-foreground">Hora de Registro</p>
                                 <p className="text-lg font-semibold flex items-center gap-2">
@@ -431,14 +327,21 @@ export default function DetalleAtencionPage({ atencion, rol_profesional }: Detal
                                     {atencion.hora}
                                 </p>
                             </div>
+
                             <div>
                                 <p className="text-sm text-muted-foreground">Servicio</p>
-                                <p className="text-lg font-semibold">{atencion.servicio.nombre}</p>
+                                <p className="text-lg font-semibold">
+                                    {atencion.servicio.nombre}
+                                </p>
                             </div>
+
                             <div>
                                 <p className="text-sm text-muted-foreground">Tipo de Atención</p>
-                                <p className="text-lg font-semibold">{atencion.tipo_atencion.nombre}</p>
+                                <p className="text-lg font-semibold">
+                                    {atencion.tipo_atencion.nombre}
+                                </p>
                             </div>
+
                             <div>
                                 <p className="text-sm text-muted-foreground">Estado</p>
                                 <Badge className={getEstadoBadgeColor(atencion.estado_atencion.nombre)}>
@@ -465,6 +368,7 @@ export default function DetalleAtencionPage({ atencion, rol_profesional }: Detal
                                     {atencion.persona.nombre} {atencion.persona.apellido}
                                 </p>
                             </div>
+
                             <div>
                                 <p className="text-sm text-muted-foreground">Documento</p>
                                 <p className="text-lg font-semibold">
@@ -476,7 +380,7 @@ export default function DetalleAtencionPage({ atencion, rol_profesional }: Detal
                     </CardContent>
                 </Card>
 
-                {/* Profesional que Atendió */}
+                {/* Profesional */}
                 <Card className="mb-6">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
@@ -493,6 +397,7 @@ export default function DetalleAtencionPage({ atencion, rol_profesional }: Detal
                                     {atencion.profesional.persona.apellido}
                                 </p>
                             </div>
+
                             <div>
                                 <p className="text-sm text-muted-foreground">Especialidad</p>
                                 <p className="text-lg font-semibold">
@@ -503,7 +408,7 @@ export default function DetalleAtencionPage({ atencion, rol_profesional }: Detal
                     </CardContent>
                 </Card>
 
-                {/* Horarios de Atención */}
+                {/* Horarios */}
                 {(atencion.hora_inicio_atencion || atencion.hora_fin_atencion) && (
                     <Card className="mb-6">
                         <CardHeader>
@@ -522,6 +427,7 @@ export default function DetalleAtencionPage({ atencion, rol_profesional }: Detal
                                         </p>
                                     </div>
                                 )}
+
                                 {atencion.hora_fin_atencion && (
                                     <div>
                                         <p className="text-sm text-muted-foreground">Fin de Atención</p>
@@ -535,11 +441,11 @@ export default function DetalleAtencionPage({ atencion, rol_profesional }: Detal
                     </Card>
                 )}
 
-                {/* Detalles Clínicos según Rol */}
+                {/* Sección dinámica por rol */}
                 {renderDetallesClinicosSegunRol()}
 
-                {/* Botones de Acción */}
-                <div className="flex justify-end gap-4">
+                {/* Botón Volver */}
+                <div className="flex justify-end">
                     <Button variant="outline" onClick={() => window.history.back()}>
                         Volver
                     </Button>

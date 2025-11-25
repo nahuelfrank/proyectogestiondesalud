@@ -277,6 +277,8 @@ export default function AtencionCreatePage({
             p => p.id === parseInt(data.profesional_id)
         );
 
+        console.log(diaSemana);
+
         console.log("dispo horarias:", profesional?.disponibilidades_horarias);
 
         if (!profesional?.disponibilidades_horarias) return true;
