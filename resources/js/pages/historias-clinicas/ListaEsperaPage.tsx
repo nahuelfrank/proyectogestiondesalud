@@ -356,7 +356,6 @@ export default function ListaEsperaPage({
                                                             {atencion.persona.nombre} {atencion.persona.apellido}
                                                         </TableCell>
                                                         <TableCell>
-                                                            {atencion.persona.tipo_documento.nombre}{' '}
                                                             {atencion.persona.numero_documento}
                                                         </TableCell>
                                                         <TableCell>{atencion.servicio.nombre}</TableCell>
@@ -439,7 +438,6 @@ export default function ListaEsperaPage({
                                                             {atencion.persona.nombre} {atencion.persona.apellido}
                                                         </TableCell>
                                                         <TableCell>
-                                                            {atencion.persona.tipo_documento.nombre}{' '}
                                                             {atencion.persona.numero_documento}
                                                         </TableCell>
                                                         <TableCell>{atencion.servicio.nombre}</TableCell>

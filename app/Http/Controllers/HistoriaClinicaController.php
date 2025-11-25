@@ -439,7 +439,7 @@ class HistoriaClinicaController extends Controller
             'disponibilidades_horarias.dia'
         ])
             ->whereIn('especialidad_id', $especialidadesIds)
-            ->where('estado', 'activo')
+            ->where('estado', 'Activo')
             ->where('id', '!=', $profesionalActual->id)
             ->get()
             ->map(function ($profesional) {
