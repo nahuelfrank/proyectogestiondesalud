@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Atencion;
 use App\Models\Atributo;
+use App\Models\Especialidad;
 use App\Models\Persona;
 use App\Models\Profesional;
 use App\Models\Servicio;
@@ -18,9 +19,135 @@ class HistoriaClinicaController extends Controller
     /**
      * Muestra la lista de espera del profesional autenticado
      */
-    public function listaEspera()
+    /**
+     * Muestra la lista de espera del profesional autenticado
+     * O de todos los profesionales si es super-admin con filtros
+     */
+    public function listaEspera(Request $request)
     {
-        // Obtener el profesional del usuario autenticado
+        $user = Auth::user();
+
+        // Verificar si es super-admin
+        $isSuperAdmin = $user->can('ver-todas-listas-espera');
+
+        if ($isSuperAdmin) {
+            return $this->listaEsperaSuperAdmin($request);
+        }
+
+        // Lógica normal para profesionales
+        return $this->listaEsperaProfesional();
+    }
+
+    /**
+     * Lista de espera para super-admin con filtros
+     * VERSIÓN SIMPLIFICADA - Compatible con PostgreSQL
+     */
+    private function listaEsperaSuperAdmin(Request $request)
+    {
+        // Obtener todas las especialidades que tengan profesionales activos
+        $especialidadesConProfesionales = Profesional::where('estado', 'Activo')
+            ->whereNull('deleted_at')
+            ->pluck('especialidad_id')
+            ->unique();
+
+        $especialidades = Especialidad::whereIn('id', $especialidadesConProfesionales)
+            ->orderBy('nombre')
+            ->get()
+            ->map(function ($especialidad) {
+                // Contar profesionales activos manualmente
+                $especialidad->profesionales_count = Profesional::where('especialidad_id', $especialidad->id)
+                    ->where('estado', 'Activo')
+                    ->whereNull('deleted_at')
+                    ->count();
+                return $especialidad;
+            });
+
+        // Obtener filtros
+        $especialidadId = $request->input('especialidad');
+        $profesionalId = $request->input('profesional');
+
+        // Variables para la vista
+        $profesionalesDeEspecialidad = null;
+        $profesionalSeleccionado = null;
+
+        // Query base para atenciones
+        $queryEspera = Atencion::with([
+            'persona.tipo_documento',
+            'tipo_atencion',
+            'estado_atencion',
+            'servicio'
+        ])->whereHas('estado_atencion', function ($query) {
+            $query->where('id', '1'); // Estado "En Espera"
+        });
+
+        $queryFinalizadas = Atencion::with([
+            'persona.tipo_documento',
+            'tipo_atencion',
+            'estado_atencion',
+            'servicio'
+        ])->whereHas('estado_atencion', function ($query) {
+            $query->whereIn('nombre', ['Atendido', 'Derivado']);
+        })->whereDate('fecha', today());
+
+        // Aplicar filtros
+        if ($especialidadId) {
+            // Si hay especialidad seleccionada, obtener profesionales de esa especialidad
+            $profesionalesDeEspecialidad = Profesional::with(['persona', 'especialidad'])
+                ->where('especialidad_id', $especialidadId)
+                ->where('estado', 'Activo')
+                ->whereNull('deleted_at')
+                ->orderBy('id')
+                ->get();
+
+            if ($profesionalId && $profesionalId !== 'todos') {
+                // Filtrar por profesional específico
+                $queryEspera->where('profesional_id', $profesionalId);
+                $queryFinalizadas->where('profesional_id', $profesionalId);
+
+                $profesionalSeleccionado = Profesional::with(['persona', 'especialidad'])
+                    ->find($profesionalId);
+            } else {
+                // Filtrar por todos los profesionales de la especialidad
+                $profesionalesIds = $profesionalesDeEspecialidad->pluck('id');
+
+                if ($profesionalesIds->isNotEmpty()) {
+                    $queryEspera->whereIn('profesional_id', $profesionalesIds);
+                    $queryFinalizadas->whereIn('profesional_id', $profesionalesIds);
+                } else {
+                    // Si no hay profesionales, devolver colecciones vacías
+                    $queryEspera->whereRaw('1 = 0'); // Forzar resultado vacío
+                    $queryFinalizadas->whereRaw('1 = 0'); // Forzar resultado vacío
+                }
+            }
+        }
+
+        // Ejecutar queries
+        $atenciones_espera = $queryEspera
+            ->orderBy('fecha', 'asc')
+            ->orderBy('hora', 'asc')
+            ->get();
+
+        $atenciones_finalizadas = $queryFinalizadas
+            ->orderBy('hora_fin_atencion', 'desc')
+            ->orderBy('hora', 'desc')
+            ->get();
+
+        return Inertia::render('historias-clinicas/ListaEsperaPage', [
+            'atenciones_espera' => $atenciones_espera,
+            'atenciones_finalizadas' => $atenciones_finalizadas,
+            'profesional' => $profesionalSeleccionado, // null si no hay selección específica
+            'especialidades' => $especialidades,
+            'especialidad_seleccionada' => $especialidadId ? (int)$especialidadId : null,
+            'profesionales_de_especialidad' => $profesionalesDeEspecialidad,
+            'profesional_seleccionado' => $profesionalId && $profesionalId !== 'todos' ? (int)$profesionalId : null,
+        ]);
+    }
+
+    /**
+     * Lista de espera para profesional normal (sin cambios)
+     */
+    private function listaEsperaProfesional()
+    {
         $user = Auth::user();
         $profesional = $user->profesional;
 
@@ -67,6 +194,10 @@ class HistoriaClinicaController extends Controller
             'atenciones_espera' => $atenciones_espera,
             'atenciones_finalizadas' => $atenciones_finalizadas,
             'profesional' => $profesional,
+            'especialidades' => null, // No se envían para profesionales normales
+            'especialidad_seleccionada' => null,
+            'profesionales_de_especialidad' => null,
+            'profesional_seleccionado' => null,
         ]);
     }
 

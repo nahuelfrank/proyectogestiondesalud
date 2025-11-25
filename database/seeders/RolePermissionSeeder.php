@@ -79,6 +79,11 @@ class RolePermissionSeeder extends Seeder
             'editar usuarios',
             'eliminar usuarios',
 
+            // ==========================================
+            // NUEVO: Permiso para super-admin
+            // ==========================================
+            // Permite ver todas las listas de espera con filtros
+            'ver-todas-listas-espera',
         ];
 
         // Crear todos los permisos definidos
@@ -95,7 +100,7 @@ class RolePermissionSeeder extends Seeder
         $profesional = Role::firstOrCreate(['name' => 'profesional']);
         $administrativo = Role::firstOrCreate(['name' => 'administrativo']);
 
-        // Super Admin - Tiene TODOS los permisos
+        // Super Admin - Tiene TODOS los permisos (incluyendo el nuevo)
         $superAdmin->syncPermissions(Permission::all());
 
         // Profesional - Puede trabajar con pacientes y atenciones
@@ -158,5 +163,10 @@ class RolePermissionSeeder extends Seeder
         //    - Editar desde la interfaz
         //    - Eliminar
         //    - Modificar sus permisos (siempre tiene todos)
+        //
+        // 5. NUEVO PERMISO 'ver-todas-listas-espera':
+        //    - Permite al super-admin ver listas de espera de cualquier profesional
+        //    - Incluye filtros por especialidad y profesional
+        //    - Solo asignado al rol 'super-admin'
     }
 }

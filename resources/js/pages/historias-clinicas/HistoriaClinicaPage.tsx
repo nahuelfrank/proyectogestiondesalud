@@ -186,7 +186,7 @@ export default function HistoriaClinicaPage({
                                                 </TableCell>
                                                 <TableCell className="text-right">
                                                     <Link
-                                                        href={`/historias-clinicas/atenciones/${atencion.id}/detalle`}
+                                                        href={`/historias-clinicas/detalle/${atencion.id}`}
                                                     >
                                                         <Button variant="ghost" size="sm">
                                                             <Eye className="h-4 w-4 mr-2" />

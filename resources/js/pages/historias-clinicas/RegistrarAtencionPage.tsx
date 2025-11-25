@@ -353,6 +353,187 @@ export default function RegistrarAtencionPage({
                                 </Field>
                             </CardContent>
                         </Card>
+
+                        {/* Derivación */}
+                        <Card>
+                            <CardHeader>
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <CardTitle>Derivación</CardTitle>
+                                        <p className="text-sm text-muted-foreground mt-1">
+                                            ¿Desea derivar esta atención a otro profesional o servicio?
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <Switch
+                                            id="derivar"
+                                            checked={data.derivar}
+                                            onCheckedChange={(checked) => {
+                                                setData('derivar', checked);
+                                                if (!checked) {
+                                                    setData('derivacion', { servicio_id: '', profesional_id: '' });
+                                                    setProfesionales([]);
+                                                    setProfesionalSeleccionado(null);
+                                                }
+                                            }}
+                                        />
+                                        <Label htmlFor="derivar">Derivar atención</Label>
+                                    </div>
+                                </div>
+                            </CardHeader>
+
+                            {data.derivar && (
+                                <CardContent className="space-y-4">
+                                    <Alert>
+                                        <AlertCircle className="h-4 w-4" />
+                                        <AlertDescription>
+                                            Al confirmar la derivación, se completará el registro actual y se creará
+                                            automáticamente una nueva atención en estado "En espera" para el profesional
+                                            seleccionado.
+                                        </AlertDescription>
+                                    </Alert>
+
+                                    {servicios.length === 0 ? (
+                                        <Alert variant="destructive">
+                                            <AlertCircle className="h-4 w-4" />
+                                            <AlertDescription>
+                                                No hay servicios disponibles para derivación. Todos los servicios están ocupados
+                                                o no tienen profesionales activos en este momento.
+                                            </AlertDescription>
+                                        </Alert>
+                                    ) : (
+                                        <>
+                                            <Field>
+                                                <FieldLabel>
+                                                    Servicio de Destino <span className="text-red-500">*</span>
+                                                </FieldLabel>
+                                                <Select
+                                                    value={data.derivacion.servicio_id}
+                                                    onValueChange={(value) =>
+                                                        setData('derivacion', { ...data.derivacion, servicio_id: value, profesional_id: '' })
+                                                    }
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Seleccione un servicio" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {servicios.map((servicio) => (
+                                                            <SelectItem key={servicio.id} value={String(servicio.id)}>
+                                                                {servicio.nombre}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                {errors['derivacion.servicio_id'] && (
+                                                    <FieldError>{errors['derivacion.servicio_id']}</FieldError>
+                                                )}
+                                            </Field>
+
+                                            {data.derivacion.servicio_id && profesionales.length > 0 && (
+                                                <Field>
+                                                    <FieldLabel>
+                                                        Profesional <span className="text-red-500">*</span>
+                                                    </FieldLabel>
+                                                    <Select
+                                                        value={data.derivacion.profesional_id}
+                                                        onValueChange={(value) =>
+                                                            setData('derivacion', {
+                                                                ...data.derivacion,
+                                                                profesional_id: value,
+                                                            })
+                                                        }
+                                                    >
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Seleccione un profesional" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {profesionales.map((profesional) => (
+                                                                <SelectItem key={profesional.id} value={String(profesional.id)}>
+                                                                    <div className="flex items-center gap-2">
+                                                                        {profesional.disponible ? (
+                                                                            <CheckCircle className="h-4 w-4 text-green-500" />
+                                                                        ) : (
+                                                                            <XCircle className="h-4 w-4 text-red-500" />
+                                                                        )}
+                                                                        <span>
+                                                                            {profesional.nombre_completo} - {profesional.especialidad}
+                                                                        </span>
+                                                                    </div>
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    {errors['derivacion.profesional_id'] && (
+                                                        <FieldError>{errors['derivacion.profesional_id']}</FieldError>
+                                                    )}
+                                                </Field>
+                                            )}
+
+                                            {data.derivacion.servicio_id && profesionales.length === 0 && (
+                                                <Alert>
+                                                    <AlertCircle className="h-4 w-4" />
+                                                    <AlertDescription>
+                                                        No hay profesionales disponibles para el servicio seleccionado.
+                                                    </AlertDescription>
+                                                </Alert>
+                                            )}
+
+                                            {/* Horarios del Profesional Seleccionado */}
+                                            {profesionalSeleccionado && (
+                                                <Card className="border-blue-200 bg-blue-50">
+                                                    <CardHeader>
+                                                        <CardTitle className="text-sm flex items-center gap-2">
+                                                            <UserCheck className="h-4 w-4" />
+                                                            Horarios de Atención - {profesionalSeleccionado.nombre_completo}
+                                                        </CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent>
+                                                        {profesionalSeleccionado.horarios.length > 0 ? (
+                                                            <>
+                                                                <div className="space-y-2">
+                                                                    {profesionalSeleccionado.horarios.map((horario, index) => (
+                                                                        <div
+                                                                            key={index}
+                                                                            className="flex items-center justify-between text-sm"
+                                                                        >
+                                                                            <span className="font-medium">{horario.dia}</span>
+                                                                            <Badge variant="outline">
+                                                                                {horario.hora_inicio} - {horario.hora_fin}
+                                                                            </Badge>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                                <div className="mt-4 flex items-center gap-2">
+                                                                    {profesionalSeleccionado.disponible ? (
+                                                                        <>
+                                                                            <CheckCircle className="h-4 w-4 text-green-500" />
+                                                                            <span className="text-sm text-green-700 font-medium">
+                                                                                Disponible en este momento
+                                                                            </span>
+                                                                        </>
+                                                                    ) : (
+                                                                        <>
+                                                                            <XCircle className="h-4 w-4 text-red-500" />
+                                                                            <span className="text-sm text-red-700 font-medium">
+                                                                                No disponible (fuera de horario de atención)
+                                                                            </span>
+                                                                        </>
+                                                                    )}
+                                                                </div>
+                                                            </>
+                                                        ) : (
+                                                            <p className="text-sm text-muted-foreground">
+                                                                No hay horarios configurados para este profesional.
+                                                            </p>
+                                                        )}
+                                                    </CardContent>
+                                                </Card>
+                                            )}
+                                        </>
+                                    )}
+                                </CardContent>
+                            )}
+                        </Card>
                     </>
                 );
 
@@ -725,187 +906,6 @@ export default function RegistrarAtencionPage({
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Campos según el rol */}
                     {renderCamposPorRol()}
-
-                    {/* Derivación */}
-                    <Card>
-                        <CardHeader>
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <CardTitle>Derivación</CardTitle>
-                                    <p className="text-sm text-muted-foreground mt-1">
-                                        ¿Desea derivar esta atención a otro profesional o servicio?
-                                    </p>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <Switch
-                                        id="derivar"
-                                        checked={data.derivar}
-                                        onCheckedChange={(checked) => {
-                                            setData('derivar', checked);
-                                            if (!checked) {
-                                                setData('derivacion', { servicio_id: '', profesional_id: '' });
-                                                setProfesionales([]);
-                                                setProfesionalSeleccionado(null);
-                                            }
-                                        }}
-                                    />
-                                    <Label htmlFor="derivar">Derivar atención</Label>
-                                </div>
-                            </div>
-                        </CardHeader>
-
-                        {data.derivar && (
-                            <CardContent className="space-y-4">
-                                <Alert>
-                                    <AlertCircle className="h-4 w-4" />
-                                    <AlertDescription>
-                                        Al confirmar la derivación, se completará el registro actual y se creará
-                                        automáticamente una nueva atención en estado "En espera" para el profesional
-                                        seleccionado.
-                                    </AlertDescription>
-                                </Alert>
-
-                                {servicios.length === 0 ? (
-                                    <Alert variant="destructive">
-                                        <AlertCircle className="h-4 w-4" />
-                                        <AlertDescription>
-                                            No hay servicios disponibles para derivación. Todos los servicios están ocupados
-                                            o no tienen profesionales activos en este momento.
-                                        </AlertDescription>
-                                    </Alert>
-                                ) : (
-                                    <>
-                                        <Field>
-                                            <FieldLabel>
-                                                Servicio de Destino <span className="text-red-500">*</span>
-                                            </FieldLabel>
-                                            <Select
-                                                value={data.derivacion.servicio_id}
-                                                onValueChange={(value) =>
-                                                    setData('derivacion', { ...data.derivacion, servicio_id: value, profesional_id: '' })
-                                                }
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Seleccione un servicio" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {servicios.map((servicio) => (
-                                                        <SelectItem key={servicio.id} value={String(servicio.id)}>
-                                                            {servicio.nombre}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            {errors['derivacion.servicio_id'] && (
-                                                <FieldError>{errors['derivacion.servicio_id']}</FieldError>
-                                            )}
-                                        </Field>
-
-                                        {data.derivacion.servicio_id && profesionales.length > 0 && (
-                                            <Field>
-                                                <FieldLabel>
-                                                    Profesional <span className="text-red-500">*</span>
-                                                </FieldLabel>
-                                                <Select
-                                                    value={data.derivacion.profesional_id}
-                                                    onValueChange={(value) =>
-                                                        setData('derivacion', {
-                                                            ...data.derivacion,
-                                                            profesional_id: value,
-                                                        })
-                                                    }
-                                                >
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Seleccione un profesional" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {profesionales.map((profesional) => (
-                                                            <SelectItem key={profesional.id} value={String(profesional.id)}>
-                                                                <div className="flex items-center gap-2">
-                                                                    {profesional.disponible ? (
-                                                                        <CheckCircle className="h-4 w-4 text-green-500" />
-                                                                    ) : (
-                                                                        <XCircle className="h-4 w-4 text-red-500" />
-                                                                    )}
-                                                                    <span>
-                                                                        {profesional.nombre_completo} - {profesional.especialidad}
-                                                                    </span>
-                                                                </div>
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                                {errors['derivacion.profesional_id'] && (
-                                                    <FieldError>{errors['derivacion.profesional_id']}</FieldError>
-                                                )}
-                                            </Field>
-                                        )}
-
-                                        {data.derivacion.servicio_id && profesionales.length === 0 && (
-                                            <Alert>
-                                                <AlertCircle className="h-4 w-4" />
-                                                <AlertDescription>
-                                                    No hay profesionales disponibles para el servicio seleccionado.
-                                                </AlertDescription>
-                                            </Alert>
-                                        )}
-
-                                        {/* Horarios del Profesional Seleccionado */}
-                                        {profesionalSeleccionado && (
-                                            <Card className="border-blue-200 bg-blue-50">
-                                                <CardHeader>
-                                                    <CardTitle className="text-sm flex items-center gap-2">
-                                                        <UserCheck className="h-4 w-4" />
-                                                        Horarios de Atención - {profesionalSeleccionado.nombre_completo}
-                                                    </CardTitle>
-                                                </CardHeader>
-                                                <CardContent>
-                                                    {profesionalSeleccionado.horarios.length > 0 ? (
-                                                        <>
-                                                            <div className="space-y-2">
-                                                                {profesionalSeleccionado.horarios.map((horario, index) => (
-                                                                    <div
-                                                                        key={index}
-                                                                        className="flex items-center justify-between text-sm"
-                                                                    >
-                                                                        <span className="font-medium">{horario.dia}</span>
-                                                                        <Badge variant="outline">
-                                                                            {horario.hora_inicio} - {horario.hora_fin}
-                                                                        </Badge>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                            <div className="mt-4 flex items-center gap-2">
-                                                                {profesionalSeleccionado.disponible ? (
-                                                                    <>
-                                                                        <CheckCircle className="h-4 w-4 text-green-500" />
-                                                                        <span className="text-sm text-green-700 font-medium">
-                                                                            Disponible en este momento
-                                                                        </span>
-                                                                    </>
-                                                                ) : (
-                                                                    <>
-                                                                        <XCircle className="h-4 w-4 text-red-500" />
-                                                                        <span className="text-sm text-red-700 font-medium">
-                                                                            No disponible (fuera de horario de atención)
-                                                                        </span>
-                                                                    </>
-                                                                )}
-                                                            </div>
-                                                        </>
-                                                    ) : (
-                                                        <p className="text-sm text-muted-foreground">
-                                                            No hay horarios configurados para este profesional.
-                                                        </p>
-                                                    )}
-                                                </CardContent>
-                                            </Card>
-                                        )}
-                                    </>
-                                )}
-                            </CardContent>
-                        )}
-                    </Card>
 
                     {/* Botones */}
                     <div className="flex justify-end gap-4">
