@@ -27,11 +27,18 @@ interface AtencionIndexPageProps {
         sort?: string;
         direction?: "asc" | "desc";
     };
+    flash: {
+        success?: string;
+        error?: string;
+    };
 }
 
-export default function AtencionCompletedListPage({ items, meta, filters }: AtencionIndexPageProps) {
+export default function AtencionCompletedListPage({ items, meta, filters, flash }: AtencionIndexPageProps) {
 
     useEffect(() => {
+
+        if (flash?.success || flash?.error) return; // No recargar si hay mensaje
+
         const interval = setInterval(() => {
             router.reload({
                 only: ["items", "meta"],
@@ -39,7 +46,7 @@ export default function AtencionCompletedListPage({ items, meta, filters }: Aten
         }, 2500);
 
         return () => clearInterval(interval);
-    }, []);
+    }, [flash]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

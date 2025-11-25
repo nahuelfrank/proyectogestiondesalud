@@ -37,7 +37,16 @@ const personaSchema = z.object({
     nombre: z.string().min(1, "El nombre es obligatorio."),
     apellido: z.string().min(1, "El apellido es obligatorio."),
     numero_documento: z.string().min(1, "El número de documento es obligatorio."),
-    fecha_de_nacimiento: z.string().min(1, "La fecha de nacimiento es obligatoria."),
+    fecha_de_nacimiento: z
+        .string()
+        .min(1, "La fecha de nacimiento es obligatoria.")
+        .refine((value) => {
+            const hoy = new Date();
+            const fecha = new Date(value + "T00:00:00"); // normalizar
+            return fecha <= hoy;
+        }, {
+            message: "La fecha de nacimiento no puede ser futura.",
+        }),
     domicilio: z.string().optional(),
     lugar_de_nacimiento: z.string().optional(),
     telefono_fijo: z.string().optional(),

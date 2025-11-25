@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { PlusIcon, TrashIcon, Undo2 } from 'lucide-react';
 import { z } from 'zod';
 import { PersonaEditPageProps } from '@/types/personas/persona';
+import BackButton from '@/components/back-button';
 
 // Schema de validación con Zod (mismo que en el formulario de creación)
 const dependenciaSchema = z.object({
@@ -36,7 +37,16 @@ const personaSchema = z.object({
     nombre: z.string().min(1, "El nombre es obligatorio."),
     apellido: z.string().min(1, "El apellido es obligatorio."),
     numero_documento: z.string().min(1, "El número de documento es obligatorio."),
-    fecha_de_nacimiento: z.string().min(1, "La fecha de nacimiento es obligatoria."),
+    fecha_de_nacimiento: z
+        .string()
+        .min(1, "La fecha de nacimiento es obligatoria.")
+        .refine((value) => {
+            const hoy = new Date();
+            const fecha = new Date(value + "T00:00:00"); // normalizar
+            return fecha <= hoy;
+        }, {
+            message: "La fecha de nacimiento no puede ser futura.",
+        }),
     domicilio: z.string().optional(),
     lugar_de_nacimiento: z.string().optional(),
     telefono_fijo: z.string().optional(),
@@ -263,20 +273,7 @@ export default function PersonaEditPage({
                         </p>
 
                     )}
-
-                    <Button
-                        onClick={() => {
-                            if (document.referrer) {
-                                router.visit(document.referrer);
-                            } else {
-                                router.visit(personas.index.url()); // fallback si entra directo por URL
-                            }
-                        }}
-                        className="flex items-center gap-2"
-                    >
-                        <Undo2 className="h-4 w-4" />
-                        Volver
-                    </Button>
+                    <BackButton fallback={personas.index.url()}></BackButton>
                 </div>
 
 

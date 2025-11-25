@@ -35,7 +35,11 @@ class UpdatePersonaRequest extends FormRequest
                 'string',
                 Rule::unique('personas', 'numero_documento')->ignore($this->route('persona'))
             ],
-            'fecha_de_nacimiento' => ['required', 'date'],
+            'fecha_de_nacimiento' => [
+                'required',
+                'date',
+                'before_or_equal:today',
+            ],
             'domicilio' => ['nullable', 'string'],
             'lugar_de_nacimiento' => ['nullable', 'string'],
             'telefono_fijo' => ['nullable', 'string'],
@@ -90,6 +94,7 @@ class UpdatePersonaRequest extends FormRequest
             // Fecha de nacimiento
             'fecha_de_nacimiento.required' => 'La fecha de nacimiento es obligatoria.',
             'fecha_de_nacimiento.date' => 'La fecha de nacimiento no tiene un formato válido.',
+            'before_or_equal' => 'La :attribute no puede ser una fecha futura.',
 
             // Domicilio
             'domicilio.string' => 'El domicilio debe ser una cadena de texto.',

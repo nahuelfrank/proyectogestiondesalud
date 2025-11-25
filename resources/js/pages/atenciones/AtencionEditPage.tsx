@@ -15,8 +15,9 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { useState } from 'react';
-import { AlertCircle, Calendar, Search, Stethoscope, Undo2, User } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { AlertCircle, BriefcaseMedical, Calendar, Search, Stethoscope, Undo2, User } from 'lucide-react';
+import { useDebounce } from '@/hooks/use-debounce';
 
 interface TipoDocumento {
     id: number;
@@ -32,6 +33,11 @@ interface Persona {
     email: string;
 }
 
+interface Especialidad {
+    id: number;
+    nombre: string;
+}
+
 interface Servicio {
     id: number;
     nombre: string;
@@ -40,6 +46,12 @@ interface Servicio {
 interface TipoAtencion {
     id: number;
     nombre: string;
+}
+
+interface Profesional {
+    id: number;
+    persona: Persona;
+    especialidad: Especialidad;
 }
 
 interface Atencion {
@@ -52,6 +64,7 @@ interface Atencion {
     servicio: Servicio;
     tipo_atencion: TipoAtencion;
     persona: Persona;
+    profesional: Profesional;
 }
 
 interface Props {
@@ -81,28 +94,34 @@ export default function AtencionEditPage({ atencion, pacientes, tiposDocumento =
     // Verificar si el paciente tiene datos incompletos
     const esPacienteTemporal = !atencion.persona.email;
 
-    const handleBuscarPaciente = () => {
-        if (!data.tipo_documento_id || !data.numero_documento) {
+    // Debounce
+    const debouncedTipoDoc = useDebounce(data.tipo_documento_id, 500);
+    const debouncedNumeroDoc = useDebounce(data.numero_documento, 500);
+
+    useEffect(() => {
+        if (!debouncedTipoDoc || !debouncedNumeroDoc) {
+            setBusquedaRealizada(false);
+            setPacienteEncontrado(null);
             return;
         }
 
-        // Buscar paciente en la lista
         const paciente = pacientes.find(
             (p) =>
-                p.tipo_documento.id.toString() === data.tipo_documento_id &&
-                p.numero_documento === data.numero_documento
+                p.tipo_documento.id.toString() === debouncedTipoDoc &&
+                p.numero_documento === debouncedNumeroDoc
         );
 
         setBusquedaRealizada(true);
 
         if (paciente) {
             setPacienteEncontrado(paciente);
-            setData('persona_id', paciente.id.toString());
+            setData("persona_id", paciente.id.toString());
         } else {
             setPacienteEncontrado(null);
-            setData('persona_id', '');
+            setData("persona_id", "");
         }
-    };
+    }, [debouncedTipoDoc, debouncedNumeroDoc]);
+
 
     const handleAsociarPaciente = () => {
         if (!pacienteEncontrado) return;
@@ -194,7 +213,7 @@ export default function AtencionEditPage({ atencion, pacientes, tiposDocumento =
 
                     {/* Servicio y Tipo de Atención */}
                     <Alert>
-                        <Stethoscope className="h-4 w-4" />
+                        <BriefcaseMedical className="h-4 w-4" />
                         <AlertTitle>Información del Servicio</AlertTitle>
                         <AlertDescription>
                             <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
@@ -208,6 +227,40 @@ export default function AtencionEditPage({ atencion, pacientes, tiposDocumento =
                                     <span className="text-muted-foreground">Tipo de Atención:</span>
                                     <span className="ml-2 font-semibold">
                                         {atencion.tipo_atencion.nombre}
+                                    </span>
+                                </div>
+                            </div>
+                        </AlertDescription>
+                    </Alert>
+
+                    {/* Profesional que realizó la atención */}
+                    <Alert>
+                        <Stethoscope className="h-4 w-4" />
+                        <AlertTitle>Profesional</AlertTitle>
+                        <AlertDescription>
+                            <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                                <div>
+                                    <span className="text-muted-foreground">Nombre:</span>
+                                    <span className="ml-2 font-semibold">
+                                        {atencion.profesional.persona.nombre} {atencion.profesional.persona.apellido}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span className="text-muted-foreground">Tipo de Documento:</span>
+                                    <span className="ml-2 font-semibold">
+                                        {atencion.profesional.persona.tipo_documento?.nombre}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span className="text-muted-foreground">Documento:</span>
+                                    <span className="ml-2 font-semibold">
+                                        {atencion.profesional.persona.numero_documento}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span className="text-muted-foreground">Especialidad:</span>
+                                    <span className="ml-2 font-semibold">
+                                        {atencion.profesional.especialidad.nombre}
                                     </span>
                                 </div>
                             </div>
@@ -307,7 +360,6 @@ export default function AtencionEditPage({ atencion, pacientes, tiposDocumento =
                                 </div>
 
                                 <Button
-                                    onClick={handleBuscarPaciente}
                                     disabled={!data.tipo_documento_id || !data.numero_documento || processing}
                                     className="w-full md:w-auto"
                                 >

@@ -65,7 +65,7 @@ class AtencionController extends Controller
             ) THEN 2
             ELSE 3
         END
-    ");
+        ");
 
         // ORDEN DE LLEGADA (primero las más tempranas)
         $query->orderBy('hora', 'asc');
@@ -121,7 +121,6 @@ class AtencionController extends Controller
                         $q3->whereRaw("LOWER(nombre) LIKE ?", ["%$search%"])
                             ->orWhereRaw("LOWER(apellido) LIKE ?", ["%$search%"]);
                     });
-
             });
         }
 
@@ -228,12 +227,15 @@ class AtencionController extends Controller
             'servicio',
             'tipo_atencion',
             'persona.tipo_documento',
+            'profesional.persona.tipo_documento',
+            'profesional.especialidad'
         ]);
 
         return Inertia::render('atenciones/AtencionEditPage', [
             'atencion' => $atencion,
             'pacientes' => Persona::with('tipo_documento')
                 ->where('id', '!=', $atencion->persona_id)
+                ->where('id', '!=', $atencion->profesional->persona->id) // ← nuevo filtro
                 ->get(),
             'tiposDocumento' => TipoDocumento::all()
         ]);
@@ -246,11 +248,15 @@ class AtencionController extends Controller
             'persona_id' => 'required|exists:personas,id'
         ]);
 
-        if ($request->persona_id == $atencion->persona_id) {
-            return back()->withErrors([
-                'persona_id' => 'No puedes volver a asignar la misma persona.'
-            ]);
+        // Validación: impedir que el profesional sea seleccionado como paciente
+        if ($request->persona_id == $atencion->profesional->persona->id) {
+            return back()->with('error', 'El profesional no puede ser seleccionado como paciente.');
         }
+
+        if ($request->persona_id == $atencion->persona_id) {
+            return back()->with('error', 'No puedes volver a asignar la misma persona.');
+        }
+
 
         $pacienteAnteriorId = $atencion->persona_id;
 
@@ -270,15 +276,9 @@ class AtencionController extends Controller
     }
 
 
-    public function actualizarAtencion()
-    {
+    public function actualizarAtencion() {}
 
-    }
-
-    public function verAtencion()
-    {
-
-    }
+    public function verAtencion() {}
 
     public function verAtencionAdministrativos(Atencion $atencion)
     {
@@ -294,5 +294,4 @@ class AtencionController extends Controller
             'atencion' => $atencion,
         ]);
     }
-
 }

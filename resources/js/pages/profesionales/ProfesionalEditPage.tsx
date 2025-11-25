@@ -142,7 +142,16 @@ const horarioSchema = z.object({
 const formSchema = z.object({
   nombre: z.string().min(1, "El nombre es requerido."),
   apellido: z.string().min(1, "El apellido es requerido."),
-  fecha_de_nacimiento: z.string().min(1, "La fecha de nacimiento es requerida."),
+  fecha_de_nacimiento: z
+    .string()
+    .min(1, "La fecha de nacimiento es obligatoria.")
+    .refine((value) => {
+      const hoy = new Date();
+      const fecha = new Date(value + "T00:00:00"); // normalizar
+      return fecha <= hoy;
+    }, {
+      message: "La fecha de nacimiento no puede ser futura.",
+    }),
   genero_id: z.string().min(1, "El género es requerido"),
   tipo_documento_id: z.string().min(1, "El tipo de documento es requerido"),
   numero_documento: z.string().min(1, "El número de documento es requerido"),

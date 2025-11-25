@@ -31,7 +31,11 @@ class UpdateProfesionalRequest extends FormRequest
                 Rule::unique('personas', 'numero_documento')->ignore($personaId)
 
             ],
-            'fecha_de_nacimiento' => ['required', 'date'],
+            'fecha_de_nacimiento' => [
+                'required',
+                'date',
+                'before_or_equal:today',
+            ],
             'domicilio' => ['nullable', 'string'],
             'lugar_de_nacimiento' => ['nullable', 'string'],
             'telefono_fijo' => ['nullable', 'string'],
@@ -68,6 +72,7 @@ class UpdateProfesionalRequest extends FormRequest
             'nombre.required' => 'El nombre es requerido.',
             'apellido.required' => 'El apellido es requerido.',
             'fecha_de_nacimiento.required' => 'La fecha de nacimiento es requerida.',
+            'before_or_equal' => 'La :attribute no puede ser una fecha futura.',
             'genero_id.required' => 'El género es requerido.',
             'tipo_documento_id.required' => 'El tipo de documento es requerido.',
             'estado_civil_id.required' => 'El estado civil es requerido.',

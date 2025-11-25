@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import atenciones from '@/routes/atenciones';
+import BackButton from '@/components/back-button';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Atenciones', href: atenciones.index.url() },
@@ -88,12 +89,7 @@ export default function AtencionShowPage({ atencion }: Props) {
                         Visualiza los detalles relacionados con esta atención del paciente.
                     </p>
 
-                    <Link href={atenciones.index.url()} className="inline-block">
-                        <Button className="flex items-center gap-2 mr-2">
-                            <Undo2 className="h-4 w-4" />
-                            Volver
-                        </Button>
-                    </Link>
+                    <BackButton fallback={atenciones.index.url()}></BackButton>
                 </div>
 
                 {/* Información del Paciente */}
