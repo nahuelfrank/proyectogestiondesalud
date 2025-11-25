@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { usePermissions } from '@/hooks/use-permissions';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface Persona {
     id: number;
@@ -84,6 +84,16 @@ export default function ListaEsperaPage({
 }: ListaEsperaPageProps) {
     const { can } = usePermissions();
     const isSuperAdmin = can('ver-todas-listas-espera');
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            router.reload({
+                only: ["atenciones_espera", "atenciones_finalizadas"],
+            });
+        }, 2500);
+
+        return () => clearInterval(interval);
+    }, []);
 
     const [selectedEspecialidad, setSelectedEspecialidad] = useState<string>(
         especialidad_seleccionada?.toString() || ''

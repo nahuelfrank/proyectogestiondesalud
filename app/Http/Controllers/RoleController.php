@@ -26,6 +26,22 @@ class RoleController extends Controller
         ]);
     }
 
+
+    public function show(Role $role)
+    {
+        $permissions = Permission::all()->groupBy(function ($permission) {
+            return explode(' ', $permission->name)[1] ?? 'otros';
+        });
+
+        $role->load('permissions');
+
+        return Inertia::render('roles/RoleShowPage', [
+            'role' => $role,
+            'permissions' => $permissions,
+            'rolePermissions' => $role->permissions->pluck('name'),
+        ]);
+    }
+
     public function create()
     {
         $this->authorize('crear roles');

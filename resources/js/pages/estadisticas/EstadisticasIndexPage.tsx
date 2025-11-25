@@ -116,6 +116,8 @@ export default function EstadisticasIndexPage({
 
     const [fechaInicio, setFechaInicio] = useState(filtros.fecha_inicio);
     const [fechaFin, setFechaFin] = useState(filtros.fecha_fin);
+    const [fieldErrors, setFieldErrors] = useState<{ fecha_inicio?: string; fecha_fin?: string }>({});
+
 
     const aplicarFiltros = () => {
         router.get(estadisticas.index.url(), {
@@ -170,6 +172,35 @@ export default function EstadisticasIndexPage({
             tension: 0.4,
         }]
     };
+
+    const handleFechaInicio = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setFechaInicio(value);
+
+        if (fechaFin && value > fechaFin) {
+            setFieldErrors({
+                fecha_inicio: 'La fecha de inicio no puede ser mayor que la fecha de fin.',
+                fecha_fin: undefined,
+            });
+        } else {
+            setFieldErrors({});
+        }
+    };
+
+    const handleFechaFin = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setFechaFin(value);
+
+        if (fechaInicio && value < fechaInicio) {
+            setFieldErrors({
+                fecha_fin: 'La fecha de fin no puede ser menor que la fecha de inicio.',
+                fecha_inicio: undefined,
+            });
+        } else {
+            setFieldErrors({});
+        }
+    };
+
 
     const distribucionGeneroData = {
         labels: distribucionGenero.map(item => item.genero),
@@ -263,41 +294,66 @@ export default function EstadisticasIndexPage({
                     </CardHeader>
                     <CardContent>
                         <div className="flex flex-wrap gap-4 items-end">
+
                             <div className="flex-1 min-w-[200px]">
-                                <Label htmlFor="fecha_inicio" className='mb-2'>Fecha Inicio</Label>
+                                <Label htmlFor="fecha_inicio" className="mb-2">Fecha Inicio</Label>
                                 <Input
                                     id="fecha_inicio"
                                     type="date"
                                     value={fechaInicio}
-                                    onChange={(e) => setFechaInicio(e.target.value)}
+                                    onChange={handleFechaInicio}
                                 />
+
+                                <div className="h-5">
+                                    {fieldErrors.fecha_inicio && (
+                                        <p className="text-sm text-red-600">
+                                            {fieldErrors.fecha_inicio}
+                                        </p>
+                                    )}
+                                </div>
                             </div>
+
                             <div className="flex-1 min-w-[200px]">
-                                <Label htmlFor="fecha_fin" className='mb-2'>Fecha Fin</Label>
+                                <Label htmlFor="fecha_fin" className="mb-2">Fecha Fin</Label>
                                 <Input
                                     id="fecha_fin"
                                     type="date"
                                     value={fechaFin}
-                                    onChange={(e) => setFechaFin(e.target.value)}
+                                    onChange={handleFechaFin}
                                 />
+                                <div className="h-5">
+                                    {fieldErrors.fecha_fin && (
+                                        <p className="text-sm text-red-600">
+                                            {fieldErrors.fecha_fin}
+                                        </p>
+                                    )}
+                                </div>
                             </div>
-                            <Button onClick={aplicarFiltros}>
-                                Aplicar Filtros
-                            </Button>
-                            <div className="flex gap-2">
-                                <Button onClick={exportarPDF} variant="outline">
-                                    <FileText className="mr-2 h-4 w-4" />
-                                    PDF
+
+                            {/* BOTÓN FILTRAR */}
+                            <div className="flex flex-col justify-end pb-[20px]">
+                                <Button onClick={aplicarFiltros} disabled={Object.keys(fieldErrors).length > 0}>
+                                    Aplicar Filtros
                                 </Button>
-                                <Button onClick={exportarExcel} variant="outline">
-                                    <FileSpreadsheet className="mr-2 h-4 w-4" />
-                                    Excel
-                                </Button>
+                            </div>
+
+                            {/* BOTONES EXPORTACIÓN */}
+                            <div className="flex flex-col justify-end pb-[20px]">
+                                <div className="flex gap-2">
+                                    <Button onClick={exportarPDF} variant="outline">
+                                        <FileText className="mr-2 h-4 w-4" />
+                                        PDF
+                                    </Button>
+                                    <Button onClick={exportarExcel} variant="outline">
+                                        <FileSpreadsheet className="mr-2 h-4 w-4" />
+                                        Excel
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     </CardContent>
                 </Card>
-
+                
                 {/* Tarjetas de resumen */}
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
                     <StatCard

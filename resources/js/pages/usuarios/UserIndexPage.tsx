@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Pencil, Trash2, UserPlus, Eye, Mail, User } from 'lucide-react';
 import { usePermissions } from '@/hooks/use-permissions';
 import { useAlert } from '@/components/alert-provider';
+import { useEffect } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -41,6 +42,17 @@ type UserIndexPageProps = {
 };
 
 export default function UserIndexPage({ users }: UserIndexPageProps) {
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            router.reload({
+                only: ["users"],
+            });
+        }, 2500);
+
+        return () => clearInterval(interval);
+    }, []);
+
     const { can } = usePermissions();
 
     const { confirm } = useAlert();

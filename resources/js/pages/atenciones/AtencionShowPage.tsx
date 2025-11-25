@@ -173,8 +173,8 @@ export default function AtencionShowPage({ atencion }: Props) {
                             </div>
                         </div>
 
-                        {/* Información Clínica Adicional */}
-                        {(atencion.diagnostico_principal || atencion.motivo_de_consulta) && (
+                        {/* Información Clínica Adicional 
+                         {(atencion.diagnostico_principal || atencion.motivo_de_consulta) && (
                             <>
                                 <Separator className="my-4" />
                                 <div className="space-y-4">
@@ -192,7 +192,9 @@ export default function AtencionShowPage({ atencion }: Props) {
                                     )}
                                 </div>
                             </>
-                        )}
+                        )}  
+                        */}
+
                     </CardContent>
                 </Card>
 

@@ -203,7 +203,7 @@ class AtencionController extends Controller
 
         return Inertia::render('atenciones/AtencionEditStatusPage', [
             'atencion' => $atencion,
-            'estadosAtenciones' => EstadoAtencion::all(),
+            'estadosAtenciones' => EstadoAtencion::whereIn('nombre', ['Cancelado', 'En Espera'])->get(),
         ]);
     }
 

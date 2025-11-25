@@ -108,11 +108,12 @@ export const columns: ColumnDef<Persona>[] = [
             </Link>
           )}
 
-          {/* Eliminar - deshabilitado si es carga rápida */}
-
+          {/* Eliminar - deshabilitado si es carga rápida 
           {isFastCreate && (
             <DeletePersonaButton persona={persona} />
           )}
+          */}
+
 
           {/**
           {isFastCreate ? (

@@ -450,7 +450,6 @@ export default function ProfesionalCreatePage({
                     <FieldError>{form.formState.errors.numero_documento.message}</FieldError>
                   )}
                 </Field>
-
               </div>
             </CardContent>
           </Card>

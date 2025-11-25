@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Eye, Pencil, Shield, Trash2, Users } from 'lucide-react';
 import { usePermissions } from '@/hooks/use-permissions';
 import { useAlert } from '@/components/alert-provider';
+import { useEffect } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -40,12 +41,23 @@ type RoleIndexPageProps = {
 };
 
 export default function RoleIndexPage({ roles }: RoleIndexPageProps) {
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            router.reload({
+                only: ["roles"],
+            });
+        }, 2500);
+
+        return () => clearInterval(interval);
+    }, []);
+
     const { can } = usePermissions();
 
     const { confirm } = useAlert();
 
     const handleDelete = async (role: Role) => {
-        
+
         const ok = await confirm({
             title: "Eliminar Rol",
             description: `¿Seguro que deseas eliminar el rol "${role.name}"? Esta acción no se puede deshacer.`,

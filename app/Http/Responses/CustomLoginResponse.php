@@ -20,7 +20,7 @@ class CustomLoginResponse implements LoginResponseContract
         }
 
         if ($user->hasRole('administrativo')) {
-            return redirect()->route('pacientes.index');
+            return redirect()->route('personas.index');
         }
 
         // Fallback para otros roles

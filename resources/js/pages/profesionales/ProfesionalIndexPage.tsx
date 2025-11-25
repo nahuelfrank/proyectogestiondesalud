@@ -1,12 +1,13 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { columns } from './columns';
 import { DataTable } from '@/components/ui/data-table';
 import { Profesional } from '@/types/profesionales/profesional';
 import { Button } from '@/components/ui/button';
 import profesionales from '@/routes/profesionales';
 import { UserCog } from 'lucide-react';
+import { useEffect } from 'react';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Profesionales',
@@ -30,6 +31,15 @@ interface ProfesionalIndexPageProps {
 }
 
 export default function ProfesionalIndexPage({ items, meta, filters }: ProfesionalIndexPageProps) {
+    useEffect(() => {
+        const interval = setInterval(() => {
+            router.reload({
+                only: ["items", "meta"],
+            });
+        }, 2500);
+
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -39,7 +49,7 @@ export default function ProfesionalIndexPage({ items, meta, filters }: Profesion
                 <div className="ml-5">
 
                     <h1 className="text-3xl font-semibold mb-3">Lista de Profesionales</h1>
-                     <p className="text-md text-muted-foreground mb-3">
+                    <p className="text-md text-muted-foreground mb-3">
                         El sistema muestra los profesionales registrados con información relevante.
                     </p>
 
@@ -57,7 +67,7 @@ export default function ProfesionalIndexPage({ items, meta, filters }: Profesion
                         data={items}
                         meta={meta}
                         filters={filters}
-                        routeName= {profesionales.index.url()}
+                        routeName={profesionales.index.url()}
                         searchPlaceholder="Buscar por documento..."
                     />
                 </div>

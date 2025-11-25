@@ -1,12 +1,13 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { columns } from './Columns';
 import { DataTable } from '@/components/ui/data-table';
 import { Persona } from '@/types/personas/persona';
 import { Button } from '@/components/ui/button';
 import personas from '@/routes/personas';
 import { UserRoundPlus } from 'lucide-react';
+import { useEffect } from 'react';
 
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -32,6 +33,15 @@ interface PersonaIndexPageProps {
 }
 
 export default function PersonaIndexPage({ items, meta, filters }: PersonaIndexPageProps) {
+    useEffect(() => {
+        const interval = setInterval(() => {
+            router.reload({
+                only: ["items", "meta"],
+            });
+        }, 2500);
+
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -41,7 +51,7 @@ export default function PersonaIndexPage({ items, meta, filters }: PersonaIndexP
 
                     <h1 className="text-3xl font-semibold mb-3">Lista de Pacientes</h1>
 
-                     <p className="text-md text-muted-foreground mb-3">
+                    <p className="text-md text-muted-foreground mb-3">
                         El sistema muestra los pacientes registrados con información relevante.
                     </p>
 

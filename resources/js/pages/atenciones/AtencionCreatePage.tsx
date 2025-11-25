@@ -236,6 +236,7 @@ export default function AtencionCreatePage({
 
         setEspecialidadesDisponibles(especialidadesUnicas);
 
+        // ---- Si solo hay 1 especialidad disponible ----
         if (especialidadesUnicas.length === 1) {
             const especialidadUnica = especialidadesUnicas[0];
             setEspecialidadSeleccionada(especialidadUnica.id.toString());
@@ -243,9 +244,23 @@ export default function AtencionCreatePage({
             const profesionalesFiltrados = profesionales.filter(
                 p => p.especialidad_id === especialidadUnica.id
             );
+
             setProfesionalesDisponibles(profesionalesFiltrados);
+
+            // === NOTIFICACIÓN SI NO HAY PROFESIONALES ===
+            if (profesionalesFiltrados.length === 0) {
+                setNotificacion({
+                    tipo: "error",
+                    mensaje: "No se encontraron profesionales disponibles para este servicio."
+                });
+            } else {
+                setNotificacion(null); // Limpia la notificación si ahora sí hay profesionales
+            }
+
         } else {
+            // Varias especialidades → limpiar profesionales
             setProfesionalesDisponibles([]);
+            setNotificacion(null);
         }
     };
 
@@ -263,7 +278,7 @@ export default function AtencionCreatePage({
         );
 
         console.log("dispo horarias:", profesional?.disponibilidades_horarias);
-        
+
         if (!profesional?.disponibilidades_horarias) return true;
 
         return profesional.disponibilidades_horarias.some(d => {

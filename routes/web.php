@@ -75,8 +75,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
      * ROLES
      * ============================
      */
+
     Route::get('roles', [RoleController::class, 'index'])
         ->name('roles.index')
+        ->middleware('permission:ver roles');
+
+    Route::get('roles/{role}', [RoleController::class, 'show'])
+        ->name('roles.show')
         ->middleware('permission:ver roles');
 
     Route::get('roles/crear_rol', [RoleController::class, 'create'])
@@ -269,33 +274,42 @@ Route::middleware(['auth', 'verified'])->group(function () {
      */
     // Lista de espera del profesional (incluye pestañas)
     Route::get('historias-clinicas/lista-espera', [HistoriaClinicaController::class, 'listaEspera'])
-        ->name('historias-clinicas.lista-espera');
+        ->name('historias-clinicas.lista-espera')
+        ->middleware('permission:ver historias-clinicas');
 
     // Ver historia clínica completa del paciente
     Route::get('historias-clinicas/{atencion}/historia', [HistoriaClinicaController::class, 'verHistoriaClinica'])
-        ->name('historias-clinicas.historia');
+        ->name('historias-clinicas.historia')
+        ->middleware('permission:ver historias-clinicas');
 
     // Ver detalle de una atención específica (con atributos clínicos)
     Route::get('historias-clinicas/detalle/{atencion}', [HistoriaClinicaController::class, 'verDetalleAtencion'])
-        ->name('historias-clinicas.detalle');
+        ->name('historias-clinicas.detalle')
+        ->middleware('permission:ver historias-clinicas');
 
     // Registrar atención (iniciar atención desde lista de espera)
     Route::get('historias-clinicas/{atencion}/registrar', [HistoriaClinicaController::class, 'registrarAtencion'])
-        ->name('historias-clinicas.registrar');
+        ->name('historias-clinicas.registrar')
+        ->middleware('permission:crear historias-clinicas');
 
     Route::post('historias-clinicas/{atencion}/guardar', [HistoriaClinicaController::class, 'guardarAtencion'])
-        ->name('historias-clinicas.guardar');
+        ->name('historias-clinicas.guardar')
+        ->middleware('permission:crear historias-clinicas');
 
     // Editar atención finalizada
     Route::get('historias-clinicas/editar/{atencion}', [HistoriaClinicaController::class, 'editarAtencionFinalizada'])
-        ->name('historias-clinicas.editar');
+        ->name('historias-clinicas.editar')
+        ->middleware('permission:editar historias-clinicas');
 
     Route::put('historias-clinicas/actualizar/{atencion}', [HistoriaClinicaController::class, 'actualizarAtencionFinalizada'])
-        ->name('historias-clinicas.actualizar');
+        ->name('historias-clinicas.actualizar')
+        ->middleware('permission:editar historias-clinicas');
 
     // Obtener profesionales por servicio (para derivaciones)
     Route::get('historias-clinicas/profesionales/{servicio}', [HistoriaClinicaController::class, 'obtenerProfesionalesPorServicio'])
-        ->name('historias-clinicas.profesionales');
+        ->name('historias-clinicas.profesionales')
+        ->middleware('permission:ver historias-clinicas');
+
 });
 
 require __DIR__ . '/settings.php';

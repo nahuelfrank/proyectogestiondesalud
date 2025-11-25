@@ -79,6 +79,12 @@ class RolePermissionSeeder extends Seeder
             'editar usuarios',
             'eliminar usuarios',
 
+            // Historia Clinica
+            'ver historias-clinicas',
+            'crear historias-clinicas',
+            'editar historias-clinicas',
+            'eliminar historias-clinicas',
+
             // ==========================================
             // NUEVO: Permiso para super-admin
             // ==========================================
@@ -108,6 +114,9 @@ class RolePermissionSeeder extends Seeder
             'ver-espera profesionales',
             'crear atenciones',
             'editar atenciones',
+            'ver historias-clinicas',
+            'crear historias-clinicas',
+            'editar historias-clinicas',
         ]);
 
         // Administrativo - Principalmente gestión de pacientes y consulta
@@ -124,6 +133,7 @@ class RolePermissionSeeder extends Seeder
             'ver servicios',
             'editar servicios',
             'eliminar servicios',
+            'ver estadisticas',
         ]);
 
         // ==========================================
