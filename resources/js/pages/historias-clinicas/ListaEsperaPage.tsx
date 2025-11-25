@@ -438,6 +438,7 @@ export default function ListaEsperaPage({
                                                 <TableRow>
                                                     <TableHead>Paciente</TableHead>
                                                     <TableHead>Documento</TableHead>
+                                                    <TableHead>Tipo de Atención</TableHead>
                                                     <TableHead>Servicio</TableHead>
                                                     <TableHead>Fecha</TableHead>
                                                     <TableHead>Hora</TableHead>
@@ -453,6 +454,9 @@ export default function ListaEsperaPage({
                                                         </TableCell>
                                                         <TableCell>
                                                             {atencion.persona.numero_documento}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {atencion.tipo_atencion.nombre}
                                                         </TableCell>
                                                         <TableCell>{atencion.servicio.nombre}</TableCell>
                                                         <TableCell>{formatFecha(atencion.fecha)}</TableCell>

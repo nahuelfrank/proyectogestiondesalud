@@ -137,7 +137,7 @@ export default function RegistrarAtencionPage({
     // Cargar profesionales cuando se selecciona un servicio
     const cargarProfesionales = async (servicioId: string) => {
         try {
-            const response = await fetch(`/historias-clinicas/servicios/${servicioId}/profesionales`);
+            const response = await fetch(`/historias-clinicas/profesionales/${servicioId}`);
             const data = await response.json();
             setProfesionales(data);
         } catch (error) {
@@ -871,9 +871,9 @@ export default function RegistrarAtencionPage({
                                 </p>
                             </div>
                             <div>
-                                <p className="text-sm text-muted-foreground">Documento</p>
+                                <p className="text-sm text-muted-foreground">N° Documento</p>
                                 <p className="font-medium">
-                                    {atencion.persona.tipo_documento.nombre} {atencion.persona.numero_documento}
+                                    {atencion.persona.numero_documento}
                                 </p>
                             </div>
                             <div>

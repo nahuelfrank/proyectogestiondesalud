@@ -432,7 +432,7 @@ class HistoriaClinicaController extends Controller
             })
             ->orderBy('nombre')
             ->get();
-
+            //var_dump($servicios->count()); exit;
         // Obtener especialidad del profesional sin romper si es null
         $especialidadNombre = $profesional->especialidad->nombre ?? 'General';
 
@@ -520,8 +520,8 @@ class HistoriaClinicaController extends Controller
                     'horarios' => $profesional->disponibilidades_horarias->map(function ($horario) {
                         return [
                             'dia' => $horario->dia->nombre,
-                            'hora_inicio' => $horario->hora_inicio_atencion,
-                            'hora_fin' => $horario->hora_fin_atencion,
+                            'hora_inicio' => ($horario->hora_inicio_atencion)->format('H:i'),
+                            'hora_fin' => ($horario->hora_fin_atencion)->format('H:i'),
                         ];
                     }),
                 ];
@@ -836,20 +836,27 @@ class HistoriaClinicaController extends Controller
      */
     private function verificarDisponibilidad(Profesional $profesional): bool
     {
-        $diaActual = now()->dayOfWeek; // 0 (Domingo) - 6 (Sábado)
-        $horaActual = now()->format('H:i');
+        $ahora = now();
+        $diaActual = $ahora->dayOfWeek; // 0 (Domingo) - 6 (Sábado)
+        $horaActual = $ahora->format('H:i:s');
 
         // Ajustar el día para que coincida con tu tabla de días
         // Asumiendo que en tu BD: 1=Lunes, 2=Martes, ..., 7=Domingo
         $diaId = $diaActual === 0 ? 7 : $diaActual;
 
-        $disponibilidad = $profesional->disponibilidades_horarias
-            ->where('dia_id', $diaId)
-            ->first(function ($horario) use ($horaActual) {
-                return $horaActual >= $horario->hora_inicio_atencion &&
-                    $horaActual <= $horario->hora_fin_atencion;
-            });
+        // Buscar disponibilidad en el día actual
+        $disponibilidadHoy = $profesional->disponibilidades_horarias
+            ->where('dia_id', $diaId);
 
-        return !is_null($disponibilidad);
+        // Verificar si algún horario incluye la hora actual
+        $estaDisponible = $disponibilidadHoy->contains(function ($horario) use ($horaActual) {
+            // Convertir las horas a formato comparable
+            $horaInicio = \Carbon\Carbon::parse($horario->hora_inicio_atencion)->format('H:i:s');
+            $horaFin = \Carbon\Carbon::parse($horario->hora_fin_atencion)->format('H:i:s');
+            
+            return $horaActual >= $horaInicio && $horaActual <= $horaFin;
+        });
+
+        return $estaDisponible;
     }
 }
