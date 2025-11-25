@@ -370,9 +370,8 @@ export default function DetalleAtencionPage({ atencion, rol_profesional }: Detal
                             </div>
 
                             <div>
-                                <p className="text-sm text-muted-foreground">Documento</p>
+                                <p className="text-sm text-muted-foreground">N° Documento</p>
                                 <p className="text-lg font-semibold">
-                                    {atencion.persona.tipo_documento.nombre}{' '}
                                     {atencion.persona.numero_documento}
                                 </p>
                             </div>

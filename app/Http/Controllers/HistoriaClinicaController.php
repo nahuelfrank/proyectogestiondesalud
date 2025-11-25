@@ -123,8 +123,24 @@ class HistoriaClinicaController extends Controller
 
         // Ejecutar queries
         $atenciones_espera = $queryEspera
-            ->orderBy('fecha', 'asc')
+            // PRIORIDAD: Emergencia → Urgencia → Otros
+            ->orderByRaw("
+        CASE 
+            WHEN tipo_atencion_id IN (
+                SELECT id FROM tipos_atenciones WHERE nombre = 'Emergencia'
+            ) THEN 1
+            WHEN tipo_atencion_id IN (
+                SELECT id FROM tipos_atenciones WHERE nombre = 'Urgencia'
+            ) THEN 2
+            ELSE 3
+        END
+    ")
+
+            // ORDEN DE LLEGADA (primero las más tempranas)
             ->orderBy('hora', 'asc')
+
+            // NUEVO: ORDEN POR CAMBIOS RECIENTES
+            ->orderBy('updated_at', 'desc')
             ->get();
 
         $atenciones_finalizadas = $queryFinalizadas
@@ -170,8 +186,25 @@ class HistoriaClinicaController extends Controller
             ->whereHas('estado_atencion', function ($query) {
                 $query->where('id', '1'); // Estado "En Espera"
             })
-            ->orderBy('fecha', 'asc')
+
+            // PRIORIDAD: Emergencia → Urgencia → Otros
+            ->orderByRaw("
+        CASE 
+            WHEN tipo_atencion_id IN (
+                SELECT id FROM tipos_atenciones WHERE nombre = 'Emergencia'
+            ) THEN 1
+            WHEN tipo_atencion_id IN (
+                SELECT id FROM tipos_atenciones WHERE nombre = 'Urgencia'
+            ) THEN 2
+            ELSE 3
+        END
+    ")
+
+            // ORDEN DE LLEGADA (primero las más tempranas)
             ->orderBy('hora', 'asc')
+
+            // NUEVO: ORDEN POR CAMBIOS RECIENTES
+            ->orderBy('updated_at', 'desc')
             ->get();
 
         // Obtener las atenciones finalizadas del día (Atendido o Derivado)

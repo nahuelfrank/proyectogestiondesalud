@@ -13,6 +13,8 @@ class Atencion extends Model
     protected $table = 'atenciones';
     protected $casts = [
         'hora' => 'datetime:H:i',
+        'hora_inicio_atencion' => 'datetime:H:i',
+        'hora_fin_atencion' => 'datetime:H:i',
     ];
     protected $fillable = [
         'fecha',
