@@ -52,7 +52,7 @@ class RolePermissionSeeder extends Seeder
             'crear atenciones',
             'editar atenciones',
             'eliminar atenciones',
-            
+
             // Servicios
             'ver servicios',
             'crear servicios',
