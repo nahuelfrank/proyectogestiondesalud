@@ -46,7 +46,7 @@ class StorePersonaRequest extends FormRequest
             'dependencias.*.claustro_id' => ['required', 'exists:claustros,id'],
             'dependencias.*.dependencia_id' => ['required', 'exists:dependencias,id'],
             'dependencias.*.area_id' => ['required', 'exists:areas,id'],
-            'dependencias.*.fecha_ingreso' => ['required', 'date'],
+            'dependencias.*.fecha_ingreso' => ['required', 'date', 'before_or_equal:today'],
             'dependencias.*.resolucion' => ['nullable', 'string'],
             'dependencias.*.expediente' => ['nullable', 'string'],
             'dependencias.*.estado' => ['required', 'in:activo,inactivo']
@@ -130,6 +130,7 @@ class StorePersonaRequest extends FormRequest
             // Fecha ingreso
             'dependencias.*.fecha_ingreso.required' => 'Debe ingresar una fecha de ingreso.',
             'dependencias.*.fecha_ingreso.date' => 'La fecha de ingreso no tiene un formato válido.',
+            
 
             // Resolución
             'dependencias.*.resolucion.string' => 'La resolución debe ser una cadena de texto.',

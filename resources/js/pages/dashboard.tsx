@@ -114,13 +114,20 @@ export default function DashboardPage({
             // Esto mantiene los filtros y la paginación actuales, 
             // pero refresca la data para ver el nuevo registro ordenado correctamente.
             router.reload({
-                only: ['items', 'meta'],
+                only: ['estadisticasDia',
+                    'salaEspera',
+                    'profesionalesActivos',
+                    'distribucionServicios',
+                    'tiposAtencion',
+                    'atencionPorHora',
+                    'emergenciasUrgencias'
+                ],
                 onSuccess: () => {
                     // Opcional: Sonido o Toast de notificación
                     toast.success("Nueva atención creada", {
                         description: `
                                 Paciente: ${e.atencion.persona.nombre} ${e.atencion.persona.apellido}
-                                  Tipo de atención: ${e.atencion.tipo_de_atencion.nombre}
+                                  Tipo de atención: ${e.atencion.tipo_atencion.nombre}
                          `,
                     });
                 }
@@ -128,7 +135,22 @@ export default function DashboardPage({
         });
 
         channel.listen('.atencion.actualizada', (e: any) => {
-            router.reload({ only: ['items', 'meta'] });
+            router.reload({
+                only: ['estadisticasDia',
+                    'salaEspera',
+                    'profesionalesActivos',
+                    'distribucionServicios',
+                    'tiposAtencion',
+                    'atencionPorHora',
+                    'emergenciasUrgencias'
+                ],
+                onSuccess: () => {
+                    toast.success("Atención actualizada", {
+                        description: `Se cambio el estado de una atención a "${e.atencion.estado_atencion.nombre}" 
+                     `,
+                    });
+                }
+            });
         });
 
         // 4. Limpieza al salir de la página
@@ -236,11 +258,11 @@ export default function DashboardPage({
                                 className="border"
                             >
                                 {/* Icono y texto en color sólido Rojo (Red 600) para un contraste fuerte */}
-                                <AlertCircle className="h-5 w-5 text-red-600" />
-                                <AlertTitle className="font-bold text-red-900">
+                                <AlertCircle className="h-5 w-5 text-destructive-foreground" />
+                                <AlertTitle className="font-bold text-destructive-foreground">
                                     Emergencias Activas
                                 </AlertTitle>
-                                <AlertDescription className="text-red-800/90">
+                                <AlertDescription className="text-destructive-foreground/90">
                                     Hay <span className="font-bold">{emergenciasUrgencias.emergencias}</span>{" "}
                                     emergencia(s) pendientes de atención inmediata.
                                 </AlertDescription>
@@ -255,11 +277,11 @@ export default function DashboardPage({
                                 className="border"
                             >
                                 {/* Icono y texto en color sólido Naranja (Orange 600) para un contraste fuerte */}
-                                <AlertTriangle className="h-5 w-5 text-orange-600" />
-                                <AlertTitle className="font-bold text-orange-900">
+                                <AlertTriangle className="h-5 w-5 text-warning-foreground" />
+                                <AlertTitle className="font-bold text-warning-foreground">
                                     Urgencias Activas
                                 </AlertTitle>
-                                <AlertDescription className="text-orange-800/90">
+                                <AlertDescription className="text-warning-foreground/90">
                                     Hay <span className="font-bold">{emergenciasUrgencias.urgencias}</span>{" "}
                                     urgencia(s) en espera de atención.
                                 </AlertDescription>

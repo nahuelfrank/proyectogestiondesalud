@@ -22,7 +22,16 @@ const dependenciaSchema = z.object({
     claustro_id: z.string().min(1, "Debe seleccionar un claustro."),
     dependencia_id: z.string().min(1, "Debe seleccionar una dependencia."),
     area_id: z.string().min(1, "Debe seleccionar un área."),
-    fecha_ingreso: z.string().min(1, "La fecha de ingreso es obligatoria."),
+    fecha_ingreso: z
+        .string()
+        .min(1, "La fecha de nacimiento es obligatoria.")
+        .refine((value) => {
+            const hoy = new Date();
+            const fecha = new Date(value + "T00:00:00"); // normalizar
+            return fecha <= hoy;
+        }, {
+            message: "La fecha de nacimiento no puede ser futura.",
+        }),
     resolucion: z.string().optional().nullable(),
     expediente: z.string().optional().nullable(),
     estado: z.enum(["activo", "inactivo"], {

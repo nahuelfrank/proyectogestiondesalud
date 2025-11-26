@@ -26,7 +26,6 @@ const mainNavItems: NavItem[] = [
         title: 'Panel Principal',
         href: dashboard(),
         icon: LayoutDashboard,
-        permission: 'ver servicios',
     },
     {
         title: 'Servicios',

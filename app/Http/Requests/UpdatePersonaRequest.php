@@ -56,7 +56,7 @@ class UpdatePersonaRequest extends FormRequest
             'dependencias.*.claustro_id' => ['required', 'exists:claustros,id'],
             'dependencias.*.dependencia_id' => ['required', 'exists:dependencias,id'],
             'dependencias.*.area_id' => ['required', 'exists:areas,id'],
-            'dependencias.*.fecha_ingreso' => ['required', 'date'],
+            'dependencias.*.fecha_ingreso' => ['required', 'date', 'before_or_equal:today'],
             'dependencias.*.resolucion' => ['nullable', 'string'],
             'dependencias.*.expediente' => ['nullable', 'string'],
             'dependencias.*.estado' => ['required', 'in:activo,inactivo']
