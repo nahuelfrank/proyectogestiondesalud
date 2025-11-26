@@ -432,7 +432,7 @@ class HistoriaClinicaController extends Controller
             })
             ->orderBy('nombre')
             ->get();
-            //var_dump($servicios->count()); exit;
+        //var_dump($servicios->count()); exit;
         // Obtener especialidad del profesional sin romper si es null
         $especialidadNombre = $profesional->especialidad->nombre ?? 'General';
 
@@ -836,7 +836,8 @@ class HistoriaClinicaController extends Controller
      */
     private function verificarDisponibilidad(Profesional $profesional): bool
     {
-        $ahora = now();
+        // Usar timezone de Argentina explícitamente
+        $ahora = now('America/Argentina/Salta');
         $diaActual = $ahora->dayOfWeek; // 0 (Domingo) - 6 (Sábado)
         $horaActual = $ahora->format('H:i:s');
 
@@ -851,9 +852,9 @@ class HistoriaClinicaController extends Controller
         // Verificar si algún horario incluye la hora actual
         $estaDisponible = $disponibilidadHoy->contains(function ($horario) use ($horaActual) {
             // Convertir las horas a formato comparable
-            $horaInicio = \Carbon\Carbon::parse($horario->hora_inicio_atencion)->format('H:i:s');
-            $horaFin = \Carbon\Carbon::parse($horario->hora_fin_atencion)->format('H:i:s');
-            
+            $horaInicio = \Carbon\Carbon::parse($horario->hora_inicio_atencion)->format('H:i');
+            $horaFin = \Carbon\Carbon::parse($horario->hora_fin_atencion)->format('H:i');
+
             return $horaActual >= $horaInicio && $horaActual <= $horaFin;
         });
 
