@@ -9,6 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { usePermissions } from '@/hooks/use-permissions';
 import { useEffect, useState } from 'react';
+import { toast } from "sonner";
+
 
 interface Persona {
     id: number;
@@ -86,13 +88,48 @@ export default function ListaEsperaPage({
     const isSuperAdmin = can('ver-todas-listas-espera');
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            router.reload({
-                only: ["atenciones_espera", "atenciones_finalizadas"],
-            });
-        }, 2500);
+        // 1. Suscribirse al canal 'atenciones'
+        const channel = window.Echo.channel('atenciones');
 
-        return () => clearInterval(interval);
+        // 2. Escuchar el evento (nota el punto en el nombre si usaste broadcastAs)
+        channel.listen('.atencion.creada', (e: any) => {
+            console.log('Nueva atención recibida:', e.atencion);
+
+            // 3. Recargar SOLO los datos de la tabla (items y meta)
+            // Esto mantiene los filtros y la paginación actuales, 
+            // pero refresca la data para ver el nuevo registro ordenado correctamente.
+            router.reload({
+                only: ['atenciones_espera', 'atenciones_finalizadas'],
+                onSuccess: () => {
+                    // Opcional: Sonido o Toast de notificación
+                    toast.success("Nueva atención creada", {
+                        description: `
+        Paciente: ${e.atencion.persona.nombre} ${e.atencion.persona.apellido}
+        Tipo de atención: ${e.atencion.tipo_de_atencion.nombre}
+    `,
+                    });
+                }
+            });
+        });
+
+        channel.listen('.atencion.actualizada', (e: any) => {
+            router.reload({
+                only: ['atenciones_espera', 'atenciones_finalizadas'],
+                onSuccess: () => {
+                    toast.success("Atención actualizada", {
+                        description: `Se cambio el estado de una atención a "${e.atencion.estado_atencion.nombre}" 
+                     `,
+                    });
+                }
+            });
+        });
+
+        // 4. Limpieza al salir de la página
+        return () => {
+            channel.stopListening('.atencion.creada');
+            channel.stopListening('.atencion.actualizada');
+            // Opcional: window.Echo.leave('atenciones');
+        };
     }, []);
 
     const [selectedEspecialidad, setSelectedEspecialidad] = useState<string>(
@@ -207,7 +244,7 @@ export default function ListaEsperaPage({
                                         <SelectContent>
                                             {especialidades?.map((esp) => (
                                                 <SelectItem key={esp.id} value={esp.id.toString()}>
-                                                    {esp.nombre} 
+                                                    {esp.nombre}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>

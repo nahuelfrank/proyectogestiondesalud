@@ -6,6 +6,7 @@ import { DataTable } from '@/components/ui/data-table';
 import { Atencion } from '@/types/atenciones/atencion';
 import atenciones from '@/routes/atenciones';
 import { useEffect } from 'react';
+import { toast } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -33,20 +34,29 @@ interface AtencionIndexPageProps {
     };
 }
 
-export default function AtencionCompletedListPage({ items, meta, filters, flash }: AtencionIndexPageProps) {
+export default function AtencionCompletedListPage({ items, meta, filters }: AtencionIndexPageProps) {
 
     useEffect(() => {
+        const channel = window.Echo.channel('atenciones');
 
-        if (flash?.success || flash?.error) return; // No recargar si hay mensaje
-
-        const interval = setInterval(() => {
+        channel.listen('.atencion.actualizada', (e: any) => {
             router.reload({
-                only: ["items", "meta"],
+                only: ['items', 'meta'],
+                onSuccess: () => {
+                    toast.success("Atención Completada", {
+                        description: `Se acaba de completar un nueva atención" 
+                     `,
+                    });
+                }
             });
-        }, 2500);
-
-        return () => clearInterval(interval);
-    }, [flash]);
+        });
+        // 4. Limpieza al salir de la página
+        return () => {
+            channel.stopListening('.atencion.creada');
+            channel.stopListening('.atencion.actualizada');
+            // Opcional: window.Echo.leave('atenciones');
+        };
+    }, []);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

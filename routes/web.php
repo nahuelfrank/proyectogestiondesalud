@@ -1,6 +1,8 @@
 <?php
 
+use App\Events\MensajeEnviado;
 use App\Http\Controllers\AtencionController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EstadisticasController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\PersonaController;
@@ -21,9 +23,8 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->name('dashboard');
 
     /**
      * ============================

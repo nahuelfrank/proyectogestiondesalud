@@ -43,16 +43,6 @@ type UserIndexPageProps = {
 
 export default function UserIndexPage({ users }: UserIndexPageProps) {
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            router.reload({
-                only: ["users"],
-            });
-        }, 2500);
-
-        return () => clearInterval(interval);
-    }, []);
-
     const { can } = usePermissions();
 
     const { confirm } = useAlert();

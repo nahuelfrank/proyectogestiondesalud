@@ -1,6 +1,5 @@
-import { useAuthData } from '@/hooks/use-permissions';
-import { dashboard, login, register } from '@/routes';
-import personas from '@/routes/personas';
+import {  } from '@/hooks/use-permissions';
+import { dashboard, login } from '@/routes';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 
@@ -10,23 +9,6 @@ export default function Welcome({
     canRegister?: boolean;
 }) {
     const { auth } = usePage<SharedData>().props;
-    const { roles } = useAuthData();
-
-    const getDashboardRoute = () => {
-        if (roles.includes("super-admin")) {
-            return "/roles";
-        }
-
-        if (roles.includes("profesional")) {
-            return "/historias-clinicas/lista-espera";
-        }
-
-        if (roles.includes("administrativo")) {
-            return "/pacientes";
-        }
-
-        return "/dashboard";
-    };
 
     return (
         <>
@@ -43,7 +25,7 @@ export default function Welcome({
                         {auth.user ? (
 
                             <Link
-                                href={getDashboardRoute()}
+                                href={dashboard()}
                                 className="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
                             >
                                 Panel

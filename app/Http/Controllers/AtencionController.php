@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\AtencionActualizada;
+use App\Events\AtencionCreada;
 use App\Http\Requests\StoreAtencionRequest;
 use App\Models\Atencion;
 use App\Models\Especialidad;
@@ -87,7 +89,6 @@ class AtencionController extends Controller
             'filters' => $request->only(['search', 'perPage']),
         ]);
     }
-
     public function indexAtendidas(Request $request)
     {
         $estados = ['Atendido', 'Derivado'];
@@ -179,8 +180,12 @@ class AtencionController extends Controller
             ])->withInput();
         }
 
-        // Crear la atención directamente
-        Atencion::create($validated);
+        // 1. Asignamos el resultado a una variable ($atencion) en lugar de solo crearlo
+        $atencion = Atencion::create($validated);
+
+        // 2. Disparamos el evento para avisar a Reverb
+        AtencionCreada::dispatch($atencion);
+        // -------------------
 
         // Limpiar la sesión
         session()->forget('carga_rapida');
@@ -214,6 +219,8 @@ class AtencionController extends Controller
 
         // Aplicamos cambios
         $atencion->update($validated);
+
+        AtencionActualizada::dispatch($atencion);
 
         return redirect()->route('atenciones.index')
             ->with('success', 'El estado de atención fue modificado exitosamente.');
@@ -257,12 +264,13 @@ class AtencionController extends Controller
             return back()->with('error', 'No puedes volver a asignar la misma persona.');
         }
 
-
         $pacienteAnteriorId = $atencion->persona_id;
 
         // Asociar nuevo paciente
         $atencion->persona_id = $request->persona_id;
         $atencion->save();
+
+        AtencionActualizada::dispatch($atencion);
 
         // Borrar físicamente el paciente anterior si existía
         if ($pacienteAnteriorId) {
@@ -276,9 +284,13 @@ class AtencionController extends Controller
     }
 
 
-    public function actualizarAtencion() {}
+    public function actualizarAtencion()
+    {
+    }
 
-    public function verAtencion() {}
+    public function verAtencion()
+    {
+    }
 
     public function verAtencionAdministrativos(Atencion $atencion)
     {

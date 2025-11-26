@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\AtencionActualizada;
+use App\Events\AtencionCreada;
 use App\Models\Atencion;
 use App\Models\Atributo;
 use App\Models\Especialidad;
-use App\Models\Persona;
 use App\Models\Profesional;
 use App\Models\Servicio;
 use App\Models\EstadoAtencion;
@@ -153,9 +154,9 @@ class HistoriaClinicaController extends Controller
             'atenciones_finalizadas' => $atenciones_finalizadas,
             'profesional' => $profesionalSeleccionado, // null si no hay selección específica
             'especialidades' => $especialidades,
-            'especialidad_seleccionada' => $especialidadId ? (int)$especialidadId : null,
+            'especialidad_seleccionada' => $especialidadId ? (int) $especialidadId : null,
             'profesionales_de_especialidad' => $profesionalesDeEspecialidad,
-            'profesional_seleccionado' => $profesionalId && $profesionalId !== 'todos' ? (int)$profesionalId : null,
+            'profesional_seleccionado' => $profesionalId && $profesionalId !== 'todos' ? (int) $profesionalId : null,
         ]);
     }
 
@@ -560,6 +561,8 @@ class HistoriaClinicaController extends Controller
             // Actualizar la atención
             $atencion->update($datosActualizacion);
 
+            AtencionActualizada::dispatch($atencion);
+
             // Guardar atributos clínicos
             foreach ($atributos as $nombreAtributo => $valor) {
                 if (!empty($valor)) {
@@ -582,11 +585,12 @@ class HistoriaClinicaController extends Controller
                 // Cambiar estado de la atención actual a "Derivado"
                 $estadoDerivado = EstadoAtencion::where('nombre', 'Derivado')->first();
                 $atencion->update(['estado_atencion_id' => $estadoDerivado->id]);
+                AtencionCreada::dispatch($atencion);
 
                 // Crear nueva atención derivada con fecha y hora automáticas
                 $estadoEnEspera = EstadoAtencion::where('nombre', 'En Espera')->first();
 
-                Atencion::create([
+                $nuevaAtencion = Atencion::create([
                     'fecha' => now()->format('Y-m-d'),
                     'hora' => now()->format('H:i'),
                     'servicio_id' => $validated['derivacion']['servicio_id'],
@@ -597,6 +601,10 @@ class HistoriaClinicaController extends Controller
                     'diagnostico_principal' => 'A definir',
                     'motivo_de_consulta' => 'Derivación de ' . $profesional->especialidad->nombre,
                 ]);
+
+                
+                AtencionCreada::dispatch($nuevaAtencion);
+
             } else {
                 // Cambiar estado a "Atendido"
                 $estadoAtendido = EstadoAtencion::where('nombre', 'Atendido')->first();

@@ -42,4 +42,10 @@ class Profesional extends Model
         return $this->hasMany(DisponibilidadHoraria::class)->orderBy('dia_id', 'asc')
             ->orderBy('hora_inicio_atencion', 'asc'); // opcional;
     }
+
+    // Un profesional tiene muchas atenciones
+    public function atenciones()
+    {
+        return $this->hasMany(Atencion::class);
+    }
 }

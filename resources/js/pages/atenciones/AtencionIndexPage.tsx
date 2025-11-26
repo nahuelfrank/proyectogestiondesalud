@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { FilePlus } from 'lucide-react';
 import atenciones from '@/routes/atenciones';
 import { useEffect } from 'react';
+import { toast } from 'sonner';
 
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -35,13 +36,40 @@ interface AtencionIndexPageProps {
 export default function AtencionIndexPage({ items, meta, filters }: AtencionIndexPageProps) {
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            router.reload({
-                only: ["items", "meta"],
-            });
-        }, 2500);
+        // 1. Suscribirse al canal 'atenciones'
+        const channel = window.Echo.channel('atenciones');
 
-        return () => clearInterval(interval);
+        // 2. Escuchar el evento (nota el punto en el nombre si usaste broadcastAs)
+        channel.listen('.atencion.creada', (e: any) => {
+            console.log('Nueva atención recibida:', e.atencion);
+
+            // 3. Recargar SOLO los datos de la tabla (items y meta)
+            // Esto mantiene los filtros y la paginación actuales, 
+            // pero refresca la data para ver el nuevo registro ordenado correctamente.
+            router.reload({
+                only: ['items', 'meta'],
+                onSuccess: () => {
+                    // Opcional: Sonido o Toast de notificación
+                    toast.success("Nueva atención creada", {
+                        description: `
+                            Paciente: ${e.atencion.persona.nombre} ${e.atencion.persona.apellido}
+                              Tipo de atención: ${e.atencion.tipo_de_atencion.nombre}
+                     `,
+                    });
+                }
+            });
+        });
+
+        channel.listen('.atencion.actualizada', (e: any) => {
+            router.reload({ only: ['items', 'meta'] });
+        });
+
+        // 4. Limpieza al salir de la página
+        return () => {
+            channel.stopListening('.atencion.creada');
+            channel.stopListening('.atencion.actualizada');
+            // Opcional: window.Echo.leave('atenciones');
+        };
     }, []);
 
     return (
