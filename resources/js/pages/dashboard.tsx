@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -25,6 +25,8 @@ import {
 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { BreadcrumbItem } from '@/types';
+import { useEffect } from 'react';
+import { toast } from 'sonner';
 
 ChartJS.register(
     CategoryScale,
@@ -99,6 +101,43 @@ export default function DashboardPage({
     atencionPorHora,
     emergenciasUrgencias,
 }: DashboardProps) {
+
+    useEffect(() => {
+        // 1. Suscribirse al canal 'atenciones'
+        const channel = window.Echo.channel('atenciones');
+
+        // 2. Escuchar el evento (nota el punto en el nombre si usaste broadcastAs)
+        channel.listen('.atencion.creada', (e: any) => {
+            console.log('Nueva atención recibida:', e.atencion);
+
+            // 3. Recargar SOLO los datos de la tabla (items y meta)
+            // Esto mantiene los filtros y la paginación actuales, 
+            // pero refresca la data para ver el nuevo registro ordenado correctamente.
+            router.reload({
+                only: ['items', 'meta'],
+                onSuccess: () => {
+                    // Opcional: Sonido o Toast de notificación
+                    toast.success("Nueva atención creada", {
+                        description: `
+                                Paciente: ${e.atencion.persona.nombre} ${e.atencion.persona.apellido}
+                                  Tipo de atención: ${e.atencion.tipo_de_atencion.nombre}
+                         `,
+                    });
+                }
+            });
+        });
+
+        channel.listen('.atencion.actualizada', (e: any) => {
+            router.reload({ only: ['items', 'meta'] });
+        });
+
+        // 4. Limpieza al salir de la página
+        return () => {
+            channel.stopListening('.atencion.creada');
+            channel.stopListening('.atencion.actualizada');
+            // Opcional: window.Echo.leave('atenciones');
+        };
+    }, []);
 
     const colors = {
         primary: 'rgba(59, 130, 246, 0.8)',

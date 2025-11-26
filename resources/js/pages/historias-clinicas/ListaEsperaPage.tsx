@@ -103,10 +103,12 @@ export default function ListaEsperaPage({
                 onSuccess: () => {
                     // Opcional: Sonido o Toast de notificación
                     toast.success("Nueva atención creada", {
-                        description: `
-        Paciente: ${e.atencion.persona.nombre} ${e.atencion.persona.apellido}
-        Tipo de atención: ${e.atencion.tipo_de_atencion.nombre}
-    `,
+                        description: (
+                            <div>
+                                Paciente: {e.atencion.persona.nombre} {e.atencion.persona.apellido} <br />
+                                Tipo de atención: {e.atencion.tipo_atencion.nombre}
+                            </div>
+                        ),
                     });
                 }
             });

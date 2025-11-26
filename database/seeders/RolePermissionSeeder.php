@@ -155,6 +155,22 @@ class RolePermissionSeeder extends Seeder
         }
 
         // ==========================================
+        // USUARIO ADMINISTRATIVO POR DEFECTO
+        // ==========================================
+        $administrativoUser = \App\Models\User::firstOrCreate(
+            ['email' => 'admin2@example.com'],
+            [
+                'name' => 'Usuario Administrativo',
+                'password' => bcrypt('password'),
+                'email_verified_at' => now(),
+            ]
+        );
+
+        if (!$administrativoUser->hasRole('administrativo')) {
+            $administrativoUser->assignRole('administrativo');
+        }
+
+        // ==========================================
         // NOTAS PARA DESARROLLO
         // ==========================================
         // 1. Para agregar un nuevo permiso:

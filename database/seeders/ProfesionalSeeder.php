@@ -12,7 +12,7 @@ class ProfesionalSeeder extends Seeder
      */
     public function run(): void
     {
-        Profesional::factory(30)->withDisponibilidades()->create();
+        Profesional::factory()->count(10)->withDisponibilidades()->create();
     }
 
 }
